@@ -1,0 +1,302 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package mobileapplication3;
+
+import at.emini.physics2D.World;
+import at.emini.physics2D.util.PhysicsFileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.Vector;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
+import javax.microedition.io.file.FileSystemRegistry;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.game.GameCanvas;
+
+/**
+ *
+ * @author vipaol
+ */
+public class Levels extends GameCanvas implements Runnable, CommandListener {
+
+    Enumeration drives;
+    String prefix = "file:///";
+    String root = "C:/";
+    String sep;
+    
+    private Command select, back;
+
+    Enumeration list;
+
+    boolean stopped = false;
+    Vector v;
+    
+    int scW = this.getWidth();
+    int scH = this.getHeight();
+    int t = 0;
+    int selected = 1;
+    int delay = 10;
+    String xoba = "";
+    Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    Thread runner;
+
+
+    Levels() {
+        super(true);
+        setFullScreenMode(true);
+        scW = this.getWidth();
+        scH = this.getHeight();
+        select = new Command("Select", Command.OK, 1);
+        back = new Command("Back", Command.BACK, 2);
+    }
+
+    public void start() {
+        //drives = FileSystemRegistry.listRoots();
+        sep = System.getProperty("file.separator");
+        stopped = false;
+        v = new Vector();
+        if (sep == null) {
+            sep = "/";
+        }
+
+        drives = getRoots();
+        v.addElement("---levels---");
+        getLevels();
+        v.addElement("--Back--");
+        if (font.getHeight() * v.size() > scH) {
+            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+        }
+        if (font.getHeight() * v.size() > scH) {
+            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+        }
+        
+        addCommand(select);
+        addCommand(back);
+        setCommandListener(this);
+
+        runner = new Thread(this);
+        runner.start();
+    }
+
+    public void paint(Graphics g) {
+        g.setColor(0, 0, 0);
+        g.fillRect(0, 0, scW - t, scH);
+        g.setColor(255, 255, 255);
+        g.drawLine(0, 0, scW, scH);
+        int offset = 0;
+        //v.setElementAt(xoba, 0);
+        for (int i = 0; i < v.size(); i++) {
+            if (i == selected) {
+                g.setColor(255, 64, 64);
+                offset = Mathh.sin(t * 360 / 10);
+            } else {
+                g.setColor(255, 255, 255);
+                offset = 0;
+            }
+            g.setFont(font);
+
+            if (i == 4) {
+                font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+            }
+            g.drawString((String) v.elementAt(i), scW / 2, (scH + font.getHeight() * 0) / (v.size() + 0) * (i) + offset * Font.getDefaultFont().getHeight() / 8000 + font.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
+        }
+        if (t > 9) {
+            t = 0;
+        } else {
+            t++;
+        }
+    }
+
+    public void getLevels() {
+        if (drives.hasMoreElements()) {
+            while (drives.hasMoreElements()) {
+                String root = (String) drives.nextElement();
+                v.setElementAt(root, 0);
+                String path = prefix + root + "Levels/";
+                //xoba += "\t" + root;
+                try {
+                    FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+                    list = fc.list();
+                    while (list.hasMoreElements()) {
+                        v.addElement(path + list.nextElement());
+                    }
+                } catch (IOException ex) {
+                    try {
+                        path = prefix + root + "other" + sep + "Levels/";
+                        FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+                        list = fc.list();
+                        while (list.hasMoreElements()) {
+                            v.addElement(path + list.nextElement());
+                        }
+                    } catch (IOException e) {
+                        Main.showAlert(e.toString());
+                        stopped = false;
+                    } catch (SecurityException e) {
+                        Main.showAlert(e.toString());
+                        stopped = false;
+                    }
+                    stopped = false;
+                } catch (SecurityException s) {
+                    //xoba += "\t" + root;
+                    try {
+                        path = prefix + root + "predefgallery" + sep + "predefgraphics" + sep + "Levels/";
+                        FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+                        list = fc.list();
+                        while (list.hasMoreElements()) {
+                            v.addElement(path + list.nextElement());
+                        }
+                    } catch (IOException ex) {
+                        v.setElementAt("err: IOException", 0);
+                        stopped = false;
+                    } catch (SecurityException ex) {
+                        v.setElementAt("err: access denied", 0);
+                        stopped = false;
+                    }
+                }
+            }
+        } else {
+            String path = root + "Levels/";
+            try {
+                FileConnection fc = (FileConnection) Connector.open(path);
+                list = fc.list();
+                while (list.hasMoreElements()) {
+                    v.addElement(path + list.nextElement());
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public void run() {
+        long sleep = 0;
+        long start = 0;
+        long millis = 50;
+
+        while (!stopped) {
+            start = System.currentTimeMillis();
+            input();
+            repaint();
+
+            sleep = millis - (System.currentTimeMillis() - start);
+            sleep = Math.max(sleep, 0);
+
+            try {
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void input() {
+        int keyStates = getKeyStates();
+        if (delay < 1) {
+            delay = 5;
+            if ((keyStates & (RIGHT_PRESSED | FIRE_PRESSED)) != 0) {
+                stopped = true;
+                selectPressed();
+            } else if ((keyStates & UP_PRESSED) != 0) {
+                if (selected > 1) {
+                    selected--;
+                } else {
+                    selected = v.size() - 1;
+                }
+            } else if ((keyStates & DOWN_PRESSED) != 0) {
+                if (selected < v.size() - 1) {
+                    selected++;
+                } else {
+                    selected = 1;
+                }
+            }
+        } else {
+            delay--;
+        }
+        if (keyStates == 0) {
+            delay = 0;
+        }
+    }
+
+    public void startLevel(String path) {
+        gCanvas gameCanvas = new gCanvas();
+        gameCanvas.setWorld(readWorldFile(path));
+        Main.set(gameCanvas);
+    }
+
+    private Enumeration getRoots() {
+        return FileSystemRegistry.listRoots();
+    }
+
+    public void commandAction(Command cmd, Displayable display) {
+        if (cmd == select) {
+            selectPressed();
+        }
+        if (cmd == back) {
+            mnCanvas m = new mnCanvas();
+            Main.set(m);
+            m.start();
+        }
+    }
+    
+    protected void pointerPressed(int x, int y) {
+        selected = v.size() * y / scH;
+        if (selected == 0) {
+            selected = 1;
+        }
+    }
+    protected void pointerDragged(int x, int y) {
+        selected = v.size() * y / scH;
+        if (selected == 0) {
+            selected = 1;
+        }
+    }
+    protected void pointerReleased(int x, int y) {
+        selected = v.size() * y / scH;
+        if (selected == 0) {
+            selected = 1;
+        } else {
+            selectPressed();
+        }
+    }
+    
+    public void selectPressed() {
+        stopped = true;
+        if (selected == v.size() - 1) {
+            runner = null;
+            mnCanvas m = new mnCanvas();
+            Main.set(m);
+            m.start();
+        } else {
+            try {
+                startLevel((String) v.elementAt(selected));
+            } catch(NullPointerException ex) {
+                Main.showAlert(ex.toString());
+            }
+        }
+    }
+    public GraphicsWorld readWorldFile(String path) {
+        //GraphicsWorld gameWorld;
+        PhysicsFileReader reader;
+        try {
+            InputStream is;
+            FileConnection fc = (FileConnection) Connector.open(path);
+            is = fc.openInputStream();
+            //mCanvas.text += is.available();
+            reader = new PhysicsFileReader(is);
+            return new GraphicsWorld(World.loadWorld(reader));
+            //reader.close();
+            //is.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+}
