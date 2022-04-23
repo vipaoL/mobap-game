@@ -20,7 +20,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  * @author vipaol
  */
 public class mnCanvas extends GameCanvas implements Runnable {
-    int k = 1;
+    int k = 20;
     int delay = 0;
     String[] menuOptions = {"-", "Play", "Levels", "Debug", "Exit", "-"};
     int selected = 1;
@@ -31,7 +31,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     Graphics g;
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int fontH = font.getHeight();
-    Thread runner;
+    boolean paused = false;
     
     String DEFAULT_LEVEL = "";
 
@@ -45,6 +45,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     public mnCanvas() {
         super(true);
         setFullScreenMode(true);
+        (new Thread(this, "menu canvas")).start();
     }
 
     public void start() {
@@ -66,17 +67,11 @@ public class mnCanvas extends GameCanvas implements Runnable {
     }
     
     protected void showNotify() {
-        if (runner == null) {
-            runner = new Thread(this);
-            runner.start();
-        }
-        //stopped = false;
+        paused = false;
     }
 
     protected void hideNotify() {
-        stopped = true;
-        //runner.interrupt();
-        runner = null;
+        paused = true;
     }
 
     public void destroyApp(boolean unconditional) {
@@ -100,7 +95,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
             sleep = Math.max(sleep, 0);
 
             try {
-                runner.sleep(sleep);
+                Thread.sleep(sleep);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -124,7 +119,8 @@ public class mnCanvas extends GameCanvas implements Runnable {
                 g.setColor(255, 255, 0);
             }
             g.setFont(font);
-            g.drawString(menuOptions[i], scW / 2, (scH + font.getHeight() * 0) / (menuOptions.length + 0) * (i) + offset*Font.getDefaultFont().getHeight() / 8000 + font.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
+            k = (scH + scH / (menuOptions.length + 1)) / (menuOptions.length + 1);
+            g.drawString(menuOptions[i], scW / 2, k * (i + 1) - font.getHeight() / 2 - scH / (menuOptions.length + 1) / 2 + offset*Font.getDefaultFont().getHeight() / 8000, Graphics.HCENTER | Graphics.TOP);
         }
         if (t > 9) {
             t = 0;
@@ -185,19 +181,22 @@ public class mnCanvas extends GameCanvas implements Runnable {
         Main.print("menu:startLevel()");
         try {
         stopped = true;
+        PhysicsFileReader reader = new PhysicsFileReader("/void.phy");
         //runner.interrupt();
-        runner = null;
+        //runner = null;
         gCanvas gameCanvas = new gCanvas();
-        gameCanvas.setWorld(readWorldFile(path));
         Main.set(gameCanvas);
+        gameCanvas.setWorld(new GraphicsWorld(World.loadWorld(reader)));
+        reader.close();
+        
         } catch (NullPointerException ex) {
             Main.showAlert(ex.toString());
         }
     }
     
     protected void pointerPressed(int x, int y) {
-        k = scH / menuOptions.length;
-        selected = (y+k/2) / k;
+        //k = scH / menuOptions.length;
+        selected = y / k;
         //selected = menuOptions.length * (y + fontH) / scH;
         if (selected == 0) {
             selected = 1;
@@ -207,7 +206,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
     }
     protected void pointerDragged(int x, int y) {
-        selected = (y+k/2) / k;
+        selected = y / k;
         //selected = menuOptions.length * (y + fontH) / scH;
         if (selected == 0) {
             selected = 1;
@@ -217,7 +216,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
     }
     protected void pointerReleased(int x, int y) {
-        selected = (y+k/2) / k;
+        selected = y / k;
         //selected = menuOptions.length * y / scH;
         if (selected == 0) {
             selected = 1;
@@ -237,7 +236,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
         if (selected == 2) {
             stopped = true;
-            runner = null;
+            //runner = null;
             wg = false;
             Levels levelPicker = new Levels();
             Main.set(levelPicker);
@@ -251,7 +250,6 @@ public class mnCanvas extends GameCanvas implements Runnable {
     }
     public GraphicsWorld readWorldFile(String path) {
         //GraphicsWorld gameWorld;
-        PhysicsFileReader reader;
         if (path == "") {
             return setDefaultWorld();
         } else {
@@ -260,7 +258,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
                 FileConnection fc = (FileConnection) Connector.open(path);
                 is = fc.openInputStream();
                 //mCanvas.text += is.available();
-                reader = new PhysicsFileReader(is);
+                PhysicsFileReader reader = new PhysicsFileReader(is);
                 return new GraphicsWorld(World.loadWorld(reader));
                 //reader.close();
                 //is.close();
