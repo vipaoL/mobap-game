@@ -42,11 +42,13 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     int scW = this.getWidth();
     int scH = this.getHeight();
     int t = 0;
+    int k = 20;
     int selected = 1;
     int delay = 10;
     String xoba = "";
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    Thread runner;
+    //Thread runner;
+    boolean paused = false;
 
 
     Levels() {
@@ -56,6 +58,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         scH = this.getHeight();
         select = new Command("Select", Command.OK, 1);
         back = new Command("Back", Command.BACK, 2);
+        (new Thread(this, "level picker")).start();
     }
 
     public void start() {
@@ -82,8 +85,15 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         addCommand(back);
         setCommandListener(this);
 
-        runner = new Thread(this);
-        runner.start();
+        //runner = new Thread(this);
+        //runner.start();
+    }
+    protected void showNotify() {
+        paused = false;
+    }
+
+    protected void hideNotify() {
+        paused = true;
     }
 
     public void paint(Graphics g) {
@@ -106,7 +116,8 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             if (i == 4) {
                 font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
             }
-            g.drawString((String) v.elementAt(i), scW / 2, (scH + font.getHeight() * 0) / (v.size() + 0) * (i) + offset * Font.getDefaultFont().getHeight() / 8000 + font.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
+            k = (scH + scH / (v.size() + 1)) / (v.size() + 1);
+            g.drawString((String) v.elementAt(i), scW / 2, k * (i + 1) - font.getHeight() / 2 - scH / (v.size() + 1) / 2 + offset * Font.getDefaultFont().getHeight() / 8000 + font.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
         }
         if (t > 9) {
             t = 0;
@@ -119,8 +130,9 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         if (drives.hasMoreElements()) {
             while (drives.hasMoreElements()) {
                 String root = (String) drives.nextElement();
-                v.setElementAt(root, 0);
+                //v.setElementAt(root, 0);
                 String path = prefix + root + "Levels/";
+                v.setElementAt(path, 0);
                 //xoba += "\t" + root;
                 try {
                     FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
@@ -128,6 +140,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
                     while (list.hasMoreElements()) {
                         v.addElement(path + list.nextElement());
                     }
+                    v.setElementAt(path, 0);
                 } catch (IOException ex) {
                     try {
                         path = prefix + root + "other" + sep + "Levels/";
@@ -136,6 +149,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
                         while (list.hasMoreElements()) {
                             v.addElement(path + list.nextElement());
                         }
+                        v.setElementAt(path, 0);
                     } catch (IOException e) {
                         Main.showAlert(e.toString());
                         stopped = false;
@@ -153,6 +167,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
                         while (list.hasMoreElements()) {
                             v.addElement(path + list.nextElement());
                         }
+                        v.setElementAt(path, 0);
                     } catch (IOException ex) {
                         v.setElementAt("err: IOException", 0);
                         stopped = false;
@@ -182,17 +197,19 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         long millis = 50;
 
         while (!stopped) {
-            start = System.currentTimeMillis();
-            input();
-            repaint();
+            if (!paused) {
+                start = System.currentTimeMillis();
+                input();
+                repaint();
 
-            sleep = millis - (System.currentTimeMillis() - start);
-            sleep = Math.max(sleep, 0);
+                sleep = millis - (System.currentTimeMillis() - start);
+                sleep = Math.max(sleep, 0);
 
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -227,8 +244,9 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
 
     public void startLevel(String path) {
         gCanvas gameCanvas = new gCanvas();
-        gameCanvas.setWorld(readWorldFile(path));
         Main.set(gameCanvas);
+        gameCanvas.setWorld(readWorldFile(path));
+        
     }
 
     private Enumeration getRoots() {
@@ -247,19 +265,22 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     }
     
     protected void pointerPressed(int x, int y) {
-        selected = v.size() * y / scH;
+        selected = y/k;
+        //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
         }
     }
     protected void pointerDragged(int x, int y) {
-        selected = v.size() * y / scH;
+        selected = y/k;
+        //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
         }
     }
     protected void pointerReleased(int x, int y) {
-        selected = v.size() * y / scH;
+        selected = y/k;
+        //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
         } else {
@@ -270,7 +291,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     public void selectPressed() {
         stopped = true;
         if (selected == v.size() - 1) {
-            runner = null;
+            //runner = null;
             mnCanvas m = new mnCanvas();
             Main.set(m);
             m.start();
@@ -291,9 +312,10 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             is = fc.openInputStream();
             //mCanvas.text += is.available();
             reader = new PhysicsFileReader(is);
-            return new GraphicsWorld(World.loadWorld(reader));
-            //reader.close();
-            //is.close();
+            GraphicsWorld w = new GraphicsWorld(World.loadWorld(reader));
+            reader.close();
+            is.close();
+            return w;
         } catch (IOException ex) {
             ex.printStackTrace();
         }

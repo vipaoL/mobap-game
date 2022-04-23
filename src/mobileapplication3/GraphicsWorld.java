@@ -27,7 +27,7 @@ public class GraphicsWorld extends World {
         this.zoomBase = 6000 * 240 / scMinSide;
         this.zoomOut = zoomBase;
     }
-    static String text = "";
+    String text = "";
     
     int scWidth;
     int halfScWidth;
@@ -63,11 +63,11 @@ public class GraphicsWorld extends World {
             carY = gCanvas.carbody.positionFX().yAsInt();
         } catch (NullPointerException ex) {
             Main.print("ждём автомобиль");
-            try {
+            /*try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex1) {
                 ex1.printStackTrace();
-            }
+            }*/
         }
         //zoomOut = (carY/2 - scMinSide / 2) * 1000 / (scMinSide / 2);
         zoomOut = 2*(500 * carY / scMinSide - 500); // same, optimized
@@ -161,7 +161,7 @@ public class GraphicsWorld extends World {
         g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
     }
 
-    public static void setText(String t) {
+    public void setText(String t) {
         text = t;
     }
     

@@ -8,11 +8,8 @@ package mobileapplication3;
 
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Constraint;
-import at.emini.physics2D.Landscape;
 import at.emini.physics2D.Shape;
-import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
-import com.sun.kvem.midp.pim.formats.VEventSupport;
 import java.util.Random;
 import java.util.Vector;
 
@@ -22,8 +19,6 @@ import java.util.Vector;
  */
 public class WorldGen implements Runnable{
     
-    private int lastLogged = -1;
-    
     private int prevR;
     private int i;
     private int lastX = 100;
@@ -32,7 +27,7 @@ public class WorldGen implements Runnable{
     private Random rand = new Random();
     private int sn = 36;
     private int sl = 360 / sn;
-    private Vector waitinForDel;
+    //private Vector waitinForDel;
     private int toD = 0;
     private int t = 1;
     private boolean reseted = true;
@@ -44,25 +39,31 @@ public class WorldGen implements Runnable{
     private int savedPoints = 0;
     private int lowestY = 0;
     private boolean paused;
-    private Thread thread;
+    //private Thread thread;
+    boolean needSpeed = true;
+    boolean ready = false;
     
     public void start() {
         stopped = false;
         waitinForReset = true;
         resume();
         Main.print("gen:start()");
-        thread = new Thread(this);
-        thread.start();
+        (new Thread(this, "world generator")).start();
+        //thread = new Thread(this);
+        //thread.start();
     }
     public void stop() {
         stopped = true;
-        thread = null;
+        //thread = null;
     }
     public void resume() {
         paused = false;
     }
     public void pause() {
         paused = true;
+    }
+    public boolean isReady() {
+        return ready;
     }
     public int getLowestY() {
         return lowestY;
@@ -71,6 +72,7 @@ public class WorldGen implements Runnable{
         waitinForReset = true;
     }
     private void reset() {
+        ready = false;
         waitinForReset = false;
         Main.print("gen:reset()");
         prevR = 1;
@@ -78,7 +80,7 @@ public class WorldGen implements Runnable{
         lastX = 100;
         lastY = 0;
         reseted = true;
-        waitinForDel = new Vector();
+        //waitinForDel = new Vector();
         try {
             cleanWorld();
         } catch (NullPointerException e) {
@@ -91,6 +93,7 @@ public class WorldGen implements Runnable{
         t = 2;
         GraphicsWorld.points = 0;
         gCanvas.addCar();
+        ready = true;
     }
     
     private void random() {
@@ -145,7 +148,7 @@ public class WorldGen implements Runnable{
         arc(x+r/2, y-r*2, r, 300, va);
         int ofs = (1000 - Mathh.cos(30))*2*r2/1000;
         arc(x+r*2-ofs, y-r2, r2, 60, 90);
-        waitinForDel.addElement(new Integer(toD));
+        //waitinForDel.addElement(new Integer(toD));
         toD = 0;
         //mCanvas.l.addSegment(FXVector.newVector(x, 0), FXVector.newVector(x + 50, 0), u);
         //return l;
@@ -182,7 +185,7 @@ public class WorldGen implements Runnable{
         arc(x+r, y, r2, 90, 90, 10, 5);
         line(x+r, y+r2/2, x+2*r, y+r2/2);
         toD++;
-        waitinForDel.addElement(new Integer(toD));
+        //waitinForDel.addElement(new Integer(toD));
         toD = 0;
         lastY += r2/2;
         
@@ -267,7 +270,7 @@ public class WorldGen implements Runnable{
             toD += 1;
         }
         lastX += l;
-        waitinForDel.addElement(new Integer(toD));
+        //waitinForDel.addElement(new Integer(toD));
     }
     private void arc(int x, int y, int r, int ang, int of) {
         for(int i = sl; i <= ang; i+=sl) {
@@ -283,7 +286,7 @@ public class WorldGen implements Runnable{
     }
     private void line(int x1, int y1, int x2, int y2) {
         gCanvas.l.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u);
-        waitinForDel.addElement(new Integer(1));
+        //waitinForDel.addElement(new Integer(1));
     }
     /*******************************************
      * 
@@ -307,25 +310,17 @@ public class WorldGen implements Runnable{
                     reset();
                 }
                 
-                if ((t == 1) & (GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
+                if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
                     ///System.out.println("ttt" + GraphicsWorld.carX + lastX);
                     random();
-                    if (reseted) {
-                        GraphicsWorld.points = 0;
-                        reseted = false;
-                    } else {
-                        if (!resettingPosition) {
-                            //GraphicsWorld.points++;
-                        }
-                    }
-                    if (false & +waitinForDel.size() > 16) {
+                    /*if (false & waitinForDel.size() > 16) {
                         toD = ((Integer)waitinForDel.elementAt(0)).intValue();
                         for(int i = 0; i < toD; i++) {
                             gCanvas.l.removeSegment(0);
                         }
                         waitinForDel.removeElementAt(0);
                         toD = 0;
-                    }
+                    }*/
                     if (structLog.size() >= 2) {
                         if (/*mnCanvas.debug & */GraphicsWorld.carX > 8000 & gCanvas.flying > 2) {
                             resetPosition();
@@ -341,8 +336,12 @@ public class WorldGen implements Runnable{
                 }
             }
             try {
-                if (!resettingPosition) {
-                    Thread.sleep(10);
+                if (!needSpeed) {
+                    Thread.sleep(200);
+                } else {
+                    if (t > 5) {
+                        needSpeed = false;
+                    }
                 }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
@@ -365,6 +364,7 @@ public class WorldGen implements Runnable{
         // костыль для обхода бага движка
         
         resettingPosition = true;
+        needSpeed = true;
         int prevLastX = lastX;
         lastX = -8000;
         savedPoints += (prevLastX - lastX) / 2000 - 1;
@@ -384,6 +384,7 @@ public class WorldGen implements Runnable{
         gCanvas.addCar(lastX - (prevLastX - carX), carY, ang);
         GraphicsWorld.refreshPos();
         resettingPosition = false;
+        needSpeed = false;
     }
     
     private void cleanWorld() {
@@ -401,7 +402,7 @@ public class WorldGen implements Runnable{
             gCanvas.l.removeSegment(0);
         }
         constraints = null;
-        waitinForDel.removeAllElements();
+        //waitinForDel.removeAllElements();
         toD = 0;
         gCanvas.paused = false;
     }

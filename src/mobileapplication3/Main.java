@@ -4,12 +4,7 @@
  */
 package mobileapplication3;
 
-import at.emini.physics2D.*;
-import at.emini.physics2D.util.*;
 import java.io.IOException;
-import java.io.InputStream;
-import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Display;
@@ -18,7 +13,7 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.midlet.*;
 
 /**
- * @author steamuser
+ * @author vipaol
  */
 public class Main extends MIDlet {
 
@@ -81,9 +76,9 @@ public class Main extends MIDlet {
             } catch (IOException ex1) {
                 ex1.printStackTrace();
             }
-            Alert alert = new Alert("О нет!", text, alertImage, AlertType.INFO);
-            alert.setTimeout(3000);    // for 3 seconds
-            //thiss.display.setCurrent(alert, current);    // so that it goes to back to your canvas after displaying the alert
+            Alert alert = new Alert("О нет!", text, alertImage, AlertType.WARNING);
+            alert.setTimeout(3000);
+            //thiss.display.setCurrent(alert, current);
             } catch(IllegalArgumentException ex) {
             ex.printStackTrace();
         }
@@ -98,6 +93,9 @@ public class Main extends MIDlet {
             text = "[INFO]: ";
         }
         System.out.println(text);
+    }
+    public static void print(int i) {
+        print("" + i);
     }
     public static void print(String text) {
         text = "info: " + text;
