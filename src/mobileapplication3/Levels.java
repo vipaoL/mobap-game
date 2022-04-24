@@ -244,9 +244,8 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
 
     public void startLevel(String path) {
         gCanvas gameCanvas = new gCanvas();
-        Main.set(gameCanvas);
         gameCanvas.setWorld(readWorldFile(path));
-        
+        Main.set(gameCanvas);
     }
 
     private Enumeration getRoots() {

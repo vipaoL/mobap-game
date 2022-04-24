@@ -185,9 +185,9 @@ public class mnCanvas extends GameCanvas implements Runnable {
         //runner.interrupt();
         //runner = null;
         gCanvas gameCanvas = new gCanvas();
-        Main.set(gameCanvas);
         gameCanvas.setWorld(new GraphicsWorld(World.loadWorld(reader)));
         reader.close();
+        Main.set(gameCanvas);
         
         } catch (NullPointerException ex) {
             Main.showAlert(ex.toString());

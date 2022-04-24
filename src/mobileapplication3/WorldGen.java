@@ -29,10 +29,10 @@ public class WorldGen implements Runnable{
     private int sl = 360 / sn;
     //private Vector waitinForDel;
     private int toD = 0;
-    private int t = 1;
+    private int t = 0;
     private boolean reseted = true;
     private boolean stopped = false;
-    private boolean resettingPosition = false;
+    public boolean resettingPosition = false;
     private Vector structLog = new Vector();
     //static Vector l_log;
     private boolean waitinForReset = false;
@@ -73,6 +73,7 @@ public class WorldGen implements Runnable{
     }
     private void reset() {
         ready = false;
+        needSpeed = true;
         waitinForReset = false;
         Main.print("gen:reset()");
         prevR = 1;
@@ -339,7 +340,7 @@ public class WorldGen implements Runnable{
                 if (!needSpeed) {
                     Thread.sleep(200);
                 } else {
-                    if (t > 5) {
+                    if (t > 15) {
                         needSpeed = false;
                     }
                 }

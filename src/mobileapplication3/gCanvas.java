@@ -149,6 +149,7 @@ public class gCanvas extends Canvas implements Runnable {
     }
 
     protected void showNotify() {
+        stopped = false;
     }
 
     protected void hideNotify() {
@@ -336,6 +337,12 @@ public class gCanvas extends Canvas implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            } else {
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -363,7 +370,7 @@ public class gCanvas extends Canvas implements Runnable {
                 g.fillRect(0, scH - scH*i/7/2, scW, scH - 1);
             }
         }
-        if (stopped) {
+        if (paused & !worldgen.resettingPosition) {
             g.setColor(0, 0, 255);
             int d = 6 * scH / 240;
             for (int i = 0; i <= scH; i++) {
@@ -401,11 +408,11 @@ public class gCanvas extends Canvas implements Runnable {
 
         if (keyCode == KEY_ACTION_RIGHT) {
             accel = false;
-            if (!stopped) {
+            if (!paused) {
                 hideNotify();
                 repaint();
             } else {
-                stopped = false;
+                paused = false;
                 showNotify();
             }
         }
@@ -421,12 +428,13 @@ public class gCanvas extends Canvas implements Runnable {
 
     protected void pointerPressed(int x, int y) {
         if (x > scW * 2 / 3 & y < scH / 6) {
-            if (!stopped) {
+            if (!paused) {
                 hideNotify();
+                //paused = true;
                 repaint();
             } else {
                 stopped = false;
-                //paused = false;
+                paused = false;
                 showNotify();
             }
         } else if (x < scW / 3 & y < scH / 6) {
