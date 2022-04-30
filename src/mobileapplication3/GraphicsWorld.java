@@ -61,14 +61,7 @@ public class GraphicsWorld extends World {
         try {
             carX = gCanvas.carbody.positionFX().xAsInt();
             carY = gCanvas.carbody.positionFX().yAsInt();
-        } catch (NullPointerException ex) {
-            Main.print("ждём автомобиль");
-            /*try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex1) {
-                ex1.printStackTrace();
-            }*/
-        }
+        
         //zoomOut = (carY/2 - scMinSide / 2) * 1000 / (scMinSide / 2);
         zoomOut = 2*(500 * carY / scMinSide - 500); // same, optimized
         if (zoomOut < 1) {
@@ -88,7 +81,7 @@ public class GraphicsWorld extends World {
 
         g.setColor(255, 255, 255);
         //g.drawString("" + carX/2000, halfScWidth, scHeight-fontH, Graphics.HCENTER|Graphics.TOP);
-        g.drawString("" + points, halfScWidth, scHeight-fontH, Graphics.HCENTER|Graphics.TOP);
+        g.drawString(String.valueOf(points), halfScWidth, scHeight-fontH, Graphics.HCENTER|Graphics.TOP);
         for (int i = 0; i < bodyCount; i++) {
             if (bodies[i] != gCanvas.leftwheel & bodies[i] != gCanvas.rightwheel)
             drawBody(g, bodies[i]);
@@ -107,6 +100,14 @@ public class GraphicsWorld extends World {
             }
         }
         drawLandscape(g);
+        } catch (NullPointerException ex) {
+            Main.print("ждём автомобиль");
+            /*try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex1) {
+                ex1.printStackTrace();
+            }*/
+        }
     }
 
     public void drawBody(Graphics g, Body b) {
@@ -172,14 +173,27 @@ public class GraphicsWorld extends World {
         return c*1000/zoomOut+offsetY;
     }
     static void refreshPos() {
+        try {
         carX = gCanvas.carbody.positionFX().xAsInt();
         carY = gCanvas.carbody.positionFX().yAsInt();
+        } catch (NullPointerException ex) {
+                    carX = -8000;
+                    carY = 0;
+                }
     }
     static void getRot() {
+        try {
         carAng2FX = gCanvas.carbody.rotation2FX();
+        } catch (NullPointerException ex) {
+                    Main.print("ждём автомобиль");
+                }
     }
     static void getVel() {
+        try {
         rVel2FX = gCanvas.carbody.rotationVelocity2FX();
         velFX = gCanvas.carbody.velocityFX();
+        } catch (NullPointerException ex) {
+                    Main.print("ждём автомобиль");
+                }
     }
 }
