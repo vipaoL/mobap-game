@@ -81,8 +81,8 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         
-        addCommand(select);
-        addCommand(back);
+        //addCommand(select);
+        //addCommand(back);
         setCommandListener(this);
 
         //runner = new Thread(this);

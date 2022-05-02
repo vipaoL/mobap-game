@@ -1,5 +1,13 @@
 #!/bin/sh -e
 #
+#####################################
+#
+#
+# IT DIDN'T WORK! USE IDE INSTEAD
+#
+#
+#####################################
+#
 # This batch file builds and preverifies the code for the demos.
 # it then packages them in a JAR file appropriately.
 #

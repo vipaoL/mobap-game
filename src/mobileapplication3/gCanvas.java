@@ -79,6 +79,8 @@ public class gCanvas extends Canvas implements Runnable {
         if (mnCanvas.wg) {
             worldgen = new WorldGen();
             worldgen.start();
+        } else {
+            worldgen.ready = true;
         }
         restart();
 

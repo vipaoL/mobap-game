@@ -24,7 +24,7 @@ public class WorldGen implements Runnable{
     private int lastX = -8000;
     private int lastY = 0;
     private short u = 0;
-    private Random rand = new Random();
+    private Random rand;
     private int sn = 36;
     private int sl = 360 / sn;
     //private Vector waitinForDel;
@@ -33,7 +33,7 @@ public class WorldGen implements Runnable{
     private boolean reseted = true;
     private boolean stopped = false;
     public boolean resettingPosition = false;
-    private Vector structLog = new Vector();
+    private Vector structLog;
     //static Vector l_log;
     private boolean waitinForReset = false;
     private int savedPoints = 0;
@@ -44,6 +44,8 @@ public class WorldGen implements Runnable{
     boolean ready = false;
     
     public void start() {
+        structLog = new Vector();
+        rand = new Random();
         stopped = false;
         waitinForReset = true;
         resume();
