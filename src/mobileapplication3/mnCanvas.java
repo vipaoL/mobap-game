@@ -22,7 +22,7 @@ import javax.microedition.lcdui.game.GameCanvas;
 public class mnCanvas extends GameCanvas implements Runnable {
     int k = 20;
     int delay = 0;
-    String[] menuOptions = {"-", "Play", "Levels", "Debug", "Exit", "-"};
+    String[] menuOptions = {"-", "Play", "Levels", "About", "Debug", "Exit", "-"};
     int selected = 1;
     int scW = getWidth();
     int scH = getHeight();
@@ -115,7 +115,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
                 g.setColor(255, 255, 255);
                 offset = 0;
             }
-            if (i == 3 & debug) {
+            if (i == 4 & debug) {
                 g.setColor(255, 255, 0);
             }
             g.setFont(font);
@@ -201,8 +201,8 @@ public class mnCanvas extends GameCanvas implements Runnable {
         if (selected == 0) {
             selected = 1;
         }
-        if (selected > 4) {
-            selected = 4;
+        if (selected > 5) {
+            selected = 5;
         }
     }
     protected void pointerDragged(int x, int y) {
@@ -211,8 +211,8 @@ public class mnCanvas extends GameCanvas implements Runnable {
         if (selected == 0) {
             selected = 1;
         }
-        if (selected > 4) {
-            selected = 4;
+        if (selected > 5) {
+            selected = 5;
         }
     }
     protected void pointerReleased(int x, int y) {
@@ -220,8 +220,8 @@ public class mnCanvas extends GameCanvas implements Runnable {
         //selected = menuOptions.length * y / scH;
         if (selected == 0) {
             selected = 1;
-        } else if (selected > 4) {
-            selected = 4;
+        } else if (selected > 5) {
+            selected = 5;
         }else {
             selectPressed();
         }
@@ -243,10 +243,13 @@ public class mnCanvas extends GameCanvas implements Runnable {
             levelPicker.start();
         }
         if (selected == 3) {
+            Main.set(new about());
+        }
+        if (selected == 4) {
             debug = !debug;
             if (debug) Main.showAlert("Ну всё.");
         }
-        if (selected == 4) Main.exit();
+        if (selected == 5) Main.exit();
     }
     public GraphicsWorld readWorldFile(String path) {
         //GraphicsWorld gameWorld;
