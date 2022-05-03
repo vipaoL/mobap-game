@@ -30,15 +30,15 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     Enumeration drives;
     String prefix = "file:///";
     String root = "C:/";
-    String sep;
-    
+    String sep = "/";
+
     private Command select, back;
 
     Enumeration list;
 
     boolean stopped = false;
     Vector v;
-    
+
     int scW = this.getWidth();
     int scH = this.getHeight();
     int tick = 0;
@@ -49,7 +49,6 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     //Thread runner;
     boolean paused = false;
-
 
     Levels() {
         super(true);
@@ -63,21 +62,17 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
 
     public void start() {
         //drives = FileSystemRegistry.listRoots();
-        sep = System.getProperty("file.separator");
         stopped = false;
         v = new Vector();
-        if (sep == null) {
-            sep = "/";
-        }
 
         drives = getRoots();
         v.addElement("---levels---");
         //try {
-            getLevels();
-        
+        getLevels();
+
         v.addElement("--Back--");
         showNotify();
-        
+
         //addCommand(select);
         //addCommand(back);
         setCommandListener(this);
@@ -85,6 +80,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         //runner = new Thread(this);
         //runner.start();
     }
+
     protected void showNotify() {
         scW = this.getWidth();
         scH = this.getHeight();
@@ -105,9 +101,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, scW, scH);
         g.setColor(255, 255, 255);
-        g.drawLine(0, 0, scW, scH);
         int offset = 0;
-        //v.setElementAt(xoba, 0);
         for (int i = 0; i < v.size(); i++) {
             if (i == selected) {
                 g.setColor(255, 64, 64);
@@ -134,76 +128,52 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     public void getLevels() {
         if (drives.hasMoreElements()) {
             while (drives.hasMoreElements()) {
-                String root = (String) drives.nextElement();
-                //v.setElementAt(root, 0);
-                String path = prefix + root + "Levels/";
-                v.setElementAt(path, 0);
-                //xoba += "\t" + root;
-                try {
-                    FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-                    list = fc.list();
-                    while (list.hasMoreElements()) {
-                        v.addElement(path + list.nextElement());
-                    }
-                    v.setElementAt(path, 0);
-                } catch (IOException ex) {
-                    try {
-                        path = prefix + root + "other" + sep + "Levels/";
-                        list = listFiles(path);
-                        while (list.hasMoreElements()) {
-                            v.addElement(path + list.nextElement());
-                        }
-                        v.setElementAt(path, 0);
-                    } catch (IOException e) {
-                        Main.showAlert(e.toString());
-                        stopped = false;
-                    } catch (SecurityException e) {
-                        Main.showAlert(e.toString());
-                        stopped = false;
-                    }
-                    stopped = false;
-                } catch (SecurityException s) {
-                    //xoba += "\t" + root;
-                    try {
-                        path = prefix + root + "predefgallery" + sep + "predefgraphics" + sep + "Levels/";
-                        FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-                        list = fc.list();
-                        while (list.hasMoreElements()) {
-                            v.addElement(path + list.nextElement());
-                        }
-                        v.setElementAt(path, 0);
-                    } catch (IOException ex) {
-                        v.setElementAt("err: IOException", 0);
-                        stopped = false;
-                    } catch (SecurityException ex) {
-                        v.setElementAt("err: access denied", 0);
-                        stopped = false;
-                    }
-                }
+                checkDrive((String) drives.nextElement());
             }
         } else {
-            String path = root + "Levels/";
-            try {
-                FileConnection fc = (FileConnection) Connector.open(path);
-                list = fc.list();
+            
+        }
+        String path = System.getProperty("fileconn.dir.photos") + "Levels/";
+        listFiles(path);
+    }
+    
+    void checkDrive(String root) {
+        String path = prefix + root + "Levels/";
+        try {
+            listFiles(path);
+            path = prefix + root + "other" + sep + "Levels/";
+            listFiles(path);
+            path = prefix + root + "predefgallery" + sep + "predefgraphics" + sep + "Levels/";
+            listFiles(path);
+        } catch (SecurityException ex) {
+            ex.printStackTrace();
+            Main.showAlert(ex);
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+            Main.showAlert(ex);
+        }
+    }
+
+    boolean listFiles(String path) {
+        try {
+            FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+            if (fc.exists() & fc.isDirectory()) {
+                list =  fc.list();
                 while (list.hasMoreElements()) {
                     v.addElement(path + list.nextElement());
                 }
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                return true;
             }
-        }
-    }
-    
-    Enumeration listFiles(String path) throws IOException {
-        try {
-        FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-        return fc.list();
+        } catch (IOException ex) {
+            //v.setElementAt(ex.toString(), 0);
+            Main.showAlert(ex);
+            ex.printStackTrace();
         } catch (IllegalArgumentException ex) {
             //v.setElementAt(ex.toString(), 0);
             Main.showAlert(ex);
+            ex.printStackTrace();
         }
-        return null;
+        return false;
     }
 
     public void run() {
@@ -280,23 +250,25 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             m.start();
         }
     }
-    
+
     protected void pointerPressed(int x, int y) {
-        selected = y/k;
+        selected = y / k;
         //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
         }
     }
+
     protected void pointerDragged(int x, int y) {
-        selected = y/k;
+        selected = y / k;
         //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
         }
     }
+
     protected void pointerReleased(int x, int y) {
-        selected = y/k;
+        selected = y / k;
         //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
@@ -304,7 +276,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             selectPressed();
         }
     }
-    
+
     public void selectPressed() {
         stopped = true;
         if (selected == v.size() - 1) {
@@ -315,11 +287,12 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         } else {
             try {
                 startLevel((String) v.elementAt(selected));
-            } catch(NullPointerException ex) {
+            } catch (NullPointerException ex) {
                 Main.showAlert(ex.toString());
             }
         }
     }
+
     public GraphicsWorld readWorldFile(String path) {
         //GraphicsWorld gameWorld;
         PhysicsFileReader reader;
