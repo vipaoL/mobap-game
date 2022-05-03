@@ -165,11 +165,9 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
                 return true;
             }
         } catch (IOException ex) {
-            //v.setElementAt(ex.toString(), 0);
             Main.showAlert(ex);
             ex.printStackTrace();
         } catch (IllegalArgumentException ex) {
-            //v.setElementAt(ex.toString(), 0);
             Main.showAlert(ex);
             ex.printStackTrace();
         }

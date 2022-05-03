@@ -325,7 +325,7 @@ public class WorldGen implements Runnable{
                         toD = 0;
                     }*/
                     if (structLog.size() >= 2) {
-                        if (/*mnCanvas.debug & */GraphicsWorld.carX > 8000 & gCanvas.flying > 2) {
+                        if (GraphicsWorld.carX > 8000 & gCanvas.flying > 1) {
                             resetPosition();
                         }
                     }
@@ -347,7 +347,7 @@ public class WorldGen implements Runnable{
                     }
                 }
             } catch (InterruptedException ex) {
-                //ex.printStackTrace();
+                ex.printStackTrace();
             }
         }
     }
@@ -371,23 +371,13 @@ public class WorldGen implements Runnable{
         needSpeed = true;
         int prevLastX = lastX;
         lastX = -8000;
-        savedPoints += (prevLastX - lastX) / 2000;
+        savedPoints += (prevLastX - lastX - 8000) / 2000;
         Main.print("REGEN");
-        /*GraphicsWorld.refreshPos();
-        GraphicsWorld.getRot();
-        int carX = GraphicsWorld.carX;
-        int carY = GraphicsWorld.carY;
-        int ang = GraphicsWorld.carAng2FX;*/
         
         rmSegs();
         rmBodies();
         reproduce();
         
-        
-        /*
-        Main.print("lastX:" + lastX + ",<lastX:" + prevLastX + ",carX:" +  carX + ",calcd:" + (lastX - (prevLastX - carX))); //lastX, <LastX, carX, moving to
-        //gCanvas.addCar(lastX - (prevLastX - carX), carY, ang, null);
-        GraphicsWorld.refreshPos();*/
         gCanvas.carbody.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
         gCanvas.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
         gCanvas.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
