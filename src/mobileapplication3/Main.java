@@ -29,23 +29,15 @@ public class Main extends MIDlet {
     
 
     public Main() {
-        
-        
-        //gameCanvas = new mCanvas();
         menuCanvas = new mnCanvas();
-        //levelPicker = new Levels();
         sWidth = menuCanvas.getWidth();
         sHeight = menuCanvas.getHeight();
-
-        //readWorldFile("/rsc/game_world_test.phy");
-        //gameCanvas.setWorld(gameWorld);
         thiss = this;
-        
     }
 
     public void startApp() {
         set(menuCanvas);
-        //menuCanvas.start();
+        //throw new NullPointerException();
     }
 
     public void pauseApp() {
@@ -65,6 +57,13 @@ public class Main extends MIDlet {
         clear();
     }
     
+    public static void main(String[] args) {
+        
+    }
+    
+    public static void showAlert(Throwable ex) {
+        showAlert(ex.toString());
+    }
     public static void showAlert(String text) {
         try {
             AlertType.ERROR.playSound(thiss.display);
@@ -78,8 +77,8 @@ public class Main extends MIDlet {
             }
             Alert alert = new Alert("О нет!", text, alertImage, AlertType.WARNING);
             alert.setTimeout(3000);
-            //thiss.display.setCurrent(alert, current);
-            } catch(IllegalArgumentException ex) {
+            thiss.display.setCurrent(alert, current);
+            } catch(Throwable ex) {
             ex.printStackTrace();
         }
     }

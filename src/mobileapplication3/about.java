@@ -30,7 +30,7 @@ public class about extends GameCanvas implements Runnable {
     int selected = 2;
     int scW = getWidth();
     int scH = getHeight();
-    int t = 5;
+    int tick = 5;
     public static boolean debug = false;
     Graphics g;
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
@@ -58,6 +58,13 @@ public class about extends GameCanvas implements Runnable {
     }
 
     public void start() {
+        g = getGraphics();
+        delay = 5;
+        showNotify();
+        stopped = false;
+    }
+
+    protected void showNotify() {
         qrMargin = fontH/2;
         scW = getWidth();
         scH = getHeight();
@@ -72,9 +79,6 @@ public class about extends GameCanvas implements Runnable {
             ex.printStackTrace();
         }
         
-        delay = 5;
-        stopped = false;
-        g = getGraphics();
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, getWidth(), getHeight());
 
@@ -86,9 +90,6 @@ public class about extends GameCanvas implements Runnable {
         }
         fontH = font.getHeight();
         offset2 = font2H + fontH * strsOnTop + qrSide + qrMargin * 2;
-    }
-
-    protected void showNotify() {
         paused = false;
     }
 
@@ -103,7 +104,6 @@ public class about extends GameCanvas implements Runnable {
 
     public void run() {
         start();
-        //stopped = false;
 
         long sleep = 0;
         long start = 0;
@@ -111,6 +111,9 @@ public class about extends GameCanvas implements Runnable {
         while (!stopped) {
             start = System.currentTimeMillis();
             input();
+            if (scW != getWidth()) {
+                showNotify();
+            }
             repaint();
 
             sleep = millis - (System.currentTimeMillis() - start);
@@ -127,7 +130,7 @@ public class about extends GameCanvas implements Runnable {
     public void paint(Graphics g) {
         int canvH = scH;
         g.setColor(0, 0, 0);
-        g.fillRect(0, 0, scW - t, scH);
+        g.fillRect(0, 0, scW, scH);
         g.setColor(255, 255, 255);
         g.setFont(font2);
         g.drawString("About:", scW/2, 0, Graphics.HCENTER | Graphics.TOP);
@@ -156,7 +159,7 @@ public class about extends GameCanvas implements Runnable {
         for (int i = 0; i < l; i++) {
             if (i == selected) {
                 g.setColor(255, 64, 64);
-                offset = Mathh.sin(t * 360 / 10);
+                offset = Mathh.sin(tick * 360 / 10);
             } else {
                 g.setColor(255, 255, 255);
                 offset = 0;
@@ -168,10 +171,10 @@ public class about extends GameCanvas implements Runnable {
             k = (canvH + canvH / (l + 1)) / (l + 1);
             g.drawString(strings[i+strsOnTop], scW / 2, k * (i + 1) - font.getHeight() / 2 - canvH / (l + 1) / 2 + offset * Font.getDefaultFont().getHeight() / 8000 + offset2, Graphics.HCENTER | Graphics.TOP);
         }
-        if (t > 9) {
-            t = 0;
+        if (tick > 9) {
+            tick = 0;
         } else {
-            t++;
+            tick++;
         }
         //flushGraphics();
     }
@@ -271,7 +274,7 @@ public class about extends GameCanvas implements Runnable {
             openLink();
         }
         if (selected == 1) {
-            t+=1;
+            tick+=1;
         }
         if (selected == 2) {
             stopped = true;

@@ -26,7 +26,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     int selected = 1;
     int scW = getWidth();
     int scH = getHeight();
-    int t = 5;
+    int tick = 5;
     public static boolean debug = false;
     Graphics g;
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
@@ -45,17 +45,22 @@ public class mnCanvas extends GameCanvas implements Runnable {
     public mnCanvas() {
         super(true);
         setFullScreenMode(true);
+        scW = getWidth();
+        scH = getHeight();
         (new Thread(this, "menu canvas")).start();
     }
 
     public void start() {
-        scW = getWidth();
-        scH = getHeight();
         delay = 5;
         stopped = false;
+    }
+    
+    protected void showNotify() {
+        scW = getWidth();
+        scH = getHeight();
         g = getGraphics();
         g.setColor(0, 0, 0);
-        g.fillRect(0, 0, getWidth(), getHeight());
+        g.fillRect(0, 0, scW, scH);
         
         if (font.getHeight() * menuOptions.length > scH) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
@@ -64,9 +69,6 @@ public class mnCanvas extends GameCanvas implements Runnable {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         fontH = font.getHeight();
-    }
-    
-    protected void showNotify() {
         paused = false;
     }
 
@@ -89,6 +91,9 @@ public class mnCanvas extends GameCanvas implements Runnable {
         while (!stopped) {
             start = System.currentTimeMillis();
             input();
+            if (scW != getWidth()) {
+                showNotify();
+            }
             repaint();
 
             sleep = millis - (System.currentTimeMillis() - start);
@@ -104,13 +109,13 @@ public class mnCanvas extends GameCanvas implements Runnable {
 
     public void paint(Graphics g) {
         g.setColor(0, 0, 0);
-        g.fillRect(0, 0, scW - t, scH);
+        g.fillRect(0, 0, scW, scH);
         g.setColor(255, 255, 255);
         offset = 0;
         for (int i = 0; i < menuOptions.length; i++) {
             if (i == selected) {
                 g.setColor(255, 64, 64);
-                offset = Mathh.sin(t * 360 / 10);
+                offset = Mathh.sin(tick * 360 / 10);
             } else {
                 g.setColor(255, 255, 255);
                 offset = 0;
@@ -122,10 +127,10 @@ public class mnCanvas extends GameCanvas implements Runnable {
             k = (scH + scH / (menuOptions.length + 1)) / (menuOptions.length + 1);
             g.drawString(menuOptions[i], scW / 2, k * (i + 1) - font.getHeight() / 2 - scH / (menuOptions.length + 1) / 2 + offset*Font.getDefaultFont().getHeight() / 8000, Graphics.HCENTER | Graphics.TOP);
         }
-        if (t > 9) {
-            t = 0;
+        if (tick > 9) {
+            tick = 0;
         } else {
-            t++;
+            tick++;
         }
         //flushGraphics();
     }
@@ -159,6 +164,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
 
     public void keyPressed(int keyCode) {
         int gameAction = getGameAction(keyCode);
+        gameAction = keyCode; //test
         if (gameAction == KEY_NUM1) {
             selected = 1;
             selectPressed();
@@ -173,6 +179,10 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
         if (gameAction == KEY_NUM4) {
             selected = 4;
+            selectPressed();
+        }
+        if (gameAction == KEY_NUM5) {
+            selected = 5;
             selectPressed();
         }
     }

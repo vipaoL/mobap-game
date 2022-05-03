@@ -41,9 +41,10 @@ public class WorldGen implements Runnable{
     private boolean paused;
     //private Thread thread;
     boolean needSpeed = true;
-    boolean ready = false;
+    boolean ready = true;
     
     public void start() {
+        ready = false;
         structLog = new Vector();
         rand = new Random();
         stopped = false;
@@ -365,6 +366,7 @@ public class WorldGen implements Runnable{
         
         // костыль для обхода бага движка
         
+        ready = false;
         resettingPosition = true;
         needSpeed = true;
         int prevLastX = lastX;
@@ -392,6 +394,7 @@ public class WorldGen implements Runnable{
 
         resettingPosition = false;
         needSpeed = false;
+        ready = true;
     }
     
     private void cleanWorld() {

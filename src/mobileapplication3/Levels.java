@@ -41,7 +41,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     
     int scW = this.getWidth();
     int scH = this.getHeight();
-    int t = 0;
+    int tick = 0;
     int k = 20;
     int selected = 1;
     int delay = 10;
@@ -72,14 +72,11 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
 
         drives = getRoots();
         v.addElement("---levels---");
-        getLevels();
+        //try {
+            getLevels();
+        
         v.addElement("--Back--");
-        if (font.getHeight() * v.size() > scH) {
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-        }
-        if (font.getHeight() * v.size() > scH) {
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-        }
+        showNotify();
         
         //addCommand(select);
         //addCommand(back);
@@ -89,6 +86,14 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         //runner.start();
     }
     protected void showNotify() {
+        scW = this.getWidth();
+        scH = this.getHeight();
+        if (font.getHeight() * v.size() > scH) {
+            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+        }
+        if (font.getHeight() * v.size() > scH) {
+            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+        }
         paused = false;
     }
 
@@ -98,7 +103,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
 
     public void paint(Graphics g) {
         g.setColor(0, 0, 0);
-        g.fillRect(0, 0, scW - t, scH);
+        g.fillRect(0, 0, scW, scH);
         g.setColor(255, 255, 255);
         g.drawLine(0, 0, scW, scH);
         int offset = 0;
@@ -106,7 +111,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         for (int i = 0; i < v.size(); i++) {
             if (i == selected) {
                 g.setColor(255, 64, 64);
-                offset = Mathh.sin(t * 360 / 10);
+                offset = Mathh.sin(tick * 360 / 10);
             } else {
                 g.setColor(255, 255, 255);
                 offset = 0;
@@ -119,10 +124,10 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             k = (scH + scH / (v.size() + 1)) / (v.size() + 1);
             g.drawString((String) v.elementAt(i), scW / 2, k * (i + 1) - font.getHeight() / 2 - scH / (v.size() + 1) / 2 + offset * Font.getDefaultFont().getHeight() / 8000 + font.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
         }
-        if (t > 9) {
-            t = 0;
+        if (tick > 9) {
+            tick = 0;
         } else {
-            t++;
+            tick++;
         }
     }
 
@@ -144,8 +149,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
                 } catch (IOException ex) {
                     try {
                         path = prefix + root + "other" + sep + "Levels/";
-                        FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-                        list = fc.list();
+                        list = listFiles(path);
                         while (list.hasMoreElements()) {
                             v.addElement(path + list.nextElement());
                         }
@@ -190,6 +194,17 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             }
         }
     }
+    
+    Enumeration listFiles(String path) throws IOException {
+        try {
+        FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+        return fc.list();
+        } catch (IllegalArgumentException ex) {
+            //v.setElementAt(ex.toString(), 0);
+            Main.showAlert(ex);
+        }
+        return null;
+    }
 
     public void run() {
         long sleep = 0;
@@ -197,6 +212,9 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         long millis = 50;
 
         while (!stopped) {
+            if (scW != getWidth()) {
+                showNotify();
+            }
             if (!paused) {
                 start = System.currentTimeMillis();
                 input();

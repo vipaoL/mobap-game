@@ -30,8 +30,8 @@ public class gCanvas extends Canvas implements Runnable {
     //private Thread thread;
     public boolean stopped = false;
     public boolean accel = false;
-    static Shape boxRectangle;
-    static Shape ball;
+    static Shape carbodyShape;
+    static Shape wheelShape;
     //Shape ball2 = Shape.createCircle(100);
     //Shape centroidCorrector = Shape.createCircle(1);
     public static Body carbody;
@@ -42,7 +42,7 @@ public class gCanvas extends Canvas implements Runnable {
     Vector waitingForDynamic = new Vector();
     Vector waitingTime = new Vector();
     static int flying = 0;
-    int motorTdOff = 0;
+    int motorTdOff = 50;
     //String text = "text";
     UserData orig;
     int prevX = 0;
@@ -56,34 +56,32 @@ public class gCanvas extends Canvas implements Runnable {
     Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int scW = 2;
     int scH = 2;
-    boolean leftContacts = true;
-    boolean rightContacts = true;
+    boolean leftContacts = false;
+    boolean rightContacts = false;
     static boolean paused = false;
     WorldGen worldgen = new WorldGen();;
     int speedMultipiler = 1;
+    boolean pauseTouched = false;
+    boolean menuTouched = false;
 
     public gCanvas() {
         setFullScreenMode(true);
         scW = getWidth();
         scH = getHeight();
-        (new Thread(this, "game canvas")).start();
     }
     public static GraphicsWorld world;
 
     public void setWorld(GraphicsWorld world) {
         Main.print("gamecanvas:setWorld()");
-
         this.world = world;
-        
         l = world.getLandscape();
+        
         if (mnCanvas.wg) {
             worldgen = new WorldGen();
             worldgen.start();
-        } else {
-            worldgen.ready = true;
         }
         restart();
-
+        (new Thread(this, "game canvas")).start();
     }
     
     static void addCar() {
@@ -99,35 +97,28 @@ public class gCanvas extends Canvas implements Runnable {
         int carbodyHeight = 40;
         int wheelRadius = 40;
 
-        boxRectangle = Shape.createRectangle(carbodyLength, carbodyHeight);
-        boxRectangle.setMass(1);
-        boxRectangle.setFriction(0);
-        boxRectangle.setElasticity(0);
-        carbody = new Body(spawnX, spawnY, boxRectangle, true);
+        carbodyShape = Shape.createRectangle(carbodyLength, carbodyHeight);
+        carbodyShape.setMass(1);
+        carbodyShape.setFriction(0);
+        carbodyShape.setElasticity(0);
+        carbodyShape.correctCentroid();
+        carbody = new Body(spawnX, spawnY, carbodyShape, true);
         carbody.setRotation2FX(ang2FX);
-        //carbody.;
-        //carbody.setRotatable(false);
-        Main.print("" + carbody.rotation2FX());
-        //carbody.setDynamic(false);
         
         long longAng2FX = ang2FX;
         int ang = (int) (longAng2FX * 360 / FXUtil.TWO_PI_2FX) + 1;
-        Main.print("" + ang);
-        
 
-        ball = Shape.createCircle(wheelRadius);
-        ball.setElasticity(0);
-        ball.setFriction(100);
-        ball.setMass(1);
-        //ball.correctCentroid();
+        wheelShape = Shape.createCircle(wheelRadius);
+        wheelShape.setElasticity(0);
+        wheelShape.setFriction(100);
+        wheelShape.setMass(1);
+        wheelShape.correctCentroid();
         int lwX = spawnX - (carbodyLength / 2 - wheelRadius)*Mathh.cos(ang) / 1000;
         int lwY = spawnY + wheelRadius / 2 - (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
         int rwX = spawnX + (carbodyLength / 2 - wheelRadius)*Mathh.cos(ang) / 1000;
         int rwY = spawnY + wheelRadius / 2 + (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
-        leftwheel = new Body(lwX, lwY, ball, true);
-        rightwheel = new Body(rwX, rwY, ball, true);
-        //leftwheel.setDynamic(false);
-        //rightwheel.setDynamic(false);
+        leftwheel = new Body(lwX, lwY, wheelShape, true);
+        rightwheel = new Body(rwX, rwY, wheelShape, true);
         
         world.removeBody(carbody);
         world.removeBody(leftwheel);
@@ -146,13 +137,6 @@ public class gCanvas extends Canvas implements Runnable {
         world.addConstraint(leftjoint);
         world.addConstraint(rightjoint);
         
-        //leftmotor = new Motor(leftwheel, -80 * FXUtil.ONE_2FX, FXUtil.toFX(5000));
-        //rightmotor = new Motor(rightwheel, -80 * FXUtil.ONE_2FX, FXUtil.toFX(5000));
-        //carbodymotor = new Motor(carbody, 0 * FXUtil.ONE_2FX, FXUtil.toFX(500));
-
-        //world.addConstraint(leftmotor);
-        //world.addConstraint(rightmotor);
-        //world.addConstraint(carbodymotor);
         if (vel != null) {
             FXVector velFX = (FXVector) vel[0];
             int rVel2FX = ((Integer) vel[1]).intValue();
@@ -161,6 +145,11 @@ public class gCanvas extends Canvas implements Runnable {
     }
 
     protected void showNotify() {
+        scW = getWidth();
+        scH = getHeight();
+        Main.sWidth = scW;
+        Main.sHeight = scH;
+        world.refreshScreenParameters();
         stopped = false;
     }
 
@@ -173,45 +162,38 @@ public class gCanvas extends Canvas implements Runnable {
     }
 
     public void run() {
-        while (!worldgen.isReady()) {
+        long sleep = 0;
+        long start = 0;
+        int tick = 0;
+        int tenFX = FXUtil.toFX(10);
+        gameoverCountdown = 0;
+        Contact[][] contacts = new Contact[3][];
+        //world.setTimestepFX(FXUtil.toFX(16));
+        while(false & world == null) {
             try {
-                Thread.sleep(20);
+                Thread.sleep(50);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
         }
-        long sleep = 0;
-        long start = 0;
-        int t = 0;
-        int tenFX = FXUtil.toFX(10);
-        Runtime rt = Runtime.getRuntime();
-        gameoverCountdown = 0;
-        Contact[][] contacts = new Contact[3][];
-        
-        
-        //world.setLandscape(l);
-        //world.setTimestepFX(FXUtil.toFX(16));
-        //Body[] bodies = world.getBodies();
         while (!stopped) {
-            if (world != null && !paused) {
-                //Main.print("" + carbody.rotation2FX());
-                //int a = FXUtil.ONE_2FX;
-                //text += GraphicsWorld.carX + " " + GraphicsWorld.carY + " ";
-                //text += rt.freeMemory() + "/" + rt.totalMemory();
+            if (scW != getWidth()) {
+                showNotify();
+            }
+            if (!paused && worldgen.isReady()) {
                 start = System.currentTimeMillis();
                 try {
                     contacts[0] = world.getContactsForBody(leftwheel);
                     contacts[1] = world.getContactsForBody(rightwheel);
                     contacts[2] = world.getContactsForBody(carbody);
+                    ang = 360 - FXUtil.angleInDegrees2FX(carbody.rotation2FX());
+                    leftContacts = contacts[0][0] != null;
+                    rightContacts = contacts[1][0] != null;
                 } catch (NullPointerException ex) {
-                    Main.print("ждём автомобиль");
+                    contacts[0] = new Contact[0];
+                    contacts[1] = new Contact[0];
+                    contacts[2] = new Contact[0];
                 }
-                ang = 360 - FXUtil.angleInDegrees2FX(carbody.rotation2FX());
-
-                leftContacts = contacts[0][0] != null;
-
-                rightContacts = contacts[1][0] != null;
-
                 if (!leftContacts & !rightContacts) {
                     flying += 1;
                 } else {
@@ -220,7 +202,6 @@ public class gCanvas extends Canvas implements Runnable {
 
                 if (accel) {
                     motorTdOff = 0;
-                    //carbody.applyTorque(FXUtil.toFX(-5000));
                     if (flying > 2) {
                         carbody.applyTorque(FXUtil.toFX(-2000));
                     } else {
@@ -257,7 +238,7 @@ public class gCanvas extends Canvas implements Runnable {
                         carbody.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
 
 
-                        if (leftContacts & rightContacts) {
+                        /*if (leftContacts & rightContacts) {
                             //leftwheel.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
                             //rightwheel.applyMomentum(new FXVector(FXCosAngM, -FXCosAngM));
 
@@ -273,31 +254,29 @@ public class gCanvas extends Canvas implements Runnable {
                             if (world.getContactsForBody(carbody)[0] != null) {
                                 carbody.applyTorque(FXUtil.toFX(-8000));
                             }
-                        }
+                        }*/
                     }
                 } else {
-                    //text = "false";
-                    //leftmotor.setParameter(0, 0, true, false, false);
-                    //rightmotor.setParameter(0, 0, true, false, false);
                     if (motorTdOff < 40) {
-                        if (carbody.angularVelocity2FX() > 0) {
-                            carbody.applyTorque(FXUtil.toFX(carbody.angularVelocity2FX() / 10000));
+                        try {
+                            if (carbody.angularVelocity2FX() > 0) {
+                                carbody.applyTorque(FXUtil.toFX(carbody.angularVelocity2FX() / 10000));
+                            }
+                            if (flying == 0) {
+                                carbody.applyMomentum(new FXVector(-carbody.velocityFX().xFX/8, -carbody.velocityFX().yFX/8));
+                            }
+                            motorTdOff++;
+                        } catch (NullPointerException ex) {
+                            ex.printStackTrace();
                         }
-                        if (flying == 0) {
-                            carbody.applyMomentum(new FXVector(-carbody.velocityFX().xFX/8, -carbody.velocityFX().yFX/8));
-                        }
-                        motorTdOff++;
                     }
                 }
 
                 waiting = waitingForDynamic.size();
                 for (int j = 0; j < 3; j++) {
                     for (int i = 0; i < contacts[j].length; i++) {
-                        //contacts[0].body1().setDynamic(true);
                         if (contacts[j][i] != null) {
-                            //contacts[i].body1().setDynamic(true);
                             Body body = contacts[j][i].body1();
-                            //contacts[i].body1().setDynamic(true);
                             if (!waitingForDynamic.contains(body)) {
                                 waitingForDynamic.addElement(body);
                                 waitingTime.addElement(new Integer(40));
@@ -312,10 +291,10 @@ public class gCanvas extends Canvas implements Runnable {
                 sleep = millis - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
 
-                if (t < 5) {
-                    t++;
+                if (tick < 5) {
+                    tick++;
                 } else {
-                    t = 1;
+                    tick = 1;
                     for (int i = 0; i < waitingForDynamic.size(); i++) {
                         if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) > 0) {
                             waitingTime.setElementAt(new Integer(Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) - 10), i);
@@ -329,7 +308,8 @@ public class gCanvas extends Canvas implements Runnable {
                         if (gameoverCountdown < 8) {
                             gameoverCountdown++;
                         } else {
-                            restart();
+                            openMenu();
+                            //restart();
                         }
                     } else {
                         if (gameoverCountdown > 0) {
@@ -434,24 +414,34 @@ public class gCanvas extends Canvas implements Runnable {
 
     protected void pointerPressed(int x, int y) {
         if (x > scW * 2 / 3 & y < scH / 6) {
+            pauseTouched = true;
+        } else if (x < scW / 3 & y < scH / 6) {
+            menuTouched = true;
+        } else {
+            accel = true;
+        }
+    }
+    
+    protected void pointerDragged(int x, int y) {
+        pauseTouched = false;
+        menuTouched = false;
+    }
+
+    protected void pointerReleased(int x, int y) {
+        if (pauseTouched) {
             if (!paused) {
                 hideNotify();
-                //paused = true;
                 repaint();
             } else {
                 stopped = false;
                 paused = false;
                 showNotify();
             }
-        } else if (x < scW / 3 & y < scH / 6) {
+        }
+        if (menuTouched) {
             stopped = true;
             openMenu();
-        } else {
-            accel = true;
         }
-    }
-
-    protected void pointerReleased(int x, int y) {
         accel = false;
     }
 
