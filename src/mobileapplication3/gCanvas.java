@@ -24,6 +24,10 @@ public class gCanvas extends Canvas implements Runnable {
     boolean r = false;
 
     int waiting = 0;
+    int hintCountdown = 60;
+    String[] menuhint = {"menu:", "here(touch),", "9, #"};
+    String[] pausehint = {"pause:", "here(touch),", "right soft btn"};
+    static boolean firstStart = true;
     int ang = 0;
     private final int millis = 50;
     //private World world;
@@ -53,6 +57,7 @@ public class gCanvas extends Canvas implements Runnable {
     int gameoverCountdown = 0;
     Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     Font mediumfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+    int mFontH = mediumfont.getHeight();
     Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int scW = 2;
     int scH = 2;
@@ -332,6 +337,9 @@ public class gCanvas extends Canvas implements Runnable {
                     ex.printStackTrace();
                 }
             }
+            if (hintCountdown > 0) {
+                hintCountdown--;
+            }
         }
     }
 
@@ -368,6 +376,20 @@ public class gCanvas extends Canvas implements Runnable {
             g.setFont(largefont);
             g.setColor(255, 255, 255);
             g.drawString("PAUSED", scW / 2, scH / 3 + largefont.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
+        }
+        if (firstStart & hintCountdown > 0) {
+            int color = 255 * hintCountdown / 60;
+            g.setColor(color/2, color, color/2);
+            g.fillRect(0, 0, scW/3, scH/6);
+            g.fillRect(scW*2/3, 0, scW/3, scH/6);
+            g.setColor(0, 0, color);
+            g.setFont(mediumfont);
+            for (int i = 0; i < menuhint.length; i++) {
+                g.drawString(menuhint[i], scW/6, i * mFontH + scH / 12 - mFontH*menuhint.length/2, Graphics.HCENTER | Graphics.TOP);
+            }
+            for (int i = 0; i < pausehint.length; i++) {
+                g.drawString(pausehint[i], scW*5/6, i * mFontH + scH / 12 - mFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
+            }
         }
     }
 
@@ -406,6 +428,7 @@ public class gCanvas extends Canvas implements Runnable {
     }
 
     public void openMenu() {
+        firstStart = false;
         mnCanvas.wg = false;
         worldgen.stop();
         stopped = true;
