@@ -173,6 +173,7 @@ public class gCanvas extends Canvas implements Runnable {
         int tenFX = FXUtil.toFX(10);
         gameoverCountdown = 0;
         Contact[][] contacts = new Contact[3][];
+        paused = firstStart;
         //world.setTimestepFX(FXUtil.toFX(16));
         while(false & world == null) {
             try {
