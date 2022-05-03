@@ -62,8 +62,10 @@ public class GraphicsWorld extends World {
             g.setColor(255, 255, 255);
             drawBodies(g); //bodies, exclude car wheels
             drawCar(g); //car wheels
-            g.drawString(String.valueOf(points), halfScWidth, scHeight - fontH,
-                    Graphics.HCENTER | Graphics.TOP);     //points
+            if (mnCanvas.wg) {
+                g.drawString(String.valueOf(points), halfScWidth, scHeight - fontH,
+                        Graphics.HCENTER | Graphics.TOP);     //points
+            }
             drawConstraints(g);
         } catch (NullPointerException ex) {
             int l = scWidth * 2 / 3;
