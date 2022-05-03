@@ -2,15 +2,9 @@
 J2ME game on emini physics engine
 - Endless gameplay and procedural generation (random combination of predefined structures)
 - Custom levels (can be created through emini world designer. Some examples are here. Paths for levels are: [root]/Levels/, [root]/other/Levels/, [root]/predefgallery/predefgraphics/Levels/)
-- "About" menu
 - Debug mode (lets see how new structures appear, changes game over color, shows X coordinate of car)
-- Touch interface is supported
+- Touch interface and screen rotation are supported
 - Adapts to any (or almost any) screen size
-
-## Controls:
-- any key - **ride**
-- 9, #, left top corner(touch) - **open menu**
-- right action key, right top corner(touch) - **pause**
 
 tested on: default emulator; Nokia 6303c, n8, 308; Samsung c3200, b320; SE w580i, z550i; j2me loader.
 
