@@ -56,6 +56,7 @@ public class gCanvas extends Canvas implements Runnable {
     public static Landscape l;
     int gameoverCountdown = 0;
     Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+    int sFontH = smallfont.getHeight();
     Font mediumfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     int mFontH = mediumfont.getHeight();
     Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
@@ -384,12 +385,12 @@ public class gCanvas extends Canvas implements Runnable {
             g.fillRect(0, 0, scW/3, scH/6);
             g.fillRect(scW*2/3, 0, scW/3, scH/6);
             g.setColor(0, 0, color);
-            g.setFont(mediumfont);
+            g.setFont(smallfont);
             for (int i = 0; i < menuhint.length; i++) {
-                g.drawString(menuhint[i], scW/6, i * mFontH + scH / 12 - mFontH*menuhint.length/2, Graphics.HCENTER | Graphics.TOP);
+                g.drawString(menuhint[i], scW/6, i * sFontH + scH / 12 - sFontH*menuhint.length/2, Graphics.HCENTER | Graphics.TOP);
             }
             for (int i = 0; i < pausehint.length; i++) {
-                g.drawString(pausehint[i], scW*5/6, i * mFontH + scH / 12 - mFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
+                g.drawString(pausehint[i], scW*5/6, i * sFontH + scH / 12 - sFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
             }
         }
     }
