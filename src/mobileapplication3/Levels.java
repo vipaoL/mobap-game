@@ -133,10 +133,18 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         } else {
             
         }
-        String path = System.getProperty("fileconn.dir.photos") + "Levels/";
-        listFiles(path);
-        path = System.getProperty("fileconn.dir.graphics") + "Levels/";
-        listFiles(path);
+        try {
+            String path = System.getProperty("fileconn.dir.photos") + "Levels/";
+            listFiles(path);
+            path = System.getProperty("fileconn.dir.graphics") + "Levels/";
+            listFiles(path);
+        } catch (SecurityException ex) {
+            ex.printStackTrace();
+            //Main.showAlert(ex);
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+            //Main.showAlert(ex);
+        }
     }
     
     void checkDrive(String root) {
@@ -151,7 +159,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             //ex.printStackTrace();
             //Main.showAlert(ex);
         } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
             //Main.showAlert(ex);
         }
     }
@@ -167,11 +175,11 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
                 return true;
             }
         } catch (IOException ex) {
-            Main.showAlert(ex);
-            ex.printStackTrace();
+            //Main.showAlert(ex);
+            //ex.printStackTrace();
         } catch (IllegalArgumentException ex) {
-            Main.showAlert(ex);
-            ex.printStackTrace();
+            //Main.showAlert(ex);
+            //ex.printStackTrace();
         }
         return false;
     }
