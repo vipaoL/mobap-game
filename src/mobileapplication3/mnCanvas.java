@@ -23,7 +23,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     int k = 20;
     int delay = 0;
     String[] menuOptions = {"-", "Play", "Levels", "About", "Debug", "Exit", "-"};
-    int selected = 1;
+    static int selected = 1;
     int scW = getWidth();
     int scH = getHeight();
     int tick = 5;
