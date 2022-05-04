@@ -245,7 +245,7 @@ public class gCanvas extends Canvas implements Runnable {
                         carbody.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
 
 
-                        /*if (leftContacts & rightContacts) {
+                        if (leftContacts & rightContacts) {
                             //leftwheel.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
                             //rightwheel.applyMomentum(new FXVector(FXCosAngM, -FXCosAngM));
 
@@ -254,14 +254,15 @@ public class gCanvas extends Canvas implements Runnable {
                                 //leftwheel.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
                             }
                             if (rightContacts) {
+                                carbody.applyTorque(FXUtil.toFX(-4000));
                                 //rightwheel.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 15) * speedMultipiler), tenFX * 5), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang - 15) * speedMultipiler), tenFX * 5)));
                                 ////leftwheel.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang) * speedMultipiler), tenFX * 5), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang) * speedMultipiler), tenFX * 5)));
                             }
                             //carbody.applyForce(new FXVector(FXUtil.toFX(sin(ang)), FXUtil.toFX(cos(ang))), 100);
                             if (world.getContactsForBody(carbody)[0] != null) {
-                                carbody.applyTorque(FXUtil.toFX(-8000));
+                                carbody.applyTorque(FXUtil.toFX(-4000));
                             }
-                        }*/
+                        }
                     }
                 } else {
                     if (motorTdOff < 40) {
