@@ -139,7 +139,7 @@ public class WorldGen implements Runnable{
     private void circ1(int x, int y, int r, int sn, int va) { // 0
         int[] h = {0, x, y, r, sn, va};
         
-        x+=r;
+        x+=r+r;
         
         //sn = 360 / sl - va/sl;
         /*for(int i = 0; i < 300/sl; i++) {
@@ -147,7 +147,7 @@ public class WorldGen implements Runnable{
         }*/
         int r2 = r*3/2;
         
-        arc(x-r, y-r2, r2, 60, 30);
+        arc(x-r-r, y-r2, r2, 60, 30);
         arc(x+r/2, y-r*2, r, 300, va);
         int ofs = (1000 - Mathh.cos(30))*2*r2/1000;
         arc(x+r*2-ofs, y-r2, r2, 60, 90);
@@ -163,7 +163,7 @@ public class WorldGen implements Runnable{
         }*/
         
         
-        int l = r2+r2-ofs;
+        int l = r2+r2+r2-ofs;
         lastX += l;
         if (!resettingPosition) {
             h[1] = l;
