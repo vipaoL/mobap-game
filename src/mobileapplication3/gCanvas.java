@@ -164,7 +164,7 @@ public class gCanvas extends Canvas implements Runnable {
     }
 
     public synchronized void end() {
-        stopped = true;
+        //stopped = true;
     }
 
     public void run() {

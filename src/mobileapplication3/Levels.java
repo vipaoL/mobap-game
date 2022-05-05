@@ -47,14 +47,11 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     int delay = 10;
     String xoba = "";
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    //Thread runner;
     boolean paused = false;
 
     Levels() {
         super(true);
         setFullScreenMode(true);
-        scW = this.getWidth();
-        scH = this.getHeight();
         select = new Command("Select", Command.OK, 1);
         back = new Command("Back", Command.BACK, 2);
         (new Thread(this, "level picker")).start();
@@ -67,15 +64,22 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
 
         drives = getRoots();
         v.addElement("---levels---");
-        //try {
-        getLevels();
+        try {
+            getLevels();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
 
         v.addElement("--Back--");
         showNotify();
 
         //addCommand(select);
         //addCommand(back);
-        setCommandListener(this);
+        //setCommandListener(this);
 
         //runner = new Thread(this);
         //runner.start();
@@ -84,11 +88,22 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     protected void showNotify() {
         scW = this.getWidth();
         scH = this.getHeight();
-        if (font.getHeight() * v.size() > scH) {
+        if (font.getHeight() * v.size() >= scH) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+            if (font.getHeight() * v.size() >= scH) {
+                font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+            }
         }
-        if (font.getHeight() * v.size() > scH) {
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+        if (font.getSize() != Font.SIZE_SMALL) {
+            for (int i = 1; i < v.size() - 1; i++) {
+                if (font.stringWidth((String) v.elementAt(i)) >= scW) {
+                    font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+                    if (font.stringWidth((String) v.elementAt(i)) >= scW) {
+                        font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+                        break;
+                    }
+                }
+            }
         }
         paused = false;
     }
@@ -118,6 +133,9 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             k = (scH + scH / (v.size() + 1)) / (v.size() + 1);
             g.drawString((String) v.elementAt(i), scW / 2, k * (i + 1) - font.getHeight() / 2 - scH / (v.size() + 1) / 2 + offset * Font.getDefaultFont().getHeight() / 8000 + font.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
         }
+        if (mnCanvas.debug) {
+            g.drawString(String.valueOf(v.size()), 0, 0, 0);
+        }
         if (tick > 9) {
             tick = 0;
         } else {
@@ -134,9 +152,9 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             
         }
         try {
-            String path = System.getProperty("fileconn.dir.photos") + "Levels/";
+            String path = System.getProperty("fileconn.dir.photos");
             listFiles(path);
-            path = System.getProperty("fileconn.dir.graphics") + "Levels/";
+            path = System.getProperty("fileconn.dir.graphics");
             listFiles(path);
         } catch (SecurityException ex) {
             ex.printStackTrace();
@@ -144,14 +162,17 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
             //Main.showAlert(ex);
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+            //Main.showAlert(ex);
         }
     }
     
     void checkDrive(String root) {
-        String path = prefix + root + "Levels/";
+        String path = prefix + root;
         try {
             listFiles(path);
-            path = prefix + root + "other" + sep + "Levels/";
+            path = prefix + root + "other" + sep;
             listFiles(path);
             //path = prefix + root + "predefgallery" + sep + "predefgraphics" + sep + "Levels/";
             //listFiles(path);
@@ -165,26 +186,30 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     }
 
     boolean listFiles(String path) {
-        try {
-            FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-            if (fc.exists() & fc.isDirectory()) {
-                list =  fc.list();
-                while (list.hasMoreElements()) {
-                    v.addElement(path + list.nextElement());
+        if (path != null) {
+            path += "Levels" + sep;
+            try {
+                FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+                if (fc.exists() & fc.isDirectory()) {
+                    list =  fc.list();
+                    while (list.hasMoreElements()) {
+                        v.addElement(path + list.nextElement());
+                    }
+                    return true;
                 }
-                return true;
+            } catch (IOException ex) {
+                //Main.showAlert(ex);
+                //ex.printStackTrace();
+            } catch (IllegalArgumentException ex) {
+                //Main.showAlert(ex);
+                //ex.printStackTrace();
             }
-        } catch (IOException ex) {
-            //Main.showAlert(ex);
-            //ex.printStackTrace();
-        } catch (IllegalArgumentException ex) {
-            //Main.showAlert(ex);
-            //ex.printStackTrace();
         }
         return false;
     }
 
     public void run() {
+        start();
         long sleep = 0;
         long start = 0;
         long millis = 50;

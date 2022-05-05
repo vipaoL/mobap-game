@@ -190,15 +190,12 @@ public class mnCanvas extends GameCanvas implements Runnable {
     public void startLevel(String path) {
         Main.print("menu:startLevel()");
         try {
-        stopped = true;
-        PhysicsFileReader reader = new PhysicsFileReader("/void.phy");
-        //runner.interrupt();
-        //runner = null;
-        gCanvas gameCanvas = new gCanvas();
-        gameCanvas.setWorld(new GraphicsWorld(World.loadWorld(reader)));
-        reader.close();
-        Main.set(gameCanvas);
-        
+            stopped = true;
+            PhysicsFileReader reader = new PhysicsFileReader("/void.phy");
+            gCanvas gameCanvas = new gCanvas();
+            gameCanvas.setWorld(new GraphicsWorld(World.loadWorld(reader)));
+            reader.close();
+            Main.set(gameCanvas);
         } catch (NullPointerException ex) {
             Main.showAlert(ex.toString());
         }
@@ -242,15 +239,11 @@ public class mnCanvas extends GameCanvas implements Runnable {
             Main.print("menu:selected == 1 -> gen = true");
             wg = true;
             startLevel(DEFAULT_LEVEL);
-            
         }
         if (selected == 2) {
             stopped = true;
-            //runner = null;
             wg = false;
-            Levels levelPicker = new Levels();
-            Main.set(levelPicker);
-            levelPicker.start();
+            Main.set(new Levels());
         }
         if (selected == 3) {
             Main.set(new about());
