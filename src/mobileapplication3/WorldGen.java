@@ -24,6 +24,7 @@ public class WorldGen implements Runnable{
     private int lastX = -8000;
     private int lastY = 0;
     private short u = 0;
+    private short u1 = 1;
     private Random rand;
     private int sn = 36;
     private int sl = 360 / sn;
@@ -114,6 +115,10 @@ public class WorldGen implements Runnable{
             floor(lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(6) - 3) * 100);
         } else if (i == 3) {
             circ2(lastX, lastY, 1000, 20);
+        } else if (i == 4 & mnCanvas.debug) {
+            int l = 6000;
+            l = rand.nextInt(6) * 1000;
+            abyss(lastX, lastY, l);
         } else {
             floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
         }
@@ -251,9 +256,21 @@ public class WorldGen implements Runnable{
         }
         toD = 0;
         //nextY = lastY;
-        line(x, y, x + l, y);
+        line1(x, y, x + l, y);
         lastX += l;
         
+    }
+    private void abyss(int x, int y, int l) {
+        if (!resettingPosition) {
+            int[] h = {2, l, y};
+            structlogger(h);
+        }
+        int ang = 60; // springboard angle
+        int r = l / 8;
+        arc(x, y-r, r, ang, 90 - ang, 15, 10);
+        line(x+l - l / 5, y - r * Mathh.cos(ang) / 1000, x+l, y - r * Mathh.cos(ang) / 1000);
+        lastX += l;
+        lastY -= r * Mathh.cos(ang) / 1000;
     }
     
     
@@ -269,7 +286,7 @@ public class WorldGen implements Runnable{
         int sl = l/sn;
         //int lInSl = l/sl;
         for(int i = sl; i <= l; i+=sl) {
-            gCanvas.l.addSegment(FXVector.newVector(x + (i-sl), y + amp * Mathh.sin(180*(i-sl)/l*halfperiods+offset) / 1000), FXVector.newVector(x + i, y + amp*Mathh.sin(180*i/l*halfperiods+offset)/1000), u);
+            line1(x + (i-sl), y + amp * Mathh.sin(180*(i-sl)/l*halfperiods+offset) / 1000, x + i, y + amp*Mathh.sin(180*i/l*halfperiods+offset)/1000);
             toD += 1;
         }
         lastX += l;
@@ -277,18 +294,22 @@ public class WorldGen implements Runnable{
     }
     private void arc(int x, int y, int r, int ang, int of) {
         for(int i = sl; i <= ang; i+=sl) {
-            gCanvas.l.addSegment(FXVector.newVector(x+Mathh.cos(i+of)*r/1000, y+Mathh.sin(i+of)*r/1000), FXVector.newVector(x+Mathh.cos((i-sl)+of)*r/1000,y+Mathh.sin((i-sl)+of)*r/1000), u);
+            line(x+Mathh.cos(i+of)*r/1000, y+Mathh.sin(i+of)*r/1000, x+Mathh.cos((i-sl)+of)*r/1000,y+Mathh.sin((i-sl)+of)*r/1000);
             toD += 1;
         }
     }
     private void arc(int x, int y, int r, int ang, int of, int kx, int ky) { //k: 10 = 1.0
         for(int i = sl; i <= ang; i+=sl) {
-            gCanvas.l.addSegment(FXVector.newVector(x+Mathh.cos(i+of)*kx*r/10000, y+Mathh.sin(i+of)*ky*r/10000), FXVector.newVector(x+Mathh.cos((i-sl)+of)*kx*r/10000,y+Mathh.sin((i-sl)+of)*ky*r/10000), u);
+            line(x+Mathh.cos(i+of)*kx*r/10000, y+Mathh.sin(i+of)*ky*r/10000, x+Mathh.cos((i-sl)+of)*kx*r/10000,y+Mathh.sin((i-sl)+of)*ky*r/10000);
             toD += 1;
         }
     }
     private void line(int x1, int y1, int x2, int y2) {
         gCanvas.l.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u);
+        //waitinForDel.addElement(new Integer(1));
+    }
+    private void line1(int x1, int y1, int x2, int y2) {
+        gCanvas.l.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u1);
         //waitinForDel.addElement(new Integer(1));
     }
     /*******************************************
@@ -356,10 +377,10 @@ public class WorldGen implements Runnable{
     
     private void structlogger(int[] a) {
         if (!resettingPosition) {
-            structLog.addElement(a);
             if (structLog.size() > 6) {
                 structLog.removeElementAt(0);
             }
+            structLog.addElement(a);
         }
     }
     private void resetPosition() {
@@ -438,7 +459,7 @@ public class WorldGen implements Runnable{
 
             int y = struct[2];
             lastY = y;
-            Main.print("REPRODUCE:" + structID + ",y:" + y);
+            Main.print("REPRODUCE:" + structID);
             if (structID == 0) {
                 int r = struct[3];
                 int sn = struct[4];
@@ -451,11 +472,10 @@ public class WorldGen implements Runnable{
                 floorStat(lastX, y, l);
                 Main.print("flStat");
             }
-            if (structID == 2) {
-                int l = struct[3];
-                int x2 = struct[4];
-                floor(lastX, y, l, x2);
-                Main.print("fl");
+            if (structID == 2) { // {2, l, y}
+                int l = struct[1];
+                abyss(lastX, l, y);
+                Main.print("abyss");
             }
             if (structID == 3) {
                 int l = struct[3];
