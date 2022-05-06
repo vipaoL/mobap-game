@@ -34,13 +34,79 @@ public class GraphicsWorld extends World {
         super(w);
         refreshScreenParameters();
     }
+    
+    public void addCar() {
+        int x = 0;
+        if (mnCanvas.wg) {
+            x = -8000;
+        }
+        addCar(x, -400, FXUtil.TWO_PI_2FX/360*30, null);
+    }
+
+    public Body carbody;
+    public Body leftwheel;
+    public Body rightwheel;
+    
+    public void addCar(int spawnX, int spawnY, int ang2FX, Object[] vel) {
+        int carbodyLength = 240;
+        int carbodyHeight = 40;
+        int wheelRadius = 40;
+        Shape carbodyShape;
+        Shape wheelShape;
+
+        carbodyShape = Shape.createRectangle(carbodyLength, carbodyHeight);
+        carbodyShape.setMass(1);
+        carbodyShape.setFriction(0);
+        carbodyShape.setElasticity(0);
+        carbodyShape.correctCentroid();
+        carbody = new Body(spawnX, spawnY, carbodyShape, true);
+        carbody.setRotation2FX(ang2FX);
+        
+        long longAng2FX = ang2FX;
+        int ang = (int) (longAng2FX * 360 / FXUtil.TWO_PI_2FX) + 1;
+
+        wheelShape = Shape.createCircle(wheelRadius);
+        wheelShape.setElasticity(0);
+        wheelShape.setFriction(100);
+        wheelShape.setMass(1);
+        wheelShape.correctCentroid();
+        int lwX = spawnX - (carbodyLength / 2 - wheelRadius)*Mathh.cos(ang) / 1000;
+        int lwY = spawnY + wheelRadius / 2 - (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
+        int rwX = spawnX + (carbodyLength / 2 - wheelRadius)*Mathh.cos(ang) / 1000;
+        int rwY = spawnY + wheelRadius / 2 + (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
+        leftwheel = new Body(lwX, lwY, wheelShape, true);
+        rightwheel = new Body(rwX, rwY, wheelShape, true);
+        
+        removeBody(carbody);
+        removeBody(leftwheel);
+        removeBody(leftwheel);
+        
+        addBody(carbody);
+        carbody.addCollisionLayer(1);
+        
+        addBody(leftwheel);
+        addBody(rightwheel);
+        leftwheel.addCollisionLayer(1);
+        rightwheel.addCollisionLayer(1);
+
+        Joint leftjoint = new Joint(carbody, leftwheel, FXVector.newVector(-carbodyLength / 2 + wheelRadius, wheelRadius*2/3), FXVector.newVector(0, 0), false);
+        Joint rightjoint = new Joint(carbody, rightwheel, FXVector.newVector(carbodyLength / 2 - wheelRadius, wheelRadius*2/3), FXVector.newVector(0, 0), false);
+        addConstraint(leftjoint);
+        addConstraint(rightjoint);
+        
+        if (vel != null) {
+            FXVector velFX = (FXVector) vel[0];
+            int rVel2FX = ((Integer) vel[1]).intValue();
+            carbody.angularVelocity2FX(rVel2FX);
+        }
+    }
 
     public void draw(Graphics g) {
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, scWidth, scHeight);
         try {
-            carX = gCanvas.carbody.positionFX().xAsInt();
-            carY = gCanvas.carbody.positionFX().yAsInt();
+            carX = carbody.positionFX().xAsInt();
+            carY = carbody.positionFX().yAsInt();
 
             zoomOut = (1000 * carY / scMinSide - 1000);
             if (zoomOut < 1) {
@@ -78,7 +144,7 @@ public class GraphicsWorld extends World {
         Body[] bodies = getBodies();
         int bodyCount = getBodyCount();
         for (int i = 0; i < bodyCount; i++) {
-            if (bodies[i] != gCanvas.leftwheel & bodies[i] != gCanvas.rightwheel) {
+            if (bodies[i] != leftwheel & bodies[i] != rightwheel) {
                 drawBody(g, bodies[i]);
             }
         }
@@ -101,8 +167,8 @@ public class GraphicsWorld extends World {
     }
 
     public void drawCar(Graphics g) {
-        drawWheel(g, gCanvas.leftwheel);
-        drawWheel(g, gCanvas.rightwheel);
+        drawWheel(g, leftwheel);
+        drawWheel(g, rightwheel);
     }
 
     private void drawLandscape(Graphics g) {
@@ -153,10 +219,10 @@ public class GraphicsWorld extends World {
         return c * 1000 / zoomOut + offsetY;
     }
 
-    static void refreshPos() {
+    void refreshPos() {
         try {
-            carX = gCanvas.carbody.positionFX().xAsInt();
-            carY = gCanvas.carbody.positionFX().yAsInt();
+            carX = carbody.positionFX().xAsInt();
+            carY = carbody.positionFX().yAsInt();
         } catch (NullPointerException ex) {
             carX = -8000;
             carY = 0;

@@ -8,6 +8,7 @@ package mobileapplication3;
 
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Constraint;
+import at.emini.physics2D.Landscape;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXVector;
 import java.util.Random;
@@ -21,6 +22,7 @@ public class WorldGen implements Runnable{
     
     private int prevR;
     private int i;
+    private int zeroPoint =  -8000;
     private int lastX = -8000;
     private int lastY = 0;
     private short u = 0;
@@ -43,6 +45,13 @@ public class WorldGen implements Runnable{
     //private Thread thread;
     boolean needSpeed = true;
     boolean ready = true;
+    GraphicsWorld w;
+    Landscape lndscp;
+    
+    public WorldGen(GraphicsWorld w) {
+        this.w = w;
+        lndscp = w.getLandscape();
+    }
     
     public void start() {
         ready = false;
@@ -58,7 +67,6 @@ public class WorldGen implements Runnable{
     }
     public void stop() {
         stopped = true;
-        //thread = null;
     }
     public void resume() {
         paused = false;
@@ -96,7 +104,7 @@ public class WorldGen implements Runnable{
         line(lastX - 600, lastY - 100, lastX, lastY);
         t = 2;
         GraphicsWorld.points = 0;
-        gCanvas.addCar();
+        w.addCar();
         ready = true;
     }
     
@@ -211,7 +219,7 @@ public class WorldGen implements Runnable{
             Body fallinPlatf = new Body(x+r+Mathh.cos(i+f0off)*(r+platfHeight/2)/1000, y-r+Mathh.sin(i+f0off)*(r+platfHeight/2)/1000, rect, true);
             fallinPlatf.setDynamic(false);
             fallinPlatf.setRotationDeg(i+f0off-90);
-            gCanvas.world.addBody(fallinPlatf);
+            w.addBody(fallinPlatf);
         }
         rect = Shape.createRectangle(l2, platfHeight);
         rect.setMass(1);
@@ -220,7 +228,7 @@ public class WorldGen implements Runnable{
         for (int i = 0; i < 2; i++) {
             Body fallinPlatf = new Body(x+r-r2+i*l2+l2/2, y+platfHeight/2, rect, true);
             fallinPlatf.setDynamic(false);
-            gCanvas.world.addBody(fallinPlatf);
+            w.addBody(fallinPlatf);
         }
         
         int l = r+r;
@@ -305,11 +313,11 @@ public class WorldGen implements Runnable{
         }
     }
     private void line(int x1, int y1, int x2, int y2) {
-        gCanvas.l.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u);
+        lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u);
         //waitinForDel.addElement(new Integer(1));
     }
     private void line1(int x1, int y1, int x2, int y2) {
-        gCanvas.l.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u1);
+        lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u1);
         //waitinForDel.addElement(new Integer(1));
     }
     /*******************************************
@@ -355,7 +363,7 @@ public class WorldGen implements Runnable{
                 if (t <= 20) {
                     t++;
                 } else {
-                    GraphicsWorld.points = Math.max(GraphicsWorld.points, savedPoints + (GraphicsWorld.carX+8000)/2000);
+                    GraphicsWorld.points = Math.max(GraphicsWorld.points, savedPoints + (GraphicsWorld.carX-zeroPoint)/2000);
                     t = 1;
                 }
             }
@@ -385,23 +393,26 @@ public class WorldGen implements Runnable{
     }
     private void resetPosition() {
         
-        // костыль для обхода бага движка
+        // world cycling
         
         ready = false;
         resettingPosition = true;
         needSpeed = true;
         int prevLastX = lastX;
         lastX = -8000;
-        savedPoints += (prevLastX - lastX - 8000) / 2000;
+        
         Main.print("REGEN");
         
         rmSegs();
         rmBodies();
         reproduce();
         
-        gCanvas.carbody.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
-        gCanvas.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
-        gCanvas.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        w.carbody.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        zeroPoint = w.carbody.positionFX().xAsInt();
+        w.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        w.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        
+        savedPoints += (prevLastX - lastX - 8000) / 2000;
 
         resettingPosition = false;
         needSpeed = false;
@@ -410,11 +421,11 @@ public class WorldGen implements Runnable{
     
     private void cleanWorld() {
         gCanvas.paused = true;
-        Constraint[] constraints = gCanvas.world.getConstraints();
-        toD = gCanvas.world.getConstraintCount();
+        Constraint[] constraints = w.getConstraints();
+        toD = w.getConstraintCount();
         //Main.print("toD:" + toD);
-        while (gCanvas.world.getConstraintCount() > 0) {
-            gCanvas.world.removeConstraint(constraints[0]);
+        while (w.getConstraintCount() > 0) {
+            w.removeConstraint(constraints[0]);
         }
         rmAllBodies();
         rmSegs();
@@ -424,29 +435,29 @@ public class WorldGen implements Runnable{
         gCanvas.paused = false;
     }
     private void rmSegs() {
-        toD = gCanvas.l.segmentCount();
+        toD = lndscp.segmentCount();
         //Main.print("toD:" + toD);
-        while (gCanvas.l.segmentCount() > 0) {
-            gCanvas.l.removeSegment(0);
+        while (lndscp.segmentCount() > 0) {
+            lndscp.removeSegment(0);
         }
     }
     private void rmBodies() {
-        Body[] bodies = gCanvas.world.getBodies();
-        toD = gCanvas.world.getBodyCount();
+        Body[] bodies = w.getBodies();
+        toD = w.getBodyCount();
         //Main.print("toD:" + toD);
-        int to = gCanvas.world.getBodyCount();
+        int to = w.getBodyCount();
         for (int i = to - 1; i >= 0; i--) {
-            if (bodies[i] != gCanvas.carbody & bodies[i] != gCanvas.leftwheel & bodies[i] != gCanvas.rightwheel)
-            gCanvas.world.removeBody(bodies[i]);
+            if (bodies[i] != w.carbody & bodies[i] != w.leftwheel & bodies[i] != w.rightwheel)
+            w.removeBody(bodies[i]);
         }
         bodies = null;
     }
     private void rmAllBodies() {
-        Body[] bodies = gCanvas.world.getBodies();
-        toD = gCanvas.world.getBodyCount();
+        Body[] bodies = w.getBodies();
+        toD = w.getBodyCount();
         //Main.print("toD:" + toD);
-        while (gCanvas.world.getBodyCount() > 0) {
-            gCanvas.world.removeBody(bodies[0]);
+        while (w.getBodyCount() > 0) {
+            w.removeBody(bodies[0]);
         }
         bodies = null;
     }
