@@ -24,6 +24,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     int delay = 0;
     String[] menuOptions = {"-", "Play", "Levels", "About", "Debug", "Exit", "-"};
     static int selected = 1;
+    boolean pressed = false;
     int scW = getWidth();
     int scH = getHeight();
     int tick = 5;
@@ -113,8 +114,14 @@ public class mnCanvas extends GameCanvas implements Runnable {
         g.setColor(255, 255, 255);
         offset = 0;
         for (int i = 0; i < menuOptions.length; i++) {
+            g.setFont(font);
             if (i == selected) {
-                g.setColor(255, 64, 64);
+                if (pressed) {
+                    g.setColor(224, 56, 56);
+                    g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, font.getSize()));
+                } else {
+                    g.setColor(255, 64, 64);
+                }
                 offset = Mathh.sin(tick * 360 / 10);
             } else {
                 g.setColor(255, 255, 255);
@@ -123,7 +130,6 @@ public class mnCanvas extends GameCanvas implements Runnable {
             if (i == 4 & debug) {
                 g.setColor(255, 255, 0);
             }
-            g.setFont(font);
             k = (scH + scH / (menuOptions.length + 1)) / (menuOptions.length + 1);
             g.drawString(menuOptions[i], scW / 2, k * (i + 1) - font.getHeight() / 2 - scH / (menuOptions.length + 1) / 2 + offset*Font.getDefaultFont().getHeight() / 8000, Graphics.HCENTER | Graphics.TOP);
         }
@@ -202,6 +208,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     }
     
     protected void pointerPressed(int x, int y) {
+        pressed = true;
         //k = scH / menuOptions.length;
         selected = y / k;
         //selected = menuOptions.length * (y + fontH) / scH;
@@ -223,6 +230,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
     }
     protected void pointerReleased(int x, int y) {
+        pressed = false;
         selected = y / k;
         //selected = menuOptions.length * y / scH;
         if (selected == 0) {
