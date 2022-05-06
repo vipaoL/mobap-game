@@ -142,9 +142,9 @@ public class gCanvas extends Canvas implements Runnable {
                     motorTdOff = 0;
                     if (flying > 2) {
                         if (w.carbody.rotationVelocity2FX() < 50000000 & w.carbody.rotationVelocity2FX() > 8000000) {
-                            w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/8000));
+                            w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/6000));
                         } else {
-                            w.carbody.applyTorque(FXUtil.toFX(-2000));
+                            w.carbody.applyTorque(FXUtil.toFX(-4000));
                         }
                     } else {
                         FXVector velFX = w.carbody.velocityFX();
@@ -291,7 +291,7 @@ public class gCanvas extends Canvas implements Runnable {
             
             //text = "";
         }
-        g.drawString(String.valueOf(w.carbody.rotationVelocity2FX()), 0, 0, 0);
+        //g.drawString(String.valueOf(w.carbody.rotationVelocity2FX()), 0, 0, 0);
         if (gameoverCountdown > 1) {
             g.setFont(largefont);
             g.setColor(255, 0, 0);

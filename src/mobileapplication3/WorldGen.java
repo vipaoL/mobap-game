@@ -412,7 +412,7 @@ public class WorldGen implements Runnable{
         w.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
         w.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
         
-        savedPoints += (prevLastX - lastX - 8000) / 2000;
+        savedPoints += (prevLastX - lastX) / 2000;
 
         resettingPosition = false;
         needSpeed = false;
