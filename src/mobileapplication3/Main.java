@@ -33,10 +33,10 @@ public class Main extends MIDlet {
         sWidth = menuCanvas.getWidth();
         sHeight = menuCanvas.getHeight();
         thiss = this;
+        set(menuCanvas);
     }
 
     public void startApp() {
-        set(menuCanvas);
         //throw new NullPointerException();
     }
 
@@ -75,7 +75,7 @@ public class Main extends MIDlet {
             }
             Alert alert = new Alert("О нет!", text, alertImage, AlertType.WARNING);
             alert.setTimeout(3000);
-            thiss.display.setCurrent(alert, current);
+            //thiss.display.setCurrent(alert, current);
             } catch(IllegalArgumentException ex) {
             ex.printStackTrace();
         }

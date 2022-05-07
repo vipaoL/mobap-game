@@ -179,6 +179,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
             selected = 2;
             selectPressed();
         }
+    
         if (gameAction == KEY_NUM3) {
             selected = 3;
             selectPressed();

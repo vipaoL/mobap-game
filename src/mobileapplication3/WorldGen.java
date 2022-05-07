@@ -40,6 +40,7 @@ public class WorldGen implements Runnable{
     //static Vector l_log;
     private boolean waitinForReset = false;
     private int savedPoints = 0;
+    private final int POINTS_DIVIDER = 2000;
     private int lowestY = 0;
     private boolean paused;
     //private Thread thread;
@@ -361,10 +362,11 @@ public class WorldGen implements Runnable{
                     }
                 }
                 
-                if (t <= 20) {
+                if (t <= 10) {
                     t++;
                 } else {
-                    GraphicsWorld.points = Math.max(GraphicsWorld.points, savedPoints + (GraphicsWorld.carX-zeroPoint)/2000);
+                    w.refreshPos();
+                    GraphicsWorld.points = Math.max(GraphicsWorld.points, savedPoints + (GraphicsWorld.carX-zeroPoint)/POINTS_DIVIDER);
                     t = 1;
                 }
             }
@@ -372,7 +374,7 @@ public class WorldGen implements Runnable{
                 if (!needSpeed) {
                     Thread.sleep(200);
                 } else {
-                    if (t > 15) {
+                    if (t > 9) {
                         needSpeed = false;
                     }
                 }
@@ -413,7 +415,7 @@ public class WorldGen implements Runnable{
         w.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
         w.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
         
-        savedPoints += (prevLastX - lastX) / 2000;
+        savedPoints += (prevLastX - lastX) / POINTS_DIVIDER;
 
         resettingPosition = false;
         needSpeed = false;

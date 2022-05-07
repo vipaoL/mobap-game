@@ -53,6 +53,7 @@ public class gCanvas extends Canvas implements Runnable {
     Font mediumfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     int mFontH = mediumfont.getHeight();
     Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    int lFontH = largefont.getHeight();
     int scW = 2;
     int scH = 2;
     boolean leftContacts = false;
@@ -60,6 +61,8 @@ public class gCanvas extends Canvas implements Runnable {
     static boolean paused = false;
     WorldGen worldgen;
     int speedMultipiler = 1;
+    int speed = 0;
+    int carVelocitySqr;
     boolean pauseTouched = false;
     boolean menuTouched = false;
 
@@ -95,9 +98,9 @@ public class gCanvas extends Canvas implements Runnable {
         paused = true;
     }
 
-    public synchronized void end() {
+    /*public synchronized void end() {
         //stopped = true;
-    }
+    }*/
 
     public void run() {
         long sleep = 0;
@@ -138,35 +141,59 @@ public class gCanvas extends Canvas implements Runnable {
                 } else {
                     flying = 0;
                 }
+                
+                FXVector velFX = w.carbody.velocityFX();
+                carVelocitySqr = velFX.xAsInt() * velFX.xAsInt() + velFX.yAsInt() * velFX.yAsInt();
+                if (carVelocitySqr > 1000000) {
+                            speedMultipiler = 2;
+                            speed = 3;
+                            //m = 0;
+                        } else {
+                            speedMultipiler = 20;
+                            speed = 0;
+                            if (carVelocitySqr > 100000) {
+                                speed = 1;
+                                //m = 0;
+                                speedMultipiler = 15;
+                                if (carVelocitySqr > 500000) {
+                                    //speedMultipiler = 8;
+                                    speed = 2;
+                                }
+                            }
+                        }
 
                 if (accel) {
                     motorTdOff = 0;
                     if (flying > 2) {
-                        if (w.carbody.rotationVelocity2FX() < 50000000 & w.carbody.rotationVelocity2FX() > 8000000) {
-                            w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/4000));
+                        if (w.carbody.rotationVelocity2FX() > 50000000) {
+                            w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/16000));
                         } else {
-                            w.carbody.applyTorque(FXUtil.toFX(-8000));
+                            w.carbody.applyTorque(FXUtil.toFX(-10000));
                         }
-                    } else {
+                    } else {/*
                         FXVector velFX = w.carbody.velocityFX();
-                        int carVelocitySqr = velFX.xAsInt() * velFX.xAsInt() + velFX.yAsInt() * velFX.yAsInt();
+                        carVelocitySqr = velFX.xAsInt() * velFX.xAsInt() + velFX.yAsInt() * velFX.yAsInt();
                         
                         //int carVelocitySqr = 0;
                         //leftwheel.applyTorque(FXUtil.toFX(-40000));
                         //int m = 8;
                         if (carVelocitySqr > 1600000) {
                             speedMultipiler = 2;
+                            speed = 3;
                             //m = 0;
                         } else {
-                            speedMultipiler = 8;
-                            if (carVelocitySqr > 100000) {
+                            speedMultipiler = 4;
+                            speed = 0;
+                            if (carVelocitySqr > 5000) {
+                                speed = 1;
                                 //m = 0;
                                 speedMultipiler = 12;
                                 if (carVelocitySqr > 400000) {
                                     speedMultipiler = 8;
+                                    speed = 2;
                                 }
                             }
-                        }
+                        }*/
                         //carbody.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 75) * m), tenFX), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang - 75) * m), tenFX)));
                         //rightwheel.applyTorque(FXUtil.toFX(-40000));
                         //boll.applyTorque(FXUtil.toFX(-40000));
@@ -204,7 +231,7 @@ public class gCanvas extends Canvas implements Runnable {
                     if (motorTdOff < 40) {
                         try {
                             if (w.carbody.angularVelocity2FX() > 0) {
-                                w.carbody.applyTorque(FXUtil.toFX(w.carbody.angularVelocity2FX() / 10000));
+                                w.carbody.applyTorque(FXUtil.toFX(w.carbody.angularVelocity2FX() / 4000));
                             }
                             if (flying == 0) {
                                 w.carbody.applyMomentum(new FXVector(-w.carbody.velocityFX().xFX/5, -w.carbody.velocityFX().yFX/5));
@@ -285,10 +312,25 @@ public class gCanvas extends Canvas implements Runnable {
     protected void paint(Graphics g) {
         w.draw(g);
         if (mnCanvas.debug) {
-            //g.setColor(255, 255, 255);
+            switch (speed) {
+                case 0:
+                    g.setColor(0, 255, 0);
+                    break;
+                case 1:
+                    g.setColor(64, 64, 0);
+                    break;
+                case 2:
+                    g.setColor(255, 64, 0);
+                    break;
+                default:
+                    g.setColor(255, 0, 0);
+                    break;
+            }
+            g.fillRect(0, 0, 30, 30);
+            g.setColor(255, 255, 255);
             g.setFont(smallfont);
             //text += " " + speedMultipiler;
-            g.drawString(String.valueOf(GraphicsWorld.carX), 0, 0, 0);                  //  debug text
+            g.drawString(String.valueOf(carVelocitySqr), 0, 0, 0);                  //  debug text
             
             //text = "";
         }
@@ -298,7 +340,7 @@ public class gCanvas extends Canvas implements Runnable {
             g.setColor(255, 0, 0);
             g.drawString("!", scW / 2, scH / 3 + largefont.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
             if (!mnCanvas.debug) {
-                g.setColor(255, 255, 255);
+                g.setColor(191, 191, 191);
             }
             for (int i = 1; i < gameoverCountdown; i++) {
                 g.fillRect(0, 0, scW, scH*i/7/2 + 1);
@@ -331,6 +373,12 @@ public class gCanvas extends Canvas implements Runnable {
             for (int i = 0; i < pausehint.length; i++) {
                 g.drawString(pausehint[i], scW*5/6, i * sFontH + scH / 12 - sFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
             }
+        }
+        if (mnCanvas.wg) {
+            g.setColor(255, 255, 255);
+            g.setFont(largefont);
+            g.drawString(String.valueOf(w.points), w.halfScWidth, w.scHeight - mFontH * 3 / 2,
+                    Graphics.HCENTER | Graphics.TOP);     //points
         }
     }
 
