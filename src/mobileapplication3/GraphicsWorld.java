@@ -67,8 +67,8 @@ public class GraphicsWorld extends World {
 
         wheelShape = Shape.createCircle(wheelRadius);
         wheelShape.setElasticity(0);
-        wheelShape.setFriction(100);
-        wheelShape.setMass(1);
+        wheelShape.setFriction(0);
+        wheelShape.setMass(2);
         wheelShape.correctCentroid();
         int lwX = spawnX - (carbodyLength / 2 - wheelRadius)*Mathh.cos(ang) / 1000;
         int lwY = spawnY + wheelRadius / 2 - (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
