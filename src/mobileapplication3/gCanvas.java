@@ -74,6 +74,7 @@ public class gCanvas extends Canvas implements Runnable {
         stopped = false;
         Main.print("gamecanvas:setWorld()");
         this.w = world;
+        w.setGravity(FXVector.newVector(0, 250));
         //l = world.getLandscape();
         restart();
         (new Thread(this, "game canvas")).start();
@@ -142,9 +143,9 @@ public class gCanvas extends Canvas implements Runnable {
                     motorTdOff = 0;
                     if (flying > 2) {
                         if (w.carbody.rotationVelocity2FX() < 50000000 & w.carbody.rotationVelocity2FX() > 8000000) {
-                            w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/6000));
+                            w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/4000));
                         } else {
-                            w.carbody.applyTorque(FXUtil.toFX(-4000));
+                            w.carbody.applyTorque(FXUtil.toFX(-8000));
                         }
                     } else {
                         FXVector velFX = w.carbody.velocityFX();
@@ -154,15 +155,15 @@ public class gCanvas extends Canvas implements Runnable {
                         //leftwheel.applyTorque(FXUtil.toFX(-40000));
                         //int m = 8;
                         if (carVelocitySqr > 1600000) {
-                            speedMultipiler = 1;
+                            speedMultipiler = 2;
                             //m = 0;
                         } else {
-                            speedMultipiler = 6;
+                            speedMultipiler = 8;
                             if (carVelocitySqr > 100000) {
                                 //m = 0;
-                                speedMultipiler = 8;
+                                speedMultipiler = 12;
                                 if (carVelocitySqr > 400000) {
-                                    speedMultipiler = 6;
+                                    speedMultipiler = 8;
                                 }
                             }
                         }

@@ -210,7 +210,7 @@ public class about extends GameCanvas implements Runnable {
         int gameAction = getGameAction(keyCode);
     }
 
-    public void keyPressed(int keyCode) {
+    /*public void keyPressed(int keyCode) {
         int gameAction = getGameAction(keyCode);
         if (gameAction == KEY_NUM1) {
             selected = 0;
@@ -224,7 +224,7 @@ public class about extends GameCanvas implements Runnable {
             selected = 2;
             selectPressed();
         }
-    }
+    }*/
 
     protected void pointerPressed(int x, int y) {
         //k = scH / menuOptions.length;
@@ -263,7 +263,9 @@ public class about extends GameCanvas implements Runnable {
     void openLink() {
         Main.print(url);
         try {
-            Main.thiss.platformRequest(url);
+            if (Main.thiss.platformRequest(url)) {
+                Main.exit();
+            }
         } catch (ConnectionNotFoundException ex) {
             ex.printStackTrace();
         }

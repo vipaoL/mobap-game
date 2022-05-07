@@ -118,12 +118,13 @@ public class WorldGen implements Runnable{
             circ1(lastX, lastY, 400, 15, 120);
         } else if (i == 1) {
             int l = 720 + rand.nextInt(8) * 180;
-            sin(lastX, lastY, l, l / 180, 0, 15 + rand.nextInt(15));
+            int amp = 15 + rand.nextInt(15);
+            sin(lastX, lastY, l, l / 180, 0, amp);
         } else if (i == 2) {
             floor(lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(6) - 3) * 100);
         } else if (i == 3) {
             circ2(lastX, lastY, 1000, 20);
-        } else if (i == 4 & mnCanvas.debug) {
+        } else if (i == 4) {
             int l = 6000;
             l = rand.nextInt(6) * 1000;
             abyss(lastX, lastY, l);
@@ -270,7 +271,7 @@ public class WorldGen implements Runnable{
     }
     private void abyss(int x, int y, int l) {
         if (!resettingPosition) {
-            int[] h = {2, l, y};
+            int[] h = {2, x, y, l};
             structlogger(h);
         }
         int ang = 60; // springboard angle
@@ -484,8 +485,8 @@ public class WorldGen implements Runnable{
                 Main.print("flStat");
             }
             if (structID == 2) { // {2, l, y}
-                int l = struct[1];
-                abyss(lastX, l, y);
+                int l = struct[3];
+                abyss(lastX, y, l);
                 Main.print("abyss");
             }
             if (structID == 3) {

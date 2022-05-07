@@ -66,9 +66,7 @@ public class Main extends MIDlet {
     }
     public static void showAlert(String text) {
         try {
-            AlertType.ERROR.playSound(thiss.display);
-        
-        //you need to import javax.microedition.lcdui;
+            //AlertType.ERROR.playSound(thiss.display);
             Image alertImage = null;
             try {
                 alertImage = Image.createImage("/driver.png");
@@ -78,7 +76,7 @@ public class Main extends MIDlet {
             Alert alert = new Alert("О нет!", text, alertImage, AlertType.WARNING);
             alert.setTimeout(3000);
             thiss.display.setCurrent(alert, current);
-            } catch(Throwable ex) {
+            } catch(IllegalArgumentException ex) {
             ex.printStackTrace();
         }
     }

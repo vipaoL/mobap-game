@@ -168,7 +168,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         int gameAction = getGameAction(keyCode);
     }
 
-    public void keyPressed(int keyCode) {
+    /*public void keyPressed(int keyCode) {
         int gameAction = getGameAction(keyCode);
         gameAction = keyCode; //test
         if (gameAction == KEY_NUM1) {
@@ -191,7 +191,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
             selected = 5;
             selectPressed();
         }
-    }
+    }*/
 
     public void startLevel(String path) {
         Main.print("menu:startLevel()");
