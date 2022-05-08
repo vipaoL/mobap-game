@@ -257,7 +257,7 @@ public class WorldGen implements Runnable{
 //        }
         
         
-        lastY = y2;
+        //lastY = y2;
     }
     private void floorStat(int x, int y, int l) {      // 1
         if (!resettingPosition) {
@@ -300,6 +300,7 @@ public class WorldGen implements Runnable{
             toD += 1;
         }
         lastX += l;
+        lastY = y + Mathh.sin(offset+180*halfperiods) * amp / 1000;
         //waitinForDel.addElement(new Integer(toD));
     }
     private void arc(int x, int y, int r, int ang, int of) {
