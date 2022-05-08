@@ -112,7 +112,7 @@ public class WorldGen implements Runnable{
     private void random() {
         Main.print("gen:random()");
         while (i == prevR) {
-            i = rand.nextInt(5);
+            i = rand.nextInt(10); //0-9
         }
         prevR = i;
         if (i == 0) {
@@ -129,6 +129,9 @@ public class WorldGen implements Runnable{
             int l = 6000;
             l = rand.nextInt(6) * 1000;
             abyss(lastX, lastY, l);
+        } else if (i == 5) {
+            int n = rand.nextInt(6) + 5;
+            dotline(lastX, lastY, n);
         } else {
             floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
         }
@@ -281,6 +284,17 @@ public class WorldGen implements Runnable{
         line(x+l - l / 5, y - r * Mathh.cos(ang) / 1000, x+l, y - r * Mathh.cos(ang) / 1000);
         lastX += l;
         lastY -= r * Mathh.cos(ang) / 1000;
+    }
+    private void dotline(int x, int y, int n) {
+        if (!resettingPosition) {
+            int[] h = {5, x, y, n};
+            structlogger(h);
+        }
+        int offsetL = 600;
+        for (int i = 0; i < n; i++) {
+            line(x + i*offsetL, y + i * 300/n, x + i*offsetL + 300, y + i * 300/n - 300);
+        }
+        lastX += n * offsetL;
     }
     
     
@@ -505,6 +519,11 @@ public class WorldGen implements Runnable{
                 int sn = struct[4];
                 circ2(lastX, y, r, sn);
                 Main.print("circ2");
+            }
+            if (structID == 5) {
+                int n = struct[3];
+                dotline(lastX, y, n);
+                Main.print("dotline");
             }
             //WorldGen.lastX = lastX;
             structLog.removeElementAt(0);
