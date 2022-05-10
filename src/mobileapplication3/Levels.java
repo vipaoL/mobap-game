@@ -106,7 +106,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
                 }
             }
         }
-        menu.loadParams(scW, scH, v, 1, v.size(), selected);
+        menu.loadParams(scW, scH, v, 1, v.size() - 1, selected);
         paused = false;
     }
 
