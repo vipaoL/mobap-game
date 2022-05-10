@@ -40,8 +40,8 @@ public class gCanvas extends Canvas implements Runnable {
     Vector waitingTime = new Vector();
     static int flying = 0;
     int motorTdOff = 50;
+    boolean debug = false;
     //String text = "text";
-    UserData orig;
     int prevX = 0;
     //Motor leftmotor;
     //Motor rightmotor;
@@ -136,7 +136,7 @@ public class gCanvas extends Canvas implements Runnable {
                     contacts[1] = new Contact[0];
                     contacts[2] = new Contact[0];
                 }
-                if (!leftContacts & !rightContacts) {
+                if ((!leftContacts & !rightContacts) & !debug) {
                     flying += 1;
                 } else {
                     flying = 0;
@@ -164,7 +164,7 @@ public class gCanvas extends Canvas implements Runnable {
 
                 if (accel) {
                     motorTdOff = 0;
-                    if (flying > 2) {
+                    if (flying > 2 & !debug) {
                         if (w.carbody.rotationVelocity2FX() > 50000000) {
                             w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/16000));
                         } else {
@@ -200,6 +200,10 @@ public class gCanvas extends Canvas implements Runnable {
 
                         int FXSinAngM = 0;
                         int FXCosAngM = 0;
+                        
+                        if (debug) {
+                            ang += 15;
+                        }
 
                         FXSinAngM = FXUtil.divideFX(FXUtil.toFX(Mathh.sin(ang - 15) * speedMultipiler), tenFX * 5);
                         FXCosAngM = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 15) * speedMultipiler), tenFX * 5);
@@ -216,24 +220,24 @@ public class gCanvas extends Canvas implements Runnable {
                             if (leftContacts) {
                                 //leftwheel.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
                             }
-                            if (rightContacts) {
+                            if (rightContacts & !debug) {
                                 w.carbody.applyTorque(FXUtil.toFX(-4000));
                                 //rightwheel.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 15) * speedMultipiler), tenFX * 5), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang - 15) * speedMultipiler), tenFX * 5)));
                                 ////leftwheel.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang) * speedMultipiler), tenFX * 5), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang) * speedMultipiler), tenFX * 5)));
                             }
                             //carbody.applyForce(new FXVector(FXUtil.toFX(sin(ang)), FXUtil.toFX(cos(ang))), 100);
-                            if (w.getContactsForBody(w.carbody)[0] != null) {
+                            if (w.getContactsForBody(w.carbody)[0] != null & !debug) {
                                 w.carbody.applyTorque(FXUtil.toFX(-4000));
                             }
                         }
                     }
                 } else {
-                    if (motorTdOff < 40) {
+                    if (motorTdOff < 40 | debug) {
                         try {
                             if (w.carbody.angularVelocity2FX() > 0) {
                                 w.carbody.applyTorque(FXUtil.toFX(w.carbody.angularVelocity2FX() / 4000));
                             }
-                            if (flying == 0) {
+                            if (flying == 0 & !debug) {
                                 w.carbody.applyMomentum(new FXVector(-w.carbody.velocityFX().xFX/5, -w.carbody.velocityFX().yFX/5));
                             }
                             motorTdOff++;
@@ -279,8 +283,11 @@ public class gCanvas extends Canvas implements Runnable {
                         if (gameoverCountdown < 8) {
                             gameoverCountdown++;
                         } else {
-                            openMenu();
-                            //restart();
+                            if (!debug) {
+                                openMenu();
+                            } else {
+                                restart();
+                            }
                         }
                     } else {
                         if (gameoverCountdown > 0) {

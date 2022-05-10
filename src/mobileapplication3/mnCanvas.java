@@ -33,6 +33,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int fontH = font.getHeight();
     boolean paused = false;
+    private GenericMenu menu = new GenericMenu();
     
     String DEFAULT_LEVEL = "";
 
@@ -70,6 +71,8 @@ public class mnCanvas extends GameCanvas implements Runnable {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         fontH = font.getHeight();
+        menu.loadParams(scW, scH, menuOptions, 1, menuOptions.length - 2, selected);
+        menu.setSpecialOption(4);
         paused = false;
     }
 
@@ -111,6 +114,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     public void paint(Graphics g) {
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, scW, scH);
+        /*
         g.setColor(255, 255, 255);
         offset = 0;
         for (int i = 0; i < menuOptions.length; i++) {
@@ -139,11 +143,15 @@ public class mnCanvas extends GameCanvas implements Runnable {
             tick++;
         }
         //flushGraphics();
+        */
+        menu.isSpecialOptionActivated = debug;
+        menu.paint(g);
+        menu.tick();
     }
 
     private void input() {
         int keyStates = getKeyStates();
-        if (delay < 1) {
+        /*if (delay < 1) {
             delay = 5;
             if ((keyStates & (RIGHT_PRESSED | FIRE_PRESSED)) != 0) {
                     selectPressed();
@@ -162,13 +170,17 @@ public class mnCanvas extends GameCanvas implements Runnable {
             }
         } else delay --;
         if (keyStates == 0) delay = 0;
+        */
+        if (menu.keyPressed(keyStates)) {
+            selectPressed();
+        }
     }
 
-    public void keyReleased(int keyCode) {
+    /*public void keyReleased(int keyCode) {
         int gameAction = getGameAction(keyCode);
     }
 
-    /*public void keyPressed(int keyCode) {
+    public void keyPressed(int keyCode) {
         int gameAction = getGameAction(keyCode);
         gameAction = keyCode; //test
         if (gameAction == KEY_NUM1) {
@@ -209,7 +221,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     }
     
     protected void pointerPressed(int x, int y) {
-        pressed = true;
+        /*pressed = true;
         //k = scH / menuOptions.length;
         selected = y / k;
         //selected = menuOptions.length * (y + fontH) / scH;
@@ -218,20 +230,23 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
         if (selected > 5) {
             selected = 5;
-        }
+        }*/
+        menu.setIsPressedNow(true);
+        menu.pointer(x, y);
     }
     protected void pointerDragged(int x, int y) {
-        selected = y / k;
+        /*selected = y / k;
         //selected = menuOptions.length * (y + fontH) / scH;
         if (selected == 0) {
             selected = 1;
         }
         if (selected > 5) {
             selected = 5;
-        }
+        }*/
+        menu.pointer(x, y);
     }
     protected void pointerReleased(int x, int y) {
-        pressed = false;
+        /*pressed = false;
         selected = y / k;
         //selected = menuOptions.length * y / scH;
         if (selected == 0) {
@@ -240,10 +255,15 @@ public class mnCanvas extends GameCanvas implements Runnable {
             selected = 5;
         }else {
             selectPressed();
+        }*/
+        menu.setIsPressedNow(false);
+        if (menu.pointer(x, y)) {
+            selectPressed();
         }
     }
     
     void selectPressed() {
+        selected = menu.selected;
         if (selected == 1) {
             Main.print("menu:selected == 1 -> gen = true");
             wg = true;

@@ -5,6 +5,8 @@
  */
 package mobileapplication3;
 
+import at.emini.physics2D.World;
+import at.emini.physics2D.util.FXVector;
 import java.io.IOException;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.Font;
@@ -20,18 +22,14 @@ public class about extends GameCanvas implements Runnable {
     Image qr;
     int qrSide = 0;
     int qrMargin = 0;
-
-    int k = 20;
     int delay = 0;
-    String url = "https://github.com/ViPaOl/mobap-game";
+    String url = "https://github.com/ViPaOl/mobap-game/";
     String urlPrew = "github: /ViPaOl/mobap-game";
-    String[] strings = {"J2ME game on emini", "physics engine", urlPrew, "Version: " + Main.thiss.getAppProperty("MIDlet-Version"), "Back"};
-    int strsOnTop = 2;
-    int selected = 2;
+    String[] strings = {"J2ME game on emini", "physics engine"};
+    String[] menuOpts = {urlPrew, "Version: " + Main.thiss.getAppProperty("MIDlet-Version"), "Back"};
     int scW = getWidth();
     int scH = getHeight();
-    int tick = 5;
-    public static boolean debug = false;
+    int counter = 5;
     Graphics g;
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     int fontH = font.getHeight();
@@ -42,14 +40,12 @@ public class about extends GameCanvas implements Runnable {
     boolean paused = false;
     int offset2 = 0;
 
-    String DEFAULT_LEVEL = "";
-
     boolean stopped = false;
 
     private static final int millis = 50;
     int offset = 0;
-
-    public static boolean wg = false;
+    
+    private GenericMenu menu = new GenericMenu();
 
     public about() {
         super(true);
@@ -68,7 +64,7 @@ public class about extends GameCanvas implements Runnable {
         qrMargin = fontH/2;
         scW = getWidth();
         scH = getHeight();
-        qrSide = scH - font3H - font2H * (strings.length);
+        qrSide = scH - font3H - font2H * (strings.length + menuOpts.length);
         if (qrSide > scW - qrMargin*2) {
             qrSide = scW - qrMargin*2;
         }
@@ -82,14 +78,15 @@ public class about extends GameCanvas implements Runnable {
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        if (font.getHeight() * strings.length > scH) {
+        if (font.getHeight() * (strings.length + menuOpts.length) + qrSide > scH) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
         }
-        if (font.getHeight() * strings.length > scH) {
+        if (font.getHeight() * (strings.length + menuOpts.length) > scH) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         fontH = font.getHeight();
-        offset2 = font2H + fontH * strsOnTop + qrSide + qrMargin * 2;
+        offset2 = font2H + fontH * strings.length + qrSide + qrMargin * 2;
+        menu.loadParams(0, offset2, scW, scH - offset2, menuOpts, 0, 2, 2);
         paused = false;
     }
 
@@ -135,7 +132,7 @@ public class about extends GameCanvas implements Runnable {
         g.setFont(font2);
         g.drawString("About:", scW/2, 0, Graphics.HCENTER | Graphics.TOP);
         int offset2 = font2H;
-        for (int i = 0; i < strsOnTop; i++) {
+        for (int i = 0; i < strings.length; i++) {
             g.setFont(font);
             g.drawString(strings[i], scW/2, offset2, Graphics.HCENTER | Graphics.TOP);
             offset2+=fontH;
@@ -155,7 +152,9 @@ public class about extends GameCanvas implements Runnable {
         offset = 0;
         offset2 += qrSide + qrMargin;
         canvH = scH - offset2;
-        int l =  strings.length - strsOnTop;
+        menu.paint(g);
+        menu.tick();
+        /*int l =  strings.length - strsOnTop;
         for (int i = 0; i < l; i++) {
             if (i == selected) {
                 g.setColor(255, 64, 64);
@@ -163,9 +162,6 @@ public class about extends GameCanvas implements Runnable {
             } else {
                 g.setColor(255, 255, 255);
                 offset = 0;
-            }
-            if (i == 3 & debug) {
-                g.setColor(255, 255, 0);
             }
             g.setFont(font);
             k = (canvH + canvH / (l + 1)) / (l + 1);
@@ -175,13 +171,13 @@ public class about extends GameCanvas implements Runnable {
             tick = 0;
         } else {
             tick++;
-        }
+        }*/
         //flushGraphics();
     }
 
     private void input() {
         int keyStates = getKeyStates();
-        if (delay < 1) {
+        /*if (delay < 1) {
             delay = 5;
             if ((keyStates & (RIGHT_PRESSED | FIRE_PRESSED)) != 0) {
                 selectPressed();
@@ -203,6 +199,9 @@ public class about extends GameCanvas implements Runnable {
         }
         if (keyStates == 0) {
             delay = 0;
+        }*/
+        if (menu.keyPressed(keyStates)) {
+            selectPressed();
         }
     }
 
@@ -228,29 +227,36 @@ public class about extends GameCanvas implements Runnable {
 
     protected void pointerPressed(int x, int y) {
         //k = scH / menuOptions.length;
-        selected = (y-offset2) / k;
+        /*selected = (y-offset2) / k;
         //selected = menuOptions.length * (y + fontH) / scH;
         if (selected <= 0) {
             selected = 0;
         }
         if (selected > 2) {
             selected = 2;
-        }
+        }*/
+        menu.setIsPressedNow(true);
+        menu.pointer(x, y - offset2);
     }
 
     protected void pointerDragged(int x, int y) {
-        selected = (y-offset2) / k;
+        /*selected = (y-offset2) / k;
         //selected = menuOptions.length * (y + fontH) / scH;
         if (selected <= 0) {
             selected = 0;
         }
         if (selected > 2) {
             selected = 2;
-        }
+        }*/
+        menu.pointer(x, y - offset2);
     }
 
     protected void pointerReleased(int x, int y) {
-        selected = (y-offset2) / k;
+        menu.setIsPressedNow(false);
+        if (menu.pointer(x, y - offset2)) {
+            selectPressed();
+        }
+        /*selected = (y-offset2) / k;
         //selected = menuOptions.length * y / scH;
         if (selected <= 0) {
             selected = 0;
@@ -258,7 +264,7 @@ public class about extends GameCanvas implements Runnable {
             selected = 2;
         } else {
             selectPressed();
-        }
+        }*/
     }
     void openLink() {
         Main.print(url);
@@ -272,11 +278,22 @@ public class about extends GameCanvas implements Runnable {
     }
 
     void selectPressed() {
+        int selected = menu.selected;
         if (selected == 0) {
             openLink();
         }
         if (selected == 1) {
-            tick+=1;
+            counter+=1;
+            if (counter == 20) {
+                mnCanvas.wg = true;
+                gCanvas test = new gCanvas();
+                World test3 = new World();
+                test3.setGravity(FXVector.newVector(10, 100));
+                GraphicsWorld test2 = new GraphicsWorld(test3);
+                test.setWorld(test2);
+                test.debug = true;
+                Main.set(test);
+            }
         }
         if (selected == 2) {
             stopped = true;

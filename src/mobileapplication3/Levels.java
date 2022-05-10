@@ -25,7 +25,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class Levels extends GameCanvas implements Runnable, CommandListener {
+public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ {
 
     Enumeration drives;
     String prefix = "file:///";
@@ -48,6 +48,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     String xoba = "";
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     boolean paused = false;
+    private GenericMenu menu = new GenericMenu();
 
     Levels() {
         super(true);
@@ -105,6 +106,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
                 }
             }
         }
+        menu.loadParams(scW, scH, v, 1, v.size(), selected);
         paused = false;
     }
 
@@ -115,7 +117,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
     public void paint(Graphics g) {
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, scW, scH);
-        g.setColor(255, 255, 255);
+        /*g.setColor(255, 255, 255);
         int offset = 0;
         for (int i = 0; i < v.size(); i++) {
             if (i == selected) {
@@ -140,7 +142,9 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             tick = 0;
         } else {
             tick++;
-        }
+        }*/
+        menu.paint(g);
+        menu.tick();
     }
 
     public void getLevels() {
@@ -237,7 +241,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
 
     private void input() {
         int keyStates = getKeyStates();
-        if (delay < 1) {
+        /*if (delay < 1) {
             delay = 5;
             if ((keyStates & (RIGHT_PRESSED | FIRE_PRESSED)) != 0) {
                 stopped = true;
@@ -260,6 +264,9 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         }
         if (keyStates == 0) {
             delay = 0;
+        }*/
+        if (menu.keyPressed(keyStates)) {
+            selectPressed();
         }
     }
 
@@ -273,7 +280,7 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
         return FileSystemRegistry.listRoots();
     }
 
-    public void commandAction(Command cmd, Displayable display) {
+    /*public void commandAction(Command cmd, Displayable display) {
         if (cmd == select) {
             selectPressed();
         }
@@ -282,35 +289,43 @@ public class Levels extends GameCanvas implements Runnable, CommandListener {
             Main.set(m);
             m.start();
         }
-    }
+    }*/
 
     protected void pointerPressed(int x, int y) {
-        selected = y / k;
+        /*selected = y / k;
         //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
-        }
+        }*/
+        menu.setIsPressedNow(true);
+        menu.pointer(x, y);
     }
 
     protected void pointerDragged(int x, int y) {
-        selected = y / k;
+        /*selected = y / k;
         //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
-        }
+        }*/
+        menu.pointer(x, y);
     }
 
     protected void pointerReleased(int x, int y) {
-        selected = y / k;
+        /*selected = y / k;
         //selected = v.size() * y / scH;
         if (selected == 0) {
             selected = 1;
         } else {
             selectPressed();
+        }*/
+        menu.setIsPressedNow(false);
+        if (menu.pointer(x, y)) {
+            selectPressed();
         }
     }
 
     public void selectPressed() {
+        selected = menu.selected;
         stopped = true;
         if (selected == v.size() - 1) {
             //runner = null;
