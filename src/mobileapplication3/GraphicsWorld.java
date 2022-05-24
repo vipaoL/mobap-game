@@ -33,6 +33,7 @@ public class GraphicsWorld extends World {
     public GraphicsWorld(World w) {
         super(w);
         refreshScreenParameters();
+        Main.print(getAreaStartFX());
     }
     
     public void addCar() {

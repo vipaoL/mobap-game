@@ -34,6 +34,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     int fontH = font.getHeight();
     boolean paused = false;
     private GenericMenu menu = new GenericMenu();
+    public static boolean music = false;
     
     String DEFAULT_LEVEL = "";
 

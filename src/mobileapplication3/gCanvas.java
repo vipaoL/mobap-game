@@ -11,6 +11,8 @@ import java.util.Vector;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
+import javax.microedition.media.Manager;
+import javax.microedition.media.Player;
 
 /**
  *
@@ -111,6 +113,19 @@ public class gCanvas extends Canvas implements Runnable {
         Contact[][] contacts = new Contact[3][];
         //paused = firstStart;
         //world.setTimestepFX(FXUtil.toFX(16));
+        Player midiPlayer = null;
+        try {
+            midiPlayer = Manager.createPlayer(getClass().getResourceAsStream("/a.mid"), "audio/midi");
+        } catch (Exception e) {
+          System.err.println(e);
+        }
+        try {
+            if (midiPlayer != null & mnCanvas.music) {
+                midiPlayer.start();
+            }
+        } catch (Exception e) {
+          System.err.println(e);
+        }
         while(false & w == null) {
             try {
                 Thread.sleep(50);
@@ -260,16 +275,13 @@ public class gCanvas extends Canvas implements Runnable {
                     }
                 }                
 
-                w.tick();
-                repaint();
-
-                sleep = millis - (System.currentTimeMillis() - start);
-                sleep = Math.max(sleep, 0);
+                
 
                 if (tick < 5) {
                     tick++;
                 } else {
                     tick = 1;
+                    
                     for (int i = 0; i < waitingForDynamic.size(); i++) {
                         if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) > 0) {
                             waitingTime.setElementAt(new Integer(Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) - 10), i);
@@ -297,6 +309,12 @@ public class gCanvas extends Canvas implements Runnable {
                         }
                     }
                 }
+                
+                w.tick();
+                repaint();
+
+                sleep = millis - (System.currentTimeMillis() - start);
+                sleep = Math.max(sleep, 0);
 
                 try {
                     Thread.sleep(sleep);

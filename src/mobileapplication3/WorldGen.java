@@ -36,7 +36,10 @@ public class WorldGen implements Runnable{
     private boolean reseted = true;
     private boolean stopped = false;
     public boolean resettingPosition = false;
-    private Vector structLog;
+    private int[][] structLog = new int[7][];
+    private int numberOfLoggedStructs = 0;
+    private int ringLogTail = 0;
+    private int nowLogging = 0;
     //static Vector l_log;
     private boolean waitinForReset = false;
     private int savedPoints = 0;
@@ -56,7 +59,6 @@ public class WorldGen implements Runnable{
     
     public void start() {
         ready = false;
-        structLog = new Vector();
         rand = new Random();
         stopped = false;
         waitinForReset = true;
@@ -370,7 +372,7 @@ public class WorldGen implements Runnable{
                         waitinForDel.removeElementAt(0);
                         toD = 0;
                     }*/
-                    if (structLog.size() >= 2) {
+                    if (numberOfLoggedStructs >= structLog.length) {
                         if (GraphicsWorld.carX > 8000 & gCanvas.flying > 1) {
                             resetPosition();
                         }
@@ -403,12 +405,30 @@ public class WorldGen implements Runnable{
     
     private void structlogger(int[] a) {
         if (!resettingPosition) {
-            if (structLog.size() > 6) {
-                structLog.removeElementAt(0);
+            if (numberOfLoggedStructs >= structLog.length) {
+                //structLog.removeElementAt(0);
+                
+            } else {
+                numberOfLoggedStructs++;
             }
-            structLog.addElement(a);
+            //structLog.addElement(a);
+            
+            int index = (ringLogTail) % structLog.length;
+            structLog[index] = a;
+            Main.print(structLog[index][0]);
+            Main.print(index);
+            if (ringLogTail >= structLog.length - 1) {
+                ringLogTail = 0;
+            } else {
+                ringLogTail++;
+            }
         }
     }
+    
+    private int[] structlog_getElementAt(int i) {
+        return structLog[(i+ringLogTail)%structLog.length];
+    }
+    
     private void resetPosition() {
         
         // world cycling
@@ -480,10 +500,12 @@ public class WorldGen implements Runnable{
         bodies = null;
     }
     private void reproduce() {
-        Main.print("REPRODUCE:" + structLog.size());
+        Main.print("REPRODUCE:" + structLog.length);
         //for (int i = 0; i < structLog.size(); i++) {
-        while (!structLog.isEmpty()) {
-            int[] struct = (int[]) structLog.elementAt(0);
+        for (int i = 0; i < numberOfLoggedStructs; i++) {
+            Main.print("REPR:0");
+            int[] struct = structlog_getElementAt(i);
+            Main.print("REPR:1");
             int structID = struct[0];
 
             int y = struct[2];
@@ -526,7 +548,9 @@ public class WorldGen implements Runnable{
                 Main.print("dotline");
             }
             //WorldGen.lastX = lastX;
-            structLog.removeElementAt(0);
+            //structLog.removeElementAt(0);
         }
+        numberOfLoggedStructs = 0;
+        ringLogTail = 0;
     }
 }

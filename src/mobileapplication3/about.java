@@ -13,6 +13,8 @@ import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.GameCanvas;
+import javax.microedition.media.Manager;
+import javax.microedition.media.Player;
 
 /**
  *
@@ -41,6 +43,7 @@ public class about extends GameCanvas implements Runnable {
     int offset2 = 0;
 
     boolean stopped = false;
+    
 
     private static final int millis = 50;
     int offset = 0;
@@ -58,6 +61,23 @@ public class about extends GameCanvas implements Runnable {
         delay = 5;
         showNotify();
         stopped = false;
+        if (mnCanvas.debug) {
+            mnCanvas.music = true;
+        }
+        Player midiPlayer = null;
+        try {
+            midiPlayer = Manager.createPlayer(getClass().getResourceAsStream("/a.mid"), "audio/midi");
+        } catch (Exception e) {
+          System.err.println(e);
+        }
+        try {
+            if (midiPlayer != null & mnCanvas.music) {
+                midiPlayer.start();
+            }
+        } catch (Exception e) {
+          System.err.println(e);
+        }
+
     }
 
     protected void showNotify() {
