@@ -279,8 +279,9 @@ public class mnCanvas extends GameCanvas implements Runnable {
             Main.set(new about());
         }
         if (selected == 4) {
-            debug = !debug;
-            if (debug) Main.showAlert("Ну всё.");
+            //debug = !debug;
+            //if (debug) Main.showAlert("Ну всё.");
+            Main.set(new DebugMenu());
         }
         if (selected == 5) Main.exit();
     }

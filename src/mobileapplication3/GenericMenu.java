@@ -25,6 +25,9 @@ public class GenericMenu {
     public GenericMenu() {
         
     }
+    public void loadParams(int w, int h, String[] options) {
+        loadParams(0, 0, w, h, options, 0, options.length - 1, options.length - 1);
+    }
     public void loadParams(int w, int h, Vector options, int firstReachable, int lastReachable, int defaultSelected) {
         String[] optsArray = new String[options.size()];
         for (int i = 0; i < options.size(); i++) {
