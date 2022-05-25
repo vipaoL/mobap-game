@@ -51,14 +51,14 @@ public class GenericMenu {
     public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected) {
         loadParams(x0, y0, w, h, options, firstReachable, lastReachable, defaultSelected, null);
     }
-    public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int[] optionTypeMap) {
+    public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int[] optionStateMap) {
         this.x0 = x0;
         this.y0 = y0;
         this.w = w;
         this.h = h;
         this.options = options;
-        if (!dontLoadStateMap & optionTypeMap != null) {
-            loadStatemap(optionTypeMap);
+        if (!dontLoadStateMap & optionStateMap != null) {
+            loadStatemap(optionStateMap);
         }
         k = (h + h / (options.length + 1)) / (options.length + 1);
         this.firstReachable = firstReachable;
