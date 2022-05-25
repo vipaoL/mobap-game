@@ -11,18 +11,27 @@
 # This batch file builds and preverifies the code for the demos.
 # it then packages them in a JAR file appropriately.
 #
+PATHSEP=":"
+
+
+
+
 
 LIBS=../lib/PhysicsEngine_v135a.jar${PATHSEP}../../WTK2.5.2/lib/jsr75.jar
+echo "LIBS:" ${LIBS}
+RES=../rsc
 APP=MobileApplication3
-MANIFEST=../build/manifest.mf
+MANIFEST=../manifest.mf
 
-LIB_DIR=../../../lib
+
+
+
+
+LIB_DIR=../../WTK2.5.2/lib
 CLDCAPI=${LIB_DIR}/cldcapi11.jar
 MIDPAPI=${LIB_DIR}/midpapi20.jar
 PREVERIFY=../../WTK2.5.2/bin/preverify
-JAVA_HOME=../../../../jdk1.6.0_45
-
-PATHSEP=":"
+JAVA_HOME=../../jdk1.6.0_45
 
 JAVAC=javac
 JAR=jar
@@ -47,14 +56,14 @@ ${JAVAC} \
     -bootclasspath ${CLDCAPI}${PATHSEP}${MIDPAPI} \
     -source 1.3 \
     -target 1.3 \
-    -d ../lib \
-    -classpath ${LIBS}\
+    -d ../tmpclasses \
+    -classpath ${LIBS}${PATHSEP}${RES} \
     `find ../src -name '*'.java`
 
 echo "Preverifying class files..."
 
 ${PREVERIFY} \
-    -classpath ${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}../tmpclasses \
+    -classpath ${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}${LIBS}${PATHSEP}${RES}${PATHSEP}../tmpclasses \
     -d ../classes \
     ../tmpclasses
 
