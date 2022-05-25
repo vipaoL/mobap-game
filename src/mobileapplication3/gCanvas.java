@@ -56,6 +56,7 @@ public class gCanvas extends Canvas implements Runnable {
     int mFontH = mediumfont.getHeight();
     Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int lFontH = largefont.getHeight();
+    Font currentFont = largefont;
     int scW = 2;
     int scH = 2;
     boolean leftContacts = false;
@@ -120,7 +121,7 @@ public class gCanvas extends Canvas implements Runnable {
           System.err.println(e);
         }
         try {
-            if (midiPlayer != null & mnCanvas.music) {
+            if (midiPlayer != null & DebugMenu.music) {
                 midiPlayer.start();
             }
         } catch (Exception e) {
@@ -269,7 +270,7 @@ public class gCanvas extends Canvas implements Runnable {
                             Body body = contacts[j][i].body1();
                             if (!waitingForDynamic.contains(body)) {
                                 waitingForDynamic.addElement(body);
-                                waitingTime.addElement(new Integer(40));
+                                waitingTime.addElement(new Integer(20));
                             }
                         }
                     }
@@ -336,7 +337,8 @@ public class gCanvas extends Canvas implements Runnable {
 
     protected void paint(Graphics g) {
         w.draw(g);
-        if (mnCanvas.debug) {
+        int debugTextOffset = 0;
+        if (DebugMenu.speedo) {
             switch (speed) {
                 case 0:
                     g.setColor(0, 255, 0);
@@ -351,13 +353,17 @@ public class gCanvas extends Canvas implements Runnable {
                     g.setColor(255, 0, 0);
                     break;
             }
-            g.fillRect(0, 0, 30, 30);
+            setFont(smallfont, g);
+            g.fillRect(0, debugTextOffset, currentFont.getHeight() * 5, currentFont.getHeight());
             g.setColor(255, 255, 255);
-            g.setFont(smallfont);
             //text += " " + speedMultipiler;
-            g.drawString(String.valueOf(carVelocitySqr), 0, 0, 0);                  //  debug text
-            
+            g.drawString(String.valueOf(carVelocitySqr), 0, debugTextOffset, 0);                  //  debug text
+            debugTextOffset+=currentFont.getHeight();
             //text = "";
+        }
+        if (DebugMenu.xCoord) {
+            g.setColor(255, 255, 255);
+            g.drawString(String.valueOf(w.carbody.positionFX().xAsInt()), 0, debugTextOffset, 0); 
         }
         //g.drawString(String.valueOf(w.carbody.rotationVelocity2FX()), 0, 0, 0);
         if (gameoverCountdown > 1) {
@@ -379,6 +385,9 @@ public class gCanvas extends Canvas implements Runnable {
                 //g.drawLine(0, i * d - 1, w, -w + i*d - 1);
                 //g.drawLine(0, i * d, w, -w + i*d);
                 //g.drawLine(0, -w + i*d, w, i * d);
+                if (mnCanvas.debug) {
+                    g.setColor(255 * i / scH % 255, 0, 0);
+                }
                 g.drawLine(scW / 2, 0, d * i, scH);
             }
             g.setFont(largefont);
@@ -416,13 +425,15 @@ public class gCanvas extends Canvas implements Runnable {
     protected void keyPressed(int keyCode) {
         int gameAction = getGameAction(keyCode);
         //text = "Last key: " + gameAction + " " + keyCode;
-        if (gameAction == KEY_POUND | gameAction == GAME_D) {
+        if (keyCode == KEY_POUND | gameAction == GAME_D) {
             openMenu();
             r = true;
         } else {
-            if (gameAction == KEY_STAR | gameAction == GAME_B) {
-            openMenu();
-            r = true;
+            if ((keyCode == KEY_STAR | gameAction == GAME_B) & DebugMenu.cheat) {
+                FXVector pos = w.carbody.positionFX();
+                int carX = pos.xAsInt();
+                int carY = pos.yAsInt();
+                worldgen.line(carX - 200, carY + 200, carX + 2000, carY + 200);
             } else {
                 accel = true;
             }
@@ -479,6 +490,8 @@ public class gCanvas extends Canvas implements Runnable {
             stopped = true;
             openMenu();
         }
+        pauseTouched = false;
+        menuTouched = false;
         accel = false;
     }
 
@@ -495,5 +508,8 @@ public class gCanvas extends Canvas implements Runnable {
             w.addCar();
         }
     }
-
+    private void setFont(Font font, Graphics g) {
+        g.setFont(font);
+        currentFont = font;
+    }
 }

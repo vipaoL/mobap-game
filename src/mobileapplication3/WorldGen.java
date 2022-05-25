@@ -331,7 +331,7 @@ public class WorldGen implements Runnable{
             toD += 1;
         }
     }
-    private void line(int x1, int y1, int x2, int y2) {
+    void line(int x1, int y1, int x2, int y2) {
         lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u);
         //waitinForDel.addElement(new Integer(1));
     }

@@ -145,7 +145,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
         //flushGraphics();
         */
-        menu.isSpecialOptionActivated = debug;
+        menu.setIsSpecialOptnActivated(debug);
         menu.paint(g);
         menu.tick();
     }
@@ -172,7 +172,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         } else delay --;
         if (keyStates == 0) delay = 0;
         */
-        if (menu.keyPressed(keyStates)) {
+        if (menu.key(keyStates)) {
             selectPressed();
         }
     }

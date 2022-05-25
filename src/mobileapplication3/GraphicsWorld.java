@@ -120,11 +120,14 @@ public class GraphicsWorld extends World {
             offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
             
             viewField = scWidth * zoomOut / 1000;
-            if (mnCanvas.debug) {
+            if (DebugMenu.closerWorldgen) {
                 viewField /= 4;
             }
 
             g.setColor(0x4444ff);
+            if (mnCanvas.debug) {
+                g.setColor(255, 255, 255);
+            }
             drawLandscape(g);
             g.setColor(255, 255, 255);
             drawBodies(g); //bodies, exclude car wheels

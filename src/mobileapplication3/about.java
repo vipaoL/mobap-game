@@ -61,7 +61,7 @@ public class about extends GameCanvas implements Runnable {
         delay = 5;
         showNotify();
         stopped = false;
-        if (mnCanvas.debug) {
+        /*if (mnCanvas.debug) {
             mnCanvas.music = true;
         }
         Player midiPlayer = null;
@@ -76,7 +76,7 @@ public class about extends GameCanvas implements Runnable {
             }
         } catch (Exception e) {
           System.err.println(e);
-        }
+        }*/
 
     }
 
@@ -220,7 +220,7 @@ public class about extends GameCanvas implements Runnable {
         if (keyStates == 0) {
             delay = 0;
         }*/
-        if (menu.keyPressed(keyStates)) {
+        if (menu.key(keyStates)) {
             selectPressed();
         }
     }

@@ -26,6 +26,8 @@ public class Main extends MIDlet {
     Display display = Display.getDisplay(this);
     public static Main thiss;
     public static Displayable current;
+    public static final int printCategory_info = 0;
+    public static final int printCategory_err = 1;
     
 
     public Main() {
@@ -86,8 +88,11 @@ public class Main extends MIDlet {
     }
 
     public static void print(String text, int category) {
-        if (category == 0) {
-            text = "[INFO]: ";
+        if (category == printCategory_info) {
+            text = "info: " + text;
+        }
+        if (category == printCategory_err) {
+            text = "ERROR: " + text;
         }
         System.out.println(text);
     }
@@ -95,7 +100,6 @@ public class Main extends MIDlet {
         print("" + i);
     }
     public static void print(String text) {
-        text = "info: " + text;
-        System.out.println(text);
+        print(text, printCategory_info);
     }
 }

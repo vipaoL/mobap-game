@@ -265,7 +265,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
         if (keyStates == 0) {
             delay = 0;
         }*/
-        if (menu.keyPressed(keyStates)) {
+        if (menu.key(keyStates)) {
             selectPressed();
         }
     }
