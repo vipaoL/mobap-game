@@ -1,16 +1,4 @@
 #!/bin/sh -e
-#
-#####################################
-#
-#
-# IT DIDN'T WORK! USE IDE INSTEAD
-#
-#
-#####################################
-#
-# This batch file builds and preverifies the code for the demos.
-# it then packages them in a JAR file appropriately.
-#
 
 echo "Downloading and updating compiler..."
 if git clone https://github.com/vipaoL/j2me_compiler.git; then
@@ -39,6 +27,10 @@ MIDPAPI=${LIB_DIR}/midpapi20.jar
 PREVERIFY=${WTK_HOME}/bin/preverify
 JAVAC=javac
 JAR=jar
+
+ls ${JAVA_HOME}
+ls ${JAVA_HOME}/bin/javac
+ls ${JAVA_HOME}/bin/jar
 
 if [ -n "${JAVA_HOME}" ] ; then
   JAVAC=${JAVA_HOME}/bin/javac
