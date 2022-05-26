@@ -29,8 +29,8 @@ JAVAC=javac
 JAR=jar
 
 ls ${JAVA_HOME}
-ls ${JAVA_HOME}/bin/javac
-ls ${JAVA_HOME}/bin/jar
+file ${JAVA_HOME}/bin/javac
+file ${JAVA_HOME}/bin/jar
 
 if [ -n "${JAVA_HOME}" ] ; then
   JAVAC=${JAVA_HOME}/bin/javac
