@@ -13,7 +13,7 @@ jobs:
       - name: Test
         run: cd ${{ github.workspace }} && ls .
       - name: Build
-        run: sudo dpkg --add-architecture i386 && sudo apt-get install libc6 && cd ${{ github.workspace }} && sudo dpkg -i ./bin/j2me_compiler/multiarch*.deb && ./bin/build.sh
+        run: sudo dpkg --add-architecture i386 && sudo apt-get install libc6 && cd ${{ github.workspace }} && ./bin/build.sh
       - name: Upload jar
         uses: actions/upload-artifact@v2
         with:
