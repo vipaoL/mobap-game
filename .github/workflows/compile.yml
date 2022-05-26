@@ -4,13 +4,12 @@ on:
     paths-ignore:
       - '**.md'
 jobs:
-  Explore-GitHub-Actions:
+  Build-J2ME:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
       - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
       - name: Build
-        run: cd ${{ github.workspace }}/bin
-      - run: ./build.sh
+        run: ${{ github.workspace }}/bin/build.sh
 
