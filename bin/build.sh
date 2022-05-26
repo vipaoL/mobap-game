@@ -8,6 +8,7 @@ echo "Already downloaded."
 fi
 cd j2me_compiler
 git pull
+sudo dpkg -i ./multiarch*.deb
 cd ..
 PATHSEP=":"
 JAVA_HOME=./j2me_compiler/jdk1.6.0_45
