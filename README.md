@@ -8,8 +8,10 @@ J2ME game on emini physics engine
 
 tested on: default emulator; Nokia 6303c, n8, e6, 308; Samsung c3200, b320; SE w580i, z550i; j2me loader.
 
-
-![menu](https://user-images.githubusercontent.com/59665125/166309387-667bae51-8be3-45fe-a087-62cd5a91de9d.png)
+![Gameplay](https://user-images.githubusercontent.com/59665125/170510578-16867f63-9968-4163-9282-d138356c4738.png)
+![About screen](https://user-images.githubusercontent.com/59665125/170510649-ac57e0da-7374-4ada-bf7d-33956d262575.png)
+![Debug menu](https://user-images.githubusercontent.com/59665125/170510660-60e9d6e1-d99e-4bc7-8931-ed5b952cd5ab.png)
+![Main menu](https://user-images.githubusercontent.com/59665125/166309387-667bae51-8be3-45fe-a087-62cd5a91de9d.png)
 
 
 # Build (linux)
