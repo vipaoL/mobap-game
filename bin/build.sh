@@ -11,28 +11,32 @@
 # This batch file builds and preverifies the code for the demos.
 # it then packages them in a JAR file appropriately.
 #
+
+echo "Downloading and updating compiler..."
+if git clone https://github.com/vipaoL/j2me_compiler.git; then
+echo "Done."
+else
+echo "Already downloaded."
+fi
+cd j2me_compiler
+git pull
+cd ..
 PATHSEP=":"
+JAVA_HOME=./j2me_compiler/jdk1.6.0_45
+WTK_HOME=./j2me_compiler/WTK2.5.2
 
 
 
-
-
-LIBS=../lib/PhysicsEngine_v135a.jar${PATHSEP}../../WTK2.5.2/lib/jsr75.jar
-echo "LIBS:" ${LIBS}
+LIBRARY=../lib/PhysicsEngine_v135a.jar
+CLASSPATH=../lib/PhysicsEngine_v135a.jar${PATHSEP}${WTK_HOME}/lib/jsr75.jar
 RES=../rsc
 APP=MobileApplication3
 MANIFEST=../manifest.mf
 
-
-
-
-
-LIB_DIR=../../WTK2.5.2/lib
+LIB_DIR=${WTK_HOME}/lib
 CLDCAPI=${LIB_DIR}/cldcapi11.jar
 MIDPAPI=${LIB_DIR}/midpapi20.jar
-PREVERIFY=../../WTK2.5.2/bin/preverify
-JAVA_HOME=../../jdk1.6.0_45
-
+PREVERIFY=${WTK_HOME}/bin/preverify
 JAVAC=javac
 JAR=jar
 
@@ -44,11 +48,14 @@ fi
 #
 # Make possible to run this script from any directory'`
 #
-cd `dirname $0`
+WORK_DIR=`dirname $0`
+cd ${WORK_DIR}
 
-echo "Creating directories..."
+echo "Creating or cleaning directories..."
 mkdir -p ../tmpclasses
 mkdir -p ../classes
+rm -rfv ../tmpclasses/*
+rm -rfv ../classes/*
 
 echo "Compiling source files..."
 
@@ -57,23 +64,32 @@ ${JAVAC} \
     -source 1.3 \
     -target 1.3 \
     -d ../tmpclasses \
-    -classpath ${LIBS}${PATHSEP}${RES} \
+    -classpath ../tmpclasses${PATHSEP}${CLASSPATH} \
+	-extdirs ../lib \
     `find ../src -name '*'.java`
+
+cd ../tmpclasses
+
+jar xf ${LIBRARY}
+rm -rf META-INF
+
+#cd ${WORK_DIR}
+cd ../bin
 
 echo "Preverifying class files..."
 
 ${PREVERIFY} \
-    -classpath ${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}${LIBS}${PATHSEP}${RES}${PATHSEP}../tmpclasses \
+    -classpath ${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}../tmpclasses \
     -d ../classes \
     ../tmpclasses
 
 echo "Jaring preverified class files..."
 ${JAR} cmf ${MANIFEST} ${APP}.jar -C ../classes .
 
-if [ -d ../res ] ; then
-  ${JAR} uf ${APP}.jar -C ../res .
+if [ -d ${RES} ] ; then
+  ${JAR} uf ${APP}.jar -C ${RES} .
 fi
 
-echo
-echo "Don't forget to update the JAR file size in the JAD file!!!"
-echo
+echo "Done!" ./${APP}.jar
+#echo "Don't forget to update the JAR file size in the JAD file!!!"
+#echo
