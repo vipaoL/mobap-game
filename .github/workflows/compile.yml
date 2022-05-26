@@ -10,8 +10,8 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
-	  - name: test
-		run: ls ${{ github.workspace }}
+      - name: Test
+        run: ls ${{ github.workspace }}
       - name: Build
         run: ${{ github.workspace }}/bin/build.sh
 
