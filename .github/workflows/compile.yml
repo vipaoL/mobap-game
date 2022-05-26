@@ -14,4 +14,9 @@ jobs:
         run: cd ${{ github.workspace }} && ls .
       - name: Build
         run: cd ${{ github.workspace }} && ./bin/build.sh
+      - name: Upload jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: mobapp-game
+          path: ${{ github.workspace }}/bin/MobileApplication3.jar
 
