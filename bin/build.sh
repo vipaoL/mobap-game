@@ -31,6 +31,7 @@ JAR=jar
 ls ${JAVA_HOME}
 file ${JAVA_HOME}/bin/javac
 file ${JAVA_HOME}/bin/jar
+ldd ${JAVA_HOME}/bin/javac
 
 if [ -n "${JAVA_HOME}" ] ; then
   JAVAC=${JAVA_HOME}/bin/javac
