@@ -13,5 +13,5 @@ jobs:
       - name: Test
         run: cd ${{ github.workspace }} && ls .
       - name: Build
-        run: ${{ github.workspace }}/bin/build.sh
+        run: cd ${{ github.workspace }} && ./bin/build.sh
 
