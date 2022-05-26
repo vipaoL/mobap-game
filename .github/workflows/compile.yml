@@ -5,7 +5,7 @@ on:
       - '**.md'
 jobs:
   Build-J2ME:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -13,10 +13,10 @@ jobs:
       - name: Test
         run: cd ${{ github.workspace }} && ls .
       - name: Build
-        run: sudo dpkg --add-architecture i386 && sudo apt-get install libc6-i386 && cd ${{ github.workspace }} && ./bin/build.sh
+        run: sudo dpkg --add-architecture i386 && sudo apt-get install libc6 && cd ${{ github.workspace }} && sudo dpkg -i ./bin/j2me_compiler/multiarch*.deb && ./bin/build.sh
       - name: Upload jar
         uses: actions/upload-artifact@v2
         with:
-          name: mobapp-game
+          name: mobapp-game-j2me
           path: ${{ github.workspace }}/bin/MobileApplication3.jar
 
