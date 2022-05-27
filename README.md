@@ -15,8 +15,12 @@ tested on: default emulator; Nokia 6303c, n8, e6, 308; Samsung c3200, b320; SE w
 
 
 # Build (linux)
+Install dependencies:
+```
+sudo apt-get install gcc-multilib libxt6:i386
+```
 ```
 git clone https://github.com/vipaoL/mobap-game.git  
-cd mobap-game/bin  
+cd mobap-game  
 git pull && chmod +x ./build.sh && ./build.sh
 ```
