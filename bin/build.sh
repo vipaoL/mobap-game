@@ -8,7 +8,6 @@ echo "Already downloaded."
 fi
 cd j2me_compiler
 git pull
-sudo dpkg -i ./multiarch*.deb
 cd ..
 PATHSEP=":"
 JAVA_HOME=./j2me_compiler/jdk1.6.0_45
@@ -16,11 +15,31 @@ WTK_HOME=./j2me_compiler/WTK2.5.2
 
 
 
-LIBRARY=../lib/PhysicsEngine_v135a.jar
-CLASSPATH=../lib/PhysicsEngine_v135a.jar${PATHSEP}${WTK_HOME}/lib/jsr75.jar
+
+######## CONFIG ########
+########
+YOUR_LIBS=../lib       # YOUR LIBRARIES
 RES=../rsc
-APP=MobileApplication3
+APP=MobileApplication3   # Output jar name
 MANIFEST=../manifest.mf
+CLASSPATH=${WTK_HOME}/lib/jsr75.jar
+########
+########
+
+
+if [ ! -e ${MANIFEST} ] ; then
+	MANIFEST=../MANIFEST.MF
+	if [ ! -e ${MANIFEST} ] ; then
+		MANIFEST=./manifest.mf
+		if [ ! -e ${MANIFEST} ] ; then
+			MANIFEST=./MANIFEST.MF
+			if [ ! -e ${MANIFEST} ] ; then
+				echo "No MANIFEST.MF or manifest.mf found in ./ and ../"
+				exit 2
+			fi
+		fi
+	fi
+fi
 
 LIB_DIR=${WTK_HOME}/lib
 CLDCAPI=${LIB_DIR}/cldcapi11.jar
@@ -29,11 +48,11 @@ PREVERIFY=${WTK_HOME}/bin/preverify
 JAVAC=javac
 JAR=jar
 
-ls ${JAVA_HOME}
-file ${JAVA_HOME}/bin/javac
-file ${JAVA_HOME}/bin/jar
-ldd ${JAVA_HOME}/bin/javac
-ls -la ${JAVA_HOME}/bin/javac
+#ls ${JAVA_HOME}
+#file ${JAVA_HOME}/bin/javac
+#file ${JAVA_HOME}/bin/jar
+#ldd ${JAVA_HOME}/bin/javac
+#ls -la ${JAVA_HOME}/bin/javac
 
 if [ -n "${JAVA_HOME}" ] ; then
   JAVAC=${JAVA_HOME}/bin/javac
@@ -52,8 +71,14 @@ mkdir -p ../classes
 rm -rfv ../tmpclasses/*
 rm -rfv ../classes/*
 
-echo "Compiling source files..."
+echo "Unpacking your libraries: " ${YOUR_LIBS}/*.jar "..."
+cd ../tmpclasses
+../bin/${JAR} xf ${YOUR_LIBS}/*.jar
+rm -rf META-INF
+cd ../bin
 
+
+echo "Compiling source files..."
 ${JAVAC} \
     -bootclasspath ${CLDCAPI}${PATHSEP}${MIDPAPI} \
     -source 1.3 \
@@ -62,14 +87,6 @@ ${JAVAC} \
     -classpath ../tmpclasses${PATHSEP}${CLASSPATH} \
 	-extdirs ../lib \
     `find ../src -name '*'.java`
-
-cd ../tmpclasses
-
-jar xf ${LIBRARY}
-rm -rf META-INF
-
-#cd ${WORK_DIR}
-cd ../bin
 
 echo "Preverifying class files..."
 
