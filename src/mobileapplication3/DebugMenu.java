@@ -101,6 +101,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
         }
     }
     void refreshStates() {
+        menu.setIsSpecialOptnActivated(mnCanvas.debug);
         if (mnCanvas.debug) {
             menu.setEnabledFor(closerWorldgen, 2);
             menu.setEnabledFor(xCoord, 3);
@@ -115,22 +116,27 @@ public class DebugMenu extends GameCanvas implements Runnable {
     }
     private void input() {
         int keyStates = getKeyStates();
-        if (menu.key(keyStates)) {
+        if (menu.handleKeyStates(keyStates)) {
             selectPressed();
         }
     }
     protected void pointerPressed(int x, int y) {
         menu.setIsPressedNow(true);
-        menu.pointer(x, y);
+        menu.handlePointer(x, y);
     }
 
     protected void pointerDragged(int x, int y) {
-        menu.pointer(x, y);
+        menu.handlePointer(x, y);
     }
 
     protected void pointerReleased(int x, int y) {
         menu.setIsPressedNow(false);
-        if (menu.pointer(x, y)) {
+        if (menu.handlePointer(x, y)) {
+            selectPressed();
+        }
+    }
+    public void keyPressed(int keyCode) {
+        if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
         }
     }

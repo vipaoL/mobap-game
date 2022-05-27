@@ -238,38 +238,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
             }
         }
     }
-
-    private void input() {
-        int keyStates = getKeyStates();
-        /*if (delay < 1) {
-            delay = 5;
-            if ((keyStates & (RIGHT_PRESSED | FIRE_PRESSED)) != 0) {
-                stopped = true;
-                selectPressed();
-            } else if ((keyStates & UP_PRESSED) != 0) {
-                if (selected > 1) {
-                    selected--;
-                } else {
-                    selected = v.size() - 1;
-                }
-            } else if ((keyStates & DOWN_PRESSED) != 0) {
-                if (selected < v.size() - 1) {
-                    selected++;
-                } else {
-                    selected = 1;
-                }
-            }
-        } else {
-            delay--;
-        }
-        if (keyStates == 0) {
-            delay = 0;
-        }*/
-        if (menu.key(keyStates)) {
-            selectPressed();
-        }
-    }
-
+    
     public void startLevel(String path) {
         gCanvas gameCanvas = new gCanvas();
         gameCanvas.setWorld(readWorldFile(path));
@@ -290,6 +259,19 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
             m.start();
         }
     }*/
+    
+    private void input() {
+        int keyStates = getKeyStates();
+        if (menu.handleKeyStates(keyStates)) {
+            selectPressed();
+        }
+    }
+    
+    public void keyPressed(int keyCode) {
+        if(menu.handleKeyPressed(keyCode)) {
+            selectPressed();
+        }
+    }
 
     protected void pointerPressed(int x, int y) {
         /*selected = y / k;
@@ -298,7 +280,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
             selected = 1;
         }*/
         menu.setIsPressedNow(true);
-        menu.pointer(x, y);
+        menu.handlePointer(x, y);
     }
 
     protected void pointerDragged(int x, int y) {
@@ -307,7 +289,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
         if (selected == 0) {
             selected = 1;
         }*/
-        menu.pointer(x, y);
+        menu.handlePointer(x, y);
     }
 
     protected void pointerReleased(int x, int y) {
@@ -319,7 +301,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
             selectPressed();
         }*/
         menu.setIsPressedNow(false);
-        if (menu.pointer(x, y)) {
+        if (menu.handlePointer(x, y)) {
             selectPressed();
         }
     }

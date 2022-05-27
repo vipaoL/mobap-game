@@ -180,41 +180,42 @@ public class GenericMenu {
         fontH = font.getHeight();
     }
     
-    public boolean pointer(int x, int y) {
-        int prevSelected = selected;
-        selected = y / k;
+    private boolean isOptionAvailable(int n) {
         if (statemapEnabled) {
-            if (stateMap[selected] == -1) {
-                selected = prevSelected;
+            if (stateMap[n] == -1) {
                 return false;
             }
         }
-        if (selected < firstReachable) {
-            selected = firstReachable;
-            return false;
-        }
-        if (selected > lastReachable) {
-            selected = lastReachable;
+        if (n < firstReachable | n > lastReachable) {
             return false;
         }
         return true;
     }
     
-    public boolean key(int key) {
+    public boolean handlePointer(int x, int y) {
+        int selected = y / k;
+        if (!isOptionAvailable(selected)) {
+            return false;
+        }
+        this.selected = selected;
+        return true;
+    }
+    
+    public boolean handleKeyStates(int keyStates) {
         isSelectAlreadyPressed = isSelectPressed;
-        isSelectPressed = ((key & (GameCanvas.RIGHT_PRESSED | GameCanvas.FIRE_PRESSED)) != 0);
+        isSelectPressed = ((keyStates & (GameCanvas.RIGHT_PRESSED | GameCanvas.FIRE_PRESSED)) != 0);
         if (delay < 1) {
             delay = 5;
             boolean needRepeat = true;
             while (needRepeat) {
                 needRepeat = false;
-                if ((key & GameCanvas.UP_PRESSED) != 0) {
+                if ((keyStates & GameCanvas.UP_PRESSED) != 0) {
                     if (selected > firstReachable) {
                         selected--;
                     } else {
                         selected = lastReachable;
                     }
-                } else if ((key & GameCanvas.DOWN_PRESSED) != 0) {
+                } else if ((keyStates & GameCanvas.DOWN_PRESSED) != 0) {
                     if (selected < lastReachable) {
                         selected++;
                     } else {
@@ -228,10 +229,67 @@ public class GenericMenu {
         } else {
             delay--;
         }
-        if (key == 0) {
+        if (keyStates == 0) {
             delay = 0;
             isSelectAlreadyPressed = false;
         }
         return isSelectPressed & !isSelectAlreadyPressed;
+    }
+    
+    public boolean handleKeyPressed(int keyCode) {
+        boolean pressed = false;
+        int selected = -1;
+        if (keyCode == GameCanvas.KEY_NUM1) {
+            selected = 0;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_NUM2) {
+            selected = 1;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_NUM3) {
+            selected = 2;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_NUM4) {
+            selected = 3;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_NUM5) {
+            selected = 4;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_NUM6) {
+            selected = 5;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_NUM7) {
+            selected = 6;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_NUM8) {
+            selected = 7;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_NUM9) {
+            selected = 8;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_STAR) {
+            selected = 9;
+            pressed = true;
+        }
+        if (keyCode == GameCanvas.KEY_POUND) {
+            selected = 10;
+            pressed = true;
+        }
+        selected += firstReachable;
+        if (pressed) {
+            if (isOptionAvailable(selected)) {
+                this.selected = selected;
+                return true;
+            }
+        }
+        return false;
     }
 }

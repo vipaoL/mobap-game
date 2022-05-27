@@ -220,7 +220,7 @@ public class about extends GameCanvas implements Runnable {
         if (keyStates == 0) {
             delay = 0;
         }*/
-        if (menu.key(keyStates)) {
+        if (menu.handleKeyStates(keyStates)) {
             selectPressed();
         }
     }
@@ -229,21 +229,11 @@ public class about extends GameCanvas implements Runnable {
         int gameAction = getGameAction(keyCode);
     }
 
-    /*public void keyPressed(int keyCode) {
-        int gameAction = getGameAction(keyCode);
-        if (gameAction == KEY_NUM1) {
-            selected = 0;
+    public void keyPressed(int keyCode) {
+        if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
         }
-        if (gameAction == KEY_NUM2) {
-            selected = 1;
-            selectPressed();
-        }
-        if (gameAction == KEY_NUM3) {
-            selected = 2;
-            selectPressed();
-        }
-    }*/
+    }
 
     protected void pointerPressed(int x, int y) {
         //k = scH / menuOptions.length;
@@ -256,7 +246,7 @@ public class about extends GameCanvas implements Runnable {
             selected = 2;
         }*/
         menu.setIsPressedNow(true);
-        menu.pointer(x, y - offset2);
+        menu.handlePointer(x, y - offset2);
     }
 
     protected void pointerDragged(int x, int y) {
@@ -268,12 +258,12 @@ public class about extends GameCanvas implements Runnable {
         if (selected > 2) {
             selected = 2;
         }*/
-        menu.pointer(x, y - offset2);
+        menu.handlePointer(x, y - offset2);
     }
 
     protected void pointerReleased(int x, int y) {
         menu.setIsPressedNow(false);
-        if (menu.pointer(x, y - offset2)) {
+        if (menu.handlePointer(x, y - offset2)) {
             selectPressed();
         }
         /*selected = (y-offset2) / k;

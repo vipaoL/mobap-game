@@ -46,7 +46,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     public static boolean wg = false;
 
     public mnCanvas() {
-        super(true);
+        super(false);
         setFullScreenMode(true);
         scW = getWidth();
         scH = getHeight();
@@ -172,40 +172,20 @@ public class mnCanvas extends GameCanvas implements Runnable {
         } else delay --;
         if (keyStates == 0) delay = 0;
         */
-        if (menu.key(keyStates)) {
+        if (menu.handleKeyStates(keyStates)) {
             selectPressed();
         }
     }
 
     /*public void keyReleased(int keyCode) {
         int gameAction = getGameAction(keyCode);
-    }
+    }*/
 
     public void keyPressed(int keyCode) {
-        int gameAction = getGameAction(keyCode);
-        gameAction = keyCode; //test
-        if (gameAction == KEY_NUM1) {
-            selected = 1;
+        if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
         }
-        if (gameAction == KEY_NUM2) {
-            selected = 2;
-            selectPressed();
-        }
-    
-        if (gameAction == KEY_NUM3) {
-            selected = 3;
-            selectPressed();
-        }
-        if (gameAction == KEY_NUM4) {
-            selected = 4;
-            selectPressed();
-        }
-        if (gameAction == KEY_NUM5) {
-            selected = 5;
-            selectPressed();
-        }
-    }*/
+    }
 
     public void startLevel(String path) {
         Main.print("menu:startLevel()");
@@ -233,7 +213,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
             selected = 5;
         }*/
         menu.setIsPressedNow(true);
-        menu.pointer(x, y);
+        menu.handlePointer(x, y);
     }
     protected void pointerDragged(int x, int y) {
         /*selected = y / k;
@@ -244,7 +224,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         if (selected > 5) {
             selected = 5;
         }*/
-        menu.pointer(x, y);
+        menu.handlePointer(x, y);
     }
     protected void pointerReleased(int x, int y) {
         /*pressed = false;
@@ -258,7 +238,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
             selectPressed();
         }*/
         menu.setIsPressedNow(false);
-        if (menu.pointer(x, y)) {
+        if (menu.handlePointer(x, y)) {
             selectPressed();
         }
     }
