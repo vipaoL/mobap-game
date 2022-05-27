@@ -1,10 +1,10 @@
 #!/bin/sh -e
 
 echo "Downloading and updating compiler..."
-if git clone https://github.com/vipaoL/j2me_compiler.git; then
-echo "Done."
+if git clone https://github.com/vipaoL/j2me_compiler.git 2>/dev/null ; then
+	echo "Done."
 else
-echo "Already downloaded."
+	echo "Already downloaded."
 fi
 cd j2me_compiler
 git pull
@@ -68,10 +68,10 @@ cd ${WORK_DIR}
 echo "Creating or cleaning directories..."
 mkdir -p ../tmpclasses
 mkdir -p ../classes
-rm -rfv ../tmpclasses/*
-rm -rfv ../classes/*
+rm -rf ../tmpclasses/*
+rm -rf ../classes/*
 
-echo "Unpacking your libraries: " ${YOUR_LIBS}/*.jar "..."
+echo "Unpacking your libraries: " ${YOUR_LIBS}/*.jar
 cd ../tmpclasses
 ../bin/${JAR} xf ${YOUR_LIBS}/*.jar
 rm -rf META-INF
