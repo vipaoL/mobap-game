@@ -429,11 +429,16 @@ public class gCanvas extends Canvas implements Runnable {
             openMenu();
             r = true;
         } else {
-            if ((keyCode == KEY_STAR | gameAction == GAME_B) & DebugMenu.cheat) {
-                FXVector pos = w.carbody.positionFX();
-                int carX = pos.xAsInt();
-                int carY = pos.yAsInt();
-                worldgen.line(carX - 200, carY + 200, carX + 2000, carY + 200);
+            if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
+                if (DebugMenu.mgstructSupport) {
+                    worldgen.mgTest();
+                } else
+                if (DebugMenu.cheat) {
+                    FXVector pos = w.carbody.positionFX();
+                    int carX = pos.xAsInt();
+                    int carY = pos.yAsInt();
+                    worldgen.line(carX - 200, carY + 200, carX + 2000, carY + 200);
+                }
             } else {
                 accel = true;
             }

@@ -51,10 +51,14 @@ public class WorldGen implements Runnable{
     boolean ready = true;
     GraphicsWorld w;
     Landscape lndscp;
+    MgStruct mg = new MgStruct();
     
     public WorldGen(GraphicsWorld w) {
         this.w = w;
         lndscp = w.getLandscape();
+        if (DebugMenu.mgstructSupport) {
+            mg.readFile();
+        }
     }
     
     public void start() {
@@ -114,7 +118,11 @@ public class WorldGen implements Runnable{
     private void random() {
         Main.print("gen:random()");
         while (i == prevR) {
-            i = rand.nextInt(10); //0-9
+            int a = 10;
+            if (DebugMenu.mgstructSupport) {
+                a = 40;
+            }
+            i = rand.nextInt(a/*10*/); //0-9
         }
         prevR = i;
         if (i == 0) {
@@ -135,7 +143,11 @@ public class WorldGen implements Runnable{
             int n = rand.nextInt(6) + 5;
             dotline(lastX, lastY, n);
         } else {
-            floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
+            if(DebugMenu.mgstructSupport) {
+                mgTest();
+            } else {
+                floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
+            }
         }
         Main.print("" + lastX);
         resettingPosition = false;
@@ -552,5 +564,35 @@ public class WorldGen implements Runnable{
         }
         numberOfLoggedStructs = 0;
         ringLogTail = 0;
+    }
+    
+    void mgTest() {
+        placeMGStruct(mg.buffer);
+    }
+    
+    void placeMGStruct(short[][] data) {
+        int l = 0;
+        for (int i = 0; i < mg.bufSizeInCells; i++) {
+            l = Math.max(l, placePrimitive(data[i]));
+        }
+        lastX+=l;
+        System.out.println(l + "l");
+    }
+    
+    int placePrimitive(short[] data) {
+        int l = 0;
+        short id = data[0];
+        for (int i = 0; i < data.length; i++) {
+            System.out.print(data[i] + " ");
+        }
+        System.out.println();
+        if (id == 1) {
+            line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
+            l = Math.max(data[1], data[3]); // max(x1, x2)
+        } else if (id == 2) {
+            arc(data[1]+lastX, data[2]+lastY, data[3], 360, 0);
+            l = data[1] + data[3]; // relativeX + radius
+        }
+        return l;
     }
 }
