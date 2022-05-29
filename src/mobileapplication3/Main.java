@@ -75,7 +75,7 @@ public class Main extends MIDlet {
             } catch (IOException ex1) {
                 ex1.printStackTrace();
             }
-            Alert alert = new Alert("О нет!", text, alertImage, AlertType.WARNING);
+            Alert alert = new Alert("Oh no!", text, alertImage, AlertType.ERROR);
             alert.setTimeout(3000);
             //thiss.display.setCurrent(alert, current);
             } catch(IllegalArgumentException ex) {

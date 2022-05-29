@@ -17,7 +17,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
     
     private static final int millis = 50;
     private GenericMenu menu = new GenericMenu();
-    private String[] menuOpts = {"Enable debug options", "-----", "closer worldgen trigger", "show X-coordinate", "show speedometer", "cheat(*)", "music", "show font size", ".mgstruct support", "back"};
+    private String[] menuOpts = {"Enable debug options", "-----", "closer worldgen trigger", "show X-coordinate", "show speedometer", "cheat(*)", "music", "show font size", ".mgstruct only", "back"};
     private final int[] statemap = {0, -1, 0, 0, 0, 0, 0, 0, 0, 0};
     boolean stopped = false;
     int scW = 0;
@@ -28,7 +28,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
     public static boolean cheat = false;
     public static boolean music = false;
     public static boolean fontSize = false;
-    public static boolean mgstructSupport = false;
+    public static boolean mgstructOnly = false;
     
     public DebugMenu() {
         super(true);
@@ -99,7 +99,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             fontSize = !fontSize;
         }
         if (selected == 8) {
-            mgstructSupport = !mgstructSupport;
+            mgstructOnly = !mgstructOnly;
         }
         if (selected == menuOpts.length - 1) {
             stopped = true;
@@ -117,7 +117,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             menu.setEnabledFor(cheat, 5);
             menu.setEnabledFor(music, 6);
             menu.setEnabledFor(fontSize, 7);
-            menu.setEnabledFor(mgstructSupport, 8);
+            menu.setEnabledFor(mgstructOnly, 8);
         } else {
             for (int i = 2; i < menuOpts.length - 1; i++) {
                 menu.setStateFor(-1, i);

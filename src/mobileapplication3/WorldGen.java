@@ -20,6 +20,9 @@ import java.util.Vector;
  */
 public class WorldGen implements Runnable{
     
+    int stdStructsNumber = 6;
+    int floorStatWheightInRandom = 4;
+    
     private int prevR;
     private int i;
     private int zeroPoint =  -8000;
@@ -56,8 +59,13 @@ public class WorldGen implements Runnable{
     public WorldGen(GraphicsWorld w) {
         this.w = w;
         lndscp = w.getLandscape();
-        if (DebugMenu.mgstructSupport) {
-            mg.readFile();
+        if (true/* | DebugMenu.mgstructSupport*/) {
+            mg.readRes("/test.mgstruct");
+            mg.readRes("/1.mgstruct");
+            mg.readRes("/2.mgstruct");
+            mg.readRes("/3.mgstruct");
+            mg.readRes("/4.mgstruct");
+            mg.readRes("/5.mgstruct");
         }
     }
     
@@ -118,13 +126,18 @@ public class WorldGen implements Runnable{
     private void random() {
         Main.print("gen:random()");
         while (i == prevR) {
-            int a = 10;
-            if (DebugMenu.mgstructSupport) {
-                a = 40;
+            int a = stdStructsNumber + floorStatWheightInRandom;
+            if (DebugMenu.mgstructOnly) {
+                a=0;
             }
+            a += mg.structBufSizeInCells;
             i = rand.nextInt(a/*10*/); //0-9
+            if (DebugMenu.mgstructOnly) {
+               i+=stdStructsNumber + floorStatWheightInRandom;
+            }
         }
         prevR = i;
+        Main.print("id"+i);
         if (i == 0) {
             circ1(lastX, lastY, 400, 15, 120);
         } else if (i == 1) {
@@ -142,14 +155,12 @@ public class WorldGen implements Runnable{
         } else if (i == 5) {
             int n = rand.nextInt(6) + 5;
             dotline(lastX, lastY, n);
+        } else if (i > stdStructsNumber - 1 & i < stdStructsNumber + floorStatWheightInRandom) {
+            floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
         } else {
-            if(DebugMenu.mgstructSupport) {
-                mgTest();
-            } else {
-                floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
-            }
+            placeMGStructByRelativeID(i);
         }
-        Main.print("" + lastX);
+        Main.print("lastX" + lastX);
         resettingPosition = false;
         lowestY = Math.max(lastY, lowestY);
     }
@@ -559,6 +570,9 @@ public class WorldGen implements Runnable{
                 dotline(lastX, y, n);
                 Main.print("dotline");
             }
+            if (structID >= stdStructsNumber + floorStatWheightInRandom) {
+                placeMGStructByRelativeID(structID);
+            }
             //WorldGen.lastX = lastX;
             //structLog.removeElementAt(0);
         }
@@ -567,32 +581,43 @@ public class WorldGen implements Runnable{
     }
     
     void mgTest() {
-        placeMGStruct(mg.buffer);
+        placeMGStruct(5);
     }
     
-    void placeMGStruct(short[][] data) {
-        int l = 0;
-        for (int i = 0; i < mg.bufSizeInCells; i++) {
-            l = Math.max(l, placePrimitive(data[i]));
+    void placeMGStructByRelativeID(int relID) {
+        int id = relID - floorStatWheightInRandom - stdStructsNumber;
+        if (!resettingPosition) {
+            int[] log = {relID, lastX, lastY};
+            structlogger(log);
         }
-        lastX+=l;
-        System.out.println(l + "l");
+        placeMGStructByID(id);
     }
     
-    int placePrimitive(short[] data) {
-        int l = 0;
+    void placeMGStructByID(int id) {
+        Main.print("byID" + id);
+        placeMGStruct(id);
+    }
+    
+    void placeMGStruct(int id) {
+        short[][] data = mg.structBuffer[id];
+        Main.print("placemg" + mg.structSizes[id]);
+        for (int i = 1; i < mg.structSizes[id]; i++) {
+            placePrimitive(data[i]);
+        }
+        lastX+=data[0][1];
+        lastY+=data[0][2];
+    }
+    
+    void placePrimitive(short[] data) {
         short id = data[0];
         for (int i = 0; i < data.length; i++) {
             System.out.print(data[i] + " ");
         }
-        System.out.println();
-        if (id == 1) {
+        System.out.println(" - prim placed");
+        if (id == 2) {
             line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
-            l = Math.max(data[1], data[3]); // max(x1, x2)
-        } else if (id == 2) {
+        } else if (id == 3) {
             arc(data[1]+lastX, data[2]+lastY, data[3], 360, 0);
-            l = data[1] + data[3]; // relativeX + radius
         }
-        return l;
     }
 }

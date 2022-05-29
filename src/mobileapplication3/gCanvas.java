@@ -430,9 +430,6 @@ public class gCanvas extends Canvas implements Runnable {
             r = true;
         } else {
             if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
-                if (DebugMenu.mgstructSupport) {
-                    worldgen.mgTest();
-                } else
                 if (DebugMenu.cheat) {
                     FXVector pos = w.carbody.positionFX();
                     int carX = pos.xAsInt();
