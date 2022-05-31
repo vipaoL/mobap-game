@@ -91,7 +91,7 @@ ${JAVAC} \
 echo "Preverifying class files..."
 
 ${PREVERIFY} \
-    -classpath ${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}../tmpclasses \
+    -classpath ${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}${CLASSPATH}${PATHSEP}../tmpclasses \
     -d ../classes \
     ../tmpclasses
 
