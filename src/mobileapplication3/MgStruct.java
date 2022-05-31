@@ -20,8 +20,9 @@ import javax.microedition.io.file.FileConnection;
 public class MgStruct {
 
     short supportedFileVer = 0;
+    short secondSupportedFileVer = 1;
     int[] args = {0, 2, 4, 7};
-    
+
     int bufSizeInCells = 0;
     int[] structSizes = new int[16];
     //int bufSizeInShort = 0;
@@ -47,76 +48,59 @@ public class MgStruct {
             ex.printStackTrace();
         }
     }*/
-    
-    /*public void readFile(String path) {
+    public void readFile(String path) {
         try {
-            FileConnection fc = (FileConnection) Connector.open("file:///root1/Levels/test.mgstruct", Connector.READ);
-            if (fc.exists()) {
-                buffer = new short[16][];
-                DataInputStream dis = fc.openDataInputStream();
-                short fVervion = dis.readShort(); // file format version, for future
-                if (fVervion == supportedFileVer) {
-                    while (true) {
-                        short id = dis.readShort();
-                        if (id == 0) {
-                            break;
-                        }
-                        short[] data = new short[args[id] + 1];
-                        data[0] = id;
-                        for (int i = 0; i < args[id]; i++) {
-                            data[i + 1] = dis.readShort();
-                        }
-                        saveToBuffer(data);
-                        Main.print(". ");
+            FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+            DataInputStream dis = fc.openDataInputStream();
+            readFromDataInputStream(dis);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public boolean readRes(String path) {
+        try {
+            InputStream is = getClass().getResourceAsStream(path);
+            DataInputStream dis = new DataInputStream(is);
+            readFromDataInputStream(dis);
+            is.close();
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
 
-                    }
-                } else {
-                    Main.showAlert("Unsupported version number: " + fVervion);
-                }
-                dis.close();
-                saveStructToBuffer(buffer);
+    public void readFromDataInputStream(DataInputStream dis) throws IOException {
+        short fVervion = dis.readShort(); // file format version
+        if (fVervion == supportedFileVer | fVervion == secondSupportedFileVer) {
+            int length = 16;
+            if (fVervion != 0) {
+                length = dis.readShort();
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }*/
-    
-    public void readRes(String path) {
-        try {
-            //FileConnection fc = (FileConnection) Connector.open("file:///root1/Levels/test.mgstruct", Connector.READ);
-            if (true/*fc.exists()*/) {
-                InputStream is = getClass().getResourceAsStream(path);
-                DataInputStream dis = new DataInputStream(is);
-                short fVervion = dis.readShort(); // file format version, for future
-                if (fVervion == supportedFileVer) {
-                    short[][] buffer = new short[16][];
-                    bufSizeInCells = 0;
-                    for (int c = 0; true; c++) {
-                        short id = dis.readShort();
-                        if (id == 0) {
-                            Main.print("break");
-                            break;
-                        }
-                        short[] data = new short[args[id] + 1]; // {1, 0, 0, 100, 0} // - e.g line
-                        data[0] = id;
-                        for (int i = 0; i < args[id]; i++) {
-                            data[i + 1] = dis.readShort();
-                            Main.print(id + "data" +data[i+1]);
-                        }
-                        buffer[c] = data;
-                        bufSizeInCells++;
-                        Main.print(". ");
-                    }
-                    saveStructToBuffer(buffer);
-                } else {
-                    Main.showAlert("Unsupported version number: " + fVervion);
+            Main.print("read: ver=" + fVervion + " length=" + length);
+            short[][] buffer = new short[length][];
+            bufSizeInCells = 0;
+            for (int c = 0; true; c++) {
+                short id = dis.readShort();
+                if (id == 0) {
+                    Main.print("break");
+                    break;
                 }
-                dis.close();
-                is.close();
+                short[] data = new short[args[id] + 1]; // {1, 0, 0, 100, 0} // - e.g line
+                data[0] = id;
+                for (int i = 0; i < args[id]; i++) {
+                    data[i + 1] = dis.readShort();
+                    Main.print(id + "data" + data[i + 1]);
+                }
+                buffer[c] = data;
+                bufSizeInCells++;
+                Main.print(". ");
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            saveStructToBuffer(buffer);
+        } else {
+            //Main.showAlert("Unsupported version number: " + fVervion);
         }
+        dis.close();
     }
 
     /*void saveToBuffer(short[] data) {
@@ -125,7 +109,6 @@ public class MgStruct {
         //bufSizeInShort += data.length;
         changed = true;
     }*/
-    
     void saveStructToBuffer(short[][] data) {
         structBuffer[structBufSizeInCells] = data;
         structSizes[structBufSizeInCells] = bufSizeInCells;

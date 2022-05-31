@@ -11,8 +11,15 @@ import at.emini.physics2D.Constraint;
 import at.emini.physics2D.Landscape;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXVector;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
+import javax.microedition.io.file.FileSystemRegistry;
 
 /**
  *
@@ -54,19 +61,70 @@ public class WorldGen implements Runnable{
     boolean ready = true;
     GraphicsWorld w;
     Landscape lndscp;
-    MgStruct mg = new MgStruct();
+    MgStruct mgStruct = new MgStruct();
+    String prefix = "file:///";
+    String root = "C:/";
+    String sep = "/";
     
     public WorldGen(GraphicsWorld w) {
         this.w = w;
         lndscp = w.getLandscape();
-        if (true/* | DebugMenu.mgstructSupport*/) {
-            mg.readRes("/test.mgstruct");
-            mg.readRes("/1.mgstruct");
-            mg.readRes("/2.mgstruct");
-            mg.readRes("/3.mgstruct");
-            mg.readRes("/4.mgstruct");
-            mg.readRes("/5.mgstruct");
+        
+        /*for (int i = 1; i < 5 & mgStruct.readRes("/" + i + ".mgstruct"); i++) {
+            Main.print(i);
+        }*/
+        
+        if (mnCanvas.extStructs) {
+            try {
+                String path = System.getProperty("fileconn.dir.photos");
+                listFiles(path);
+                path = System.getProperty("fileconn.dir.graphics");
+                listFiles(path);
+            } catch (SecurityException ex) {
+                ex.printStackTrace();
+            } catch (IllegalArgumentException ex) {
+                ex.printStackTrace();
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+            }
+            Enumeration roots = FileSystemRegistry.listRoots();
+            while (roots.hasMoreElements()) {
+                roots.nextElement();
+                String path = prefix + root;
+                try {
+                    listFiles(path);
+                    path = prefix + root + "other" + sep;
+                    listFiles(path);
+                } catch (SecurityException ex) {
+                } catch (IllegalArgumentException ex) {
+                }
+            }
         }
+        
+        Main.print("read completed");
+    }
+    
+    boolean listFiles(String path) {
+        if (path != null) {
+            path += "Structs" + sep;
+            try {
+                FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+                if (fc.exists() & fc.isDirectory()) {
+                    Enumeration list =  fc.list();
+                    while (list.hasMoreElements()) {
+                        mgStruct.readFile((String) list.nextElement());
+                    }
+                    return true;
+                }
+            } catch (IOException ex) {
+                //Main.showAlert(ex);
+                //ex.printStackTrace();
+            } catch (IllegalArgumentException ex) {
+                //Main.showAlert(ex);
+                //ex.printStackTrace();
+            }
+        }
+        return false;
     }
     
     public void start() {
@@ -130,7 +188,7 @@ public class WorldGen implements Runnable{
             if (DebugMenu.mgstructOnly) {
                 a=0;
             }
-            a += mg.structBufSizeInCells;
+            a += mgStruct.structBufSizeInCells;
             i = rand.nextInt(a/*10*/); //0-9
             if (DebugMenu.mgstructOnly) {
                i+=stdStructsNumber + floorStatWheightInRandom;
@@ -599,9 +657,9 @@ public class WorldGen implements Runnable{
     }
     
     void placeMGStruct(int id) {
-        short[][] data = mg.structBuffer[id];
-        Main.print("placemg" + mg.structSizes[id]);
-        for (int i = 1; i < mg.structSizes[id]; i++) {
+        short[][] data = mgStruct.structBuffer[id];
+        Main.print("placemg" + mgStruct.structSizes[id]);
+        for (int i = 1; i < mgStruct.structSizes[id]; i++) {
             placePrimitive(data[i]);
         }
         lastX+=data[0][1];

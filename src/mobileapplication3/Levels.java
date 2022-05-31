@@ -45,7 +45,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     int k = 20;
     int selected = 1;
     int delay = 10;
-    String xoba = "";
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     boolean paused = false;
     private GenericMenu menu = new GenericMenu();

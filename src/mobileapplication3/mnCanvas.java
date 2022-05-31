@@ -22,7 +22,8 @@ import javax.microedition.lcdui.game.GameCanvas;
 public class mnCanvas extends GameCanvas implements Runnable {
     int k = 20;
     int delay = 0;
-    String[] menuOptions = {"-", "Play", "Levels", "About", "Debug", "Exit", "-"};
+    String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Debug", "Exit", "-"};
+    private final int[] statemap = {0, 0, 0, 0, 0, 0, 0, 0};
     static int selected = 1;
     boolean pressed = false;
     int scW = getWidth();
@@ -35,6 +36,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     boolean paused = false;
     private GenericMenu menu = new GenericMenu();
     public static boolean music = false;
+    public static boolean extStructs = false;
     
     String DEFAULT_LEVEL = "";
 
@@ -73,6 +75,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
         fontH = font.getHeight();
         menu.loadParams(scW, scH, menuOptions, 1, menuOptions.length - 2, selected);
+        menu.loadStatemap(statemap);
         menu.setSpecialOption(4);
         paused = false;
     }
@@ -251,19 +254,23 @@ public class mnCanvas extends GameCanvas implements Runnable {
             startLevel(DEFAULT_LEVEL);
         }
         if (selected == 2) {
+            menu.setStateFor(1, 2);
+            extStructs = true;
+        }
+        if (selected == 3) {
             stopped = true;
             wg = false;
             Main.set(new Levels());
         }
-        if (selected == 3) {
+        if (selected == 4) {
             Main.set(new about());
         }
-        if (selected == 4) {
+        if (selected == 5) {
             //debug = !debug;
             //if (debug) Main.showAlert("Ну всё.");
             Main.set(new DebugMenu());
         }
-        if (selected == 5) Main.exit();
+        if (selected == 6) Main.exit();
     }
     public GraphicsWorld readWorldFile(String path) {
         //GraphicsWorld gameWorld;
