@@ -107,7 +107,7 @@ public class WorldGen implements Runnable{
     
     boolean listFiles(String path) {
         if (path != null) {
-            path += "Structs" + sep;
+            path += "MGStructs" + sep;
             try {
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 if (fc.exists() & fc.isDirectory()) {
