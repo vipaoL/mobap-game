@@ -26,7 +26,7 @@ import javax.microedition.io.file.FileSystemRegistry;
  *
  * @author vipaol
  */
-public class WorldGen implements Runnable{
+public class WorldGen implements Runnable {
     
     int stdStructsNumber = 6;
     int floorStatWheightInRandom = 4;
@@ -71,9 +71,9 @@ public class WorldGen implements Runnable{
         this.w = w;
         lndscp = w.getLandscape();
         
-        for (int i = 1; i < 0 & mgStruct.readRes("/" + i + ".mgstruct"); i++) {
+        /*for (int i = 1; i < 0 & mgStruct.readRes("/" + i + ".mgstruct"); i++) {
             Main.print(i);
-        }
+        }*/
         
         if (mnCanvas.extStructs) {
             try {
