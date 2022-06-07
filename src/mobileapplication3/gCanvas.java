@@ -7,11 +7,13 @@ package mobileapplication3;
 import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
+import java.io.IOException;
 import java.util.Vector;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.media.Manager;
+import javax.microedition.media.MediaException;
 import javax.microedition.media.Player;
 
 /**
@@ -114,19 +116,18 @@ public class gCanvas extends Canvas implements Runnable {
         Contact[][] contacts = new Contact[3][];
         //paused = firstStart;
         //world.setTimestepFX(FXUtil.toFX(16));
-        Player midiPlayer = null;
+
         try {
-            midiPlayer = Manager.createPlayer(getClass().getResourceAsStream("/a.mid"), "audio/midi");
-        } catch (Exception e) {
-          System.err.println(e);
-        }
-        try {
-            if (midiPlayer != null & DebugMenu.music) {
+            if (DebugMenu.music) {
+                Player midiPlayer = Manager.createPlayer(getClass().getResourceAsStream("/a.mid"), "audio/midi");
                 midiPlayer.start();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
           System.err.println(e);
+        } catch (MediaException e) {
+            System.err.println(e);
         }
+        
         while(false & w == null) {
             try {
                 Thread.sleep(50);
@@ -307,6 +308,12 @@ public class gCanvas extends Canvas implements Runnable {
                             gameoverCountdown--;
                         } else {
                             gameoverCountdown = 0;
+                        }
+                    }
+                    for (int i = 0; i < w.getBodyCount(); i++) {
+                        Body[] bs = w.getBodies();
+                        if (bs[i].positionFX().yAsInt() > 20000 + worldgen.getLowestY()) {
+                            w.removeBody(bs[i]);
                         }
                     }
                 }
