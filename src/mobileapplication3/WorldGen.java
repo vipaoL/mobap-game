@@ -90,7 +90,7 @@ public class WorldGen implements Runnable {
             }
             Enumeration roots = FileSystemRegistry.listRoots();
             while (roots.hasMoreElements()) {
-                roots.nextElement();
+                root = (String) roots.nextElement();
                 String path = prefix + root;
                 try {
                     listFiles(path);
@@ -108,12 +108,13 @@ public class WorldGen implements Runnable {
     boolean listFiles(String path) {
         if (path != null) {
             path += "MGStructs" + sep;
+            System.out.println("path: " + path);
             try {
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 if (fc.exists() & fc.isDirectory()) {
                     Enumeration list =  fc.list();
                     while (list.hasMoreElements()) {
-                        mgStruct.readFile((String) list.nextElement());
+                        mgStruct.readFile(path + list.nextElement());
                     }
                     return true;
                 }

@@ -49,6 +49,7 @@ public class MgStruct {
         }
     }*/
     public void readFile(String path) {
+        System.out.println("file path: " + path);
         try {
             FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
             DataInputStream dis = fc.openDataInputStream();
@@ -99,7 +100,7 @@ public class MgStruct {
             }
             saveStructToBuffer(buffer);
         } else {
-            //Main.showAlert("Unsupported version number: " + fVervion);
+            Main.print("Unsupported version number: " + fVervion);
         }
         dis.close();
     }
