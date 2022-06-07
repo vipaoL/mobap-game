@@ -21,12 +21,12 @@ public class MgStruct {
 
     short supportedFileVer = 0;
     short secondSupportedFileVer = 1;
-    int[] args = {0, 2, 4, 7};
+    int[] args = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10};
 
     int bufSizeInCells = 0;
-    int[] structSizes = new int[16];
+    int[] structSizes = new int[32];
     //int bufSizeInShort = 0;
-    short[][][] structBuffer = new short[16][][];
+    short[][][] structBuffer = new short[32][][];
     int structBufSizeInCells = 0;
     boolean changed = true;
 
@@ -79,6 +79,7 @@ public class MgStruct {
             }
             Main.print("read: ver=" + fVervion + " length=" + length);
             short[][] buffer = new short[length][];
+            //structSizes = new int[length];
             bufSizeInCells = 0;
             for (int c = 0; true; c++) {
                 short id = dis.readShort();

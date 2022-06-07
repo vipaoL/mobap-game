@@ -76,6 +76,9 @@ public class mnCanvas extends GameCanvas implements Runnable {
         fontH = font.getHeight();
         menu.loadParams(scW, scH, menuOptions, 1, menuOptions.length - 2, selected);
         menu.loadStatemap(statemap);
+        if (extStructs) {
+            menu.setStateFor(1, 2);
+        }
         menu.setSpecialOption(4);
         paused = false;
     }

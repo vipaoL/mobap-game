@@ -10,6 +10,7 @@ import at.emini.physics2D.Body;
 import at.emini.physics2D.Constraint;
 import at.emini.physics2D.Landscape;
 import at.emini.physics2D.Shape;
+import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -70,9 +71,9 @@ public class WorldGen implements Runnable{
         this.w = w;
         lndscp = w.getLandscape();
         
-        /*for (int i = 1; i < 5 & mgStruct.readRes("/" + i + ".mgstruct"); i++) {
+        for (int i = 1; i < 0 & mgStruct.readRes("/" + i + ".mgstruct"); i++) {
             Main.print(i);
-        }*/
+        }
         
         if (mnCanvas.extStructs) {
             try {
@@ -407,6 +408,9 @@ public class WorldGen implements Runnable{
         }
     }
     private void arc(int x, int y, int r, int ang, int of, int kx, int ky) { //k: 10 = 1.0
+        while (of < 0) {
+            of += 360;
+        }
         for(int i = sl; i <= ang; i+=sl) {
             line(x+Mathh.cos(i+of)*kx*r/10000, y+Mathh.sin(i+of)*ky*r/10000, x+Mathh.cos((i-sl)+of)*kx*r/10000,y+Mathh.sin((i-sl)+of)*ky*r/10000);
             toD += 1;
@@ -675,7 +679,71 @@ public class WorldGen implements Runnable{
         if (id == 2) {
             line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
         } else if (id == 3) {
+            arc(data[1]+lastX, data[2]+lastY, data[3], data[4], data[5], data[6] / 10, data[7] / 10);
+        } else if (id == 4) {
+            int x1 = data[1];
+            int y1 = data[2];
+            int x2 = data[3];
+            int y2 = data[4];
+            int dx = x2 - x1;
+            int dy = y2 - y1;
+            
+            /*int l;
+            if (dy == 0) {
+                l = dx;
+            } else if (dx == 0) {
+                l = dy;
+            } else {
+                l = distance(x1, y1, x2, y2);
+            }*/
+            int platfH = data[5];
+            int platfL = data[6];
+            int spacing = data[7];
+            int l = data[8];
+            int ang = data[9];
+            Shape rect = Shape.createRectangle(platfL, platfH);
+            rect.setMass(1);
+            rect.setFriction(0);
+            rect.setElasticity(50);
+            dx/=(l/platfL);
+            int spX = spacing * dx / l;
+            dy/=(l/platfL);
+            int spY = spacing * dy / l;
+            int plLX = platfL * dx / l;
+            int plLY = platfL * dy / l;
+            System.out.println("dx=" + dx + "dy=" + dy);
+            for (int i = 0; i < l / platfL; i++) {
+                Body fallinPlatf = new Body(lastX + x1 + i*(dx+spX) - plLX/2, lastY + y1 + i*(dy+spY) - plLY/2, rect, true);
+                fallinPlatf.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
+                fallinPlatf.setDynamic(false);
+                //fallinPlatf.setInteracting(false);
+                w.addBody(fallinPlatf);
+            }
+            
+        } else if (id == 5) {
             arc(data[1]+lastX, data[2]+lastY, data[3], 360, 0);
         }
+        
+        
+        
+        /*for (int i = f0off+sl/2; i < 60; i+=sl) {
+            Body fallinPlatf = new Body(x+r+Mathh.cos(i+f0off)*(r+platfHeight/2)/1000, y-r+Mathh.sin(i+f0off)*(r+platfHeight/2)/1000, rect, true);
+            fallinPlatf.setDynamic(false);
+            fallinPlatf.setRotationDeg(i+f0off-90);
+            w.addBody(fallinPlatf);
+        }
+        rect = Shape.createRectangle(l2, platfHeight);
+        rect.setMass(1);
+        rect.setFriction(0);
+        rect.setElasticity(50);
+        */
+        
+        
+    }
+    
+    int distance(int x1, int y1, int x2, int y2) {
+        int dx = x1 - x2;
+        int dy = y1 - y2;
+        return (int) Math.sqrt(dx * dx + dy * dy);
     }
 }
