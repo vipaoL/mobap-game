@@ -79,7 +79,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         if (extStructs) {
             menu.setStateFor(1, 2);
         }
-        menu.setSpecialOption(4);
+        menu.setSpecialOption(menuOptions.length - 3);
         paused = false;
     }
 

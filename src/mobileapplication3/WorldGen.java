@@ -295,30 +295,32 @@ public class WorldGen implements Runnable {
         toD = 0;
         lastY += r2/2;
         
-        int l2 = (r2) / 2;
-        
-        int platfLength = 2*sl*r*3141/1000/360;
-        int platfHeight = r/100;
+        if (!resettingPosition) {
+            int l2 = (r2) / 2;
 
-        Shape rect = Shape.createRectangle(platfLength, platfHeight);
-        rect.setMass(1);
-        rect.setFriction(0);
-        rect.setElasticity(50);
-        
-        for (int i = f0off+sl/2; i < 60; i+=sl) {
-            Body fallinPlatf = new Body(x+r+Mathh.cos(i+f0off)*(r+platfHeight/2)/1000, y-r+Mathh.sin(i+f0off)*(r+platfHeight/2)/1000, rect, true);
-            fallinPlatf.setDynamic(false);
-            fallinPlatf.setRotationDeg(i+f0off-90);
-            w.addBody(fallinPlatf);
-        }
-        rect = Shape.createRectangle(l2, platfHeight);
-        rect.setMass(1);
-        rect.setFriction(0);
-        rect.setElasticity(50);
-        for (int i = 0; i < 2; i++) {
-            Body fallinPlatf = new Body(x+r-r2+i*l2+l2/2, y+platfHeight/2, rect, true);
-            fallinPlatf.setDynamic(false);
-            w.addBody(fallinPlatf);
+            int platfLength = 2*sl*r*3141/1000/360;
+            int platfHeight = r/100;
+
+            Shape rect = Shape.createRectangle(platfLength, platfHeight);
+            rect.setMass(1);
+            rect.setFriction(0);
+            rect.setElasticity(50);
+
+            for (int i = f0off+sl/2; i < 60; i+=sl) {
+                Body fallinPlatf = new Body(x+r+Mathh.cos(i+f0off)*(r+platfHeight/2)/1000, y-r+Mathh.sin(i+f0off)*(r+platfHeight/2)/1000, rect, true);
+                fallinPlatf.setDynamic(false);
+                fallinPlatf.setRotationDeg(i+f0off-90);
+                w.addBody(fallinPlatf);
+            }
+            rect = Shape.createRectangle(l2, platfHeight);
+            rect.setMass(1);
+            rect.setFriction(0);
+            rect.setElasticity(50);
+            for (int i = 0; i < 2; i++) {
+                Body fallinPlatf = new Body(x+r-r2+i*l2+l2/2, y+platfHeight/2, rect, true);
+                fallinPlatf.setDynamic(false);
+                w.addBody(fallinPlatf);
+            }
         }
         
         int l = r+r;
@@ -528,13 +530,14 @@ public class WorldGen implements Runnable {
         Main.print("REGEN");
         
         rmSegs();
-        rmBodies();
+        //rmBodies();
         reproduce();
         
-        w.carbody.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        //w.carbody.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        moveBodies(lastX - prevLastX);
         zeroPoint = w.carbody.positionFX().xAsInt();
-        w.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
-        w.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        //w.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        //w.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
         
         savedPoints += (prevLastX - lastX) / POINTS_DIVIDER;
 
@@ -585,18 +588,24 @@ public class WorldGen implements Runnable {
         }
         bodies = null;
     }
+    private void moveBodies(int dx) {
+        Body[] bodies = w.getBodies();
+        for (int i = 0; i < w.getBodyCount(); i++) {
+            bodies[i].translate(FXVector.newVector(dx, 0), 0);
+        }
+    }
     private void reproduce() {
-        Main.print("REPRODUCE:" + structLog.length);
+        Main.print("REPRODUCE:" + numberOfLoggedStructs);
         //for (int i = 0; i < structLog.size(); i++) {
         for (int i = 0; i < numberOfLoggedStructs; i++) {
-            Main.print("REPR:0");
+            //Main.print("REPR:0");
             int[] struct = structlog_getElementAt(i);
-            Main.print("REPR:1");
+            //Main.print("REPR:1");
             int structID = struct[0];
 
             int y = struct[2];
             lastY = y;
-            Main.print("REPRODUCE:" + structID);
+            //Main.print("REPRODUCE:" + structID);
             if (structID == 0) {
                 int r = struct[3];
                 int sn = struct[4];
@@ -643,6 +652,10 @@ public class WorldGen implements Runnable {
         ringLogTail = 0;
     }
     
+    /*void placeStructAsReproduced(int[] struct) {
+        
+    }*/
+    
     void mgTest() {
         placeMGStruct(5);
     }
@@ -681,7 +694,7 @@ public class WorldGen implements Runnable {
             line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
         } else if (id == 3) {
             arc(data[1]+lastX, data[2]+lastY, data[3], data[4], data[5], data[6] / 10, data[7] / 10);
-        } else if (id == 4) {
+        } else if (id == 4 & !resettingPosition) {
             int x1 = data[1];
             int y1 = data[2];
             int x2 = data[3];
