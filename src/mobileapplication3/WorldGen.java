@@ -12,12 +12,7 @@ import at.emini.physics2D.Landscape;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
-import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Random;
-import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
-import javax.microedition.io.file.FileSystemRegistry;
 
 /**
  *

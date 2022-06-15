@@ -13,8 +13,6 @@ import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.GameCanvas;
-import javax.microedition.media.Manager;
-import javax.microedition.media.Player;
 
 /**
  *
