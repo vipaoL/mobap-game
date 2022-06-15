@@ -16,7 +16,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  */
 public class GenericMenu {
     
-    private int x0, y0, w, h, fontH, tick = 0, k, delay = 5, firstReachable, lastReachable, specialOption = -1;
+    private int x0, y0, w, h, fontH, tick = 0, k, delay = 5, delayAfterShowing = 5, firstReachable, lastReachable, specialOption = -1;
     int selected;
     private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040, pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00, colUnreachable = 0x00888888, colUnreachableEnabled = 0x00ccff00;
     String[] options;
@@ -114,10 +114,11 @@ public class GenericMenu {
         return true;
     }
     
+    boolean inited = false;
     public boolean handleKeyStates(int keyStates) {
         isSelectAlreadyPressed = isSelectPressed;
-        isSelectPressed = ((keyStates & (GameCanvas.RIGHT_PRESSED | GameCanvas.FIRE_PRESSED)) != 0);
         if (delay < 1) {
+            isSelectPressed = ((keyStates & (GameCanvas.RIGHT_PRESSED | GameCanvas.FIRE_PRESSED)) != 0);
             delay = 5;
             boolean needRepeat = true;
             while (needRepeat) {
@@ -140,11 +141,22 @@ public class GenericMenu {
                 }
             }
         } else {
-            delay--;
+            if (delay > 0)
+                delay--;
         }
         if (keyStates == 0) {
             delay = 0;
             isSelectAlreadyPressed = false;
+        }
+        if (delayAfterShowing > 0) {
+            delayAfterShowing--;
+            return false;
+        } else {
+            if (!inited) {
+                inited = true;
+                delay = 0;
+                isSelectAlreadyPressed = false;
+            }
         }
         return isSelectPressed & !isSelectAlreadyPressed;
     }
