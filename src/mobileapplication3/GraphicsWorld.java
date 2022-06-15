@@ -115,7 +115,7 @@ public class GraphicsWorld extends World {
             offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
 
             viewField = scWidth * zoomOut / 1000;
-            if (DebugMenu.closerWorldgen) {
+            if (mnCanvas.debug & DebugMenu.closerWorldgen) {
                 viewField /= 4;
             }
 
