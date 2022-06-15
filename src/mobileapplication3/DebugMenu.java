@@ -31,7 +31,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
     public static boolean mgstructOnly = false;
     
     public DebugMenu() {
-        super(true);
+        super(false);
         setFullScreenMode(true);
         (new Thread(this, "about canvas")).start();
     }
@@ -149,5 +149,8 @@ public class DebugMenu extends GameCanvas implements Runnable {
         if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
         }
+    }
+    public void keyReleased(int keyCode) {
+        menu.handleKeyReleased(keyCode);
     }
 }
