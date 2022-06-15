@@ -192,10 +192,6 @@ public class mnCanvas extends GameCanvas implements Runnable {
             selectPressed();
         }
     }
-    
-    public void keyReleased(int keyCode) {
-        menu.handleKeyReleased(keyCode);
-    }
 
     public void startLevel(String path) {
         Main.print("menu:startLevel()");

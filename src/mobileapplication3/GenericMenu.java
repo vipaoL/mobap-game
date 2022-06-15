@@ -26,7 +26,6 @@ public class GenericMenu {
     public static final int OPTIONTYPE_UNREACHABLE = -1;
     public static final int OPTIONTYPE_NORMAL = 0;
     public static final int OPTIONTYPE_REACHABLE_ENABLED = 1;
-    private boolean isFirstKeyRelease = true;
     
     public void paint(Graphics g) {
         
@@ -143,6 +142,10 @@ public class GenericMenu {
         } else {
             delay--;
         }
+        if (keyStates == 0) {
+            delay = 0;
+            isSelectAlreadyPressed = false;
+        }
         return isSelectPressed & !isSelectAlreadyPressed;
     }
     
@@ -201,13 +204,6 @@ public class GenericMenu {
             }
         }
         return false;
-    }
-    
-    public void handleKeyReleased(int keyCode) {
-        if (keyCode == 0) {
-            delay = 0;
-            isSelectAlreadyPressed = false;
-        }
     }
     
     

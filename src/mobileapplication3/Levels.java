@@ -50,7 +50,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     private GenericMenu menu = new GenericMenu();
 
     Levels() {
-        super(false);
+        super(true);
         setFullScreenMode(true);
         select = new Command("Select", Command.OK, 1);
         back = new Command("Back", Command.BACK, 2);
@@ -270,10 +270,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
         if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
         }
-    }
-    
-    public void keyReleased(int keyCode) {
-        menu.handleKeyReleased(keyCode);
     }
 
     protected void pointerPressed(int x, int y) {
