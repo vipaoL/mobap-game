@@ -116,16 +116,9 @@ public class gCanvas extends Canvas implements Runnable {
         Contact[][] contacts = new Contact[3][];
         //paused = firstStart;
         //world.setTimestepFX(FXUtil.toFX(16));
-
-        try {
-            if (DebugMenu.music) {
-                Player midiPlayer = Manager.createPlayer(getClass().getResourceAsStream("/a.mid"), "audio/midi");
-                midiPlayer.start();
-            }
-        } catch (IOException e) {
-          System.err.println(e);
-        } catch (MediaException e) {
-            System.err.println(e);
+        if (mnCanvas.debug & DebugMenu.music) {
+            Sound sound = new Sound();
+            sound.startBgMusic();
         }
         
         while(false & w == null) {
@@ -254,7 +247,7 @@ public class gCanvas extends Canvas implements Runnable {
                             if (w.carbody.angularVelocity2FX() > 0) {
                                 w.carbody.applyTorque(FXUtil.toFX(w.carbody.angularVelocity2FX() / 4000));
                             }
-                            if (flying == 0 & !debug) {
+                            if (flying < 2 & !debug) {
                                 w.carbody.applyMomentum(new FXVector(-w.carbody.velocityFX().xFX/5, -w.carbody.velocityFX().yFX/5));
                             }
                             motorTdOff++;
@@ -344,35 +337,37 @@ public class gCanvas extends Canvas implements Runnable {
 
     protected void paint(Graphics g) {
         w.draw(g);
-        int debugTextOffset = 0;
-        if (DebugMenu.speedo) {
-            switch (speed) {
-                case 0:
-                    g.setColor(0, 255, 0);
-                    break;
-                case 1:
-                    g.setColor(64, 64, 0);
-                    break;
-                case 2:
-                    g.setColor(255, 64, 0);
-                    break;
-                default:
-                    g.setColor(255, 0, 0);
-                    break;
+        if (mnCanvas.debug) {               //  debug text
+            int debugTextOffset = 0;
+            if (DebugMenu.speedo) {
+                switch (speed) {
+                    case 0:
+                        g.setColor(0, 255, 0);
+                        break;
+                    case 1:
+                        g.setColor(64, 64, 0);
+                        break;
+                    case 2:
+                        g.setColor(255, 64, 0);
+                        break;
+                    default:
+                        g.setColor(255, 0, 0);
+                        break;
+                }
+                setFont(smallfont, g);
+                g.fillRect(0, debugTextOffset, currentFont.getHeight() * 5, currentFont.getHeight());
+                g.setColor(255, 255, 255);
+                //text += " " + speedMultipiler;
+                g.drawString(String.valueOf(carVelocitySqr), 0, debugTextOffset, 0);
+                debugTextOffset+=currentFont.getHeight();
+                //text = "";
             }
-            setFont(smallfont, g);
-            g.fillRect(0, debugTextOffset, currentFont.getHeight() * 5, currentFont.getHeight());
-            g.setColor(255, 255, 255);
-            //text += " " + speedMultipiler;
-            g.drawString(String.valueOf(carVelocitySqr), 0, debugTextOffset, 0);                  //  debug text
-            debugTextOffset+=currentFont.getHeight();
-            //text = "";
+            if (DebugMenu.xCoord) {
+                g.setColor(255, 255, 255);
+                g.drawString(String.valueOf(w.carbody.positionFX().xAsInt()), 0, debugTextOffset, 0); 
+            }
+            //g.drawString(String.valueOf(w.carbody.rotationVelocity2FX()), 0, 0, 0);
         }
-        if (DebugMenu.xCoord) {
-            g.setColor(255, 255, 255);
-            g.drawString(String.valueOf(w.carbody.positionFX().xAsInt()), 0, debugTextOffset, 0); 
-        }
-        //g.drawString(String.valueOf(w.carbody.rotationVelocity2FX()), 0, 0, 0);
         if (gameoverCountdown > 1) {
             g.setFont(largefont);
             g.setColor(255, 0, 0);
@@ -427,29 +422,15 @@ public class gCanvas extends Canvas implements Runnable {
         int gameAction = getGameAction(keyCode);
         accel = false;
         r = false;
+        if (flying > 0) {
+            flying = Math.max(5, flying);
+        }
     }
 
     protected void keyPressed(int keyCode) {
         int gameAction = getGameAction(keyCode);
         //text = "Last key: " + gameAction + " " + keyCode;
-        if (keyCode == KEY_POUND | gameAction == GAME_D) {
-            openMenu();
-            r = true;
-        } else {
-            if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
-                if (DebugMenu.cheat) {
-                    FXVector pos = w.carbody.positionFX();
-                    int carX = pos.xAsInt();
-                    int carY = pos.yAsInt();
-                    worldgen.line(carX - 200, carY + 200, carX + 2000, carY + 200);
-                }
-            } else {
-                accel = true;
-            }
-        }
-
         if (keyCode == KEY_ACTION_RIGHT) {
-            accel = false;
             if (!paused) {
                 hideNotify();
                 repaint();
@@ -457,8 +438,21 @@ public class gCanvas extends Canvas implements Runnable {
                 paused = false;
                 showNotify();
             }
+        } else
+        if (keyCode == KEY_POUND | gameAction == GAME_D) {
+            openMenu();
+            r = true;
+        } else 
+        if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
+            if (mnCanvas.debug & DebugMenu.cheat) {
+                FXVector pos = w.carbody.positionFX();
+                int carX = pos.xAsInt();
+                int carY = pos.yAsInt();
+                worldgen.line(carX - 200, carY + 200, carX + 2000, carY + 0);
+            }
+        } else {
+            accel = true;
         }
-
     }
 
     public void openMenu() {
