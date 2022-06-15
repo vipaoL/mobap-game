@@ -49,7 +49,7 @@ public class WorldGen implements Runnable {
     private int ringLogTail = 0;
     private int nowLogging = 0;
     //static Vector l_log;
-    private boolean waitinForReset = false;
+    private boolean waitinForRestart = false;
     private int savedPoints = 0;
     private final int POINTS_DIVIDER = 2000;
     private int lowestY = 0;
@@ -60,9 +60,6 @@ public class WorldGen implements Runnable {
     GraphicsWorld w;
     Landscape lndscp;
     MgStruct mgStruct = new MgStruct();
-    String prefix = "file:///";
-    String root = "C:/";
-    String sep = "/";
     
     public WorldGen(GraphicsWorld w) {
         this.w = w;
@@ -72,112 +69,56 @@ public class WorldGen implements Runnable {
             Main.print(i);
         }*/
         
-        if (mnCanvas.extStructs) {
-            try {
-                String path = System.getProperty("fileconn.dir.photos");
-                listFiles(path);
-                path = System.getProperty("fileconn.dir.graphics");
-                listFiles(path);
-            } catch (SecurityException ex) {
-                ex.printStackTrace();
-            } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
-            } catch (NullPointerException ex) {
-                ex.printStackTrace();
-            }
-            Enumeration roots = FileSystemRegistry.listRoots();
-            while (roots.hasMoreElements()) {
-                root = (String) roots.nextElement();
-                String path = prefix + root;
-                try {
-                    listFiles(path);
-                    path = prefix + root + "other" + sep;
-                    listFiles(path);
-                } catch (SecurityException ex) {
-                } catch (IllegalArgumentException ex) {
-                }
-            }
-        }
-        
         Main.print("read completed");
     }
     
-    boolean listFiles(String path) {
-        if (path != null) {
-            path += "MGStructs" + sep;
-            System.out.println("path: " + path);
-            try {
-                FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-                if (fc.exists() & fc.isDirectory()) {
-                    Enumeration list =  fc.list();
-                    while (list.hasMoreElements()) {
-                        mgStruct.readFile(path + list.nextElement());
-                    }
-                    return true;
+    public void run() {
+        t = 1;
+        Main.print("gen:run()");
+        while(mnCanvas.wg) {
+            if (!paused) {
+                if (waitinForRestart) {
+                    restart();
                 }
-            } catch (IOException ex) {
-                //Main.showAlert(ex);
-                //ex.printStackTrace();
-            } catch (IllegalArgumentException ex) {
-                //Main.showAlert(ex);
-                //ex.printStackTrace();
+                
+                if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
+                    ///System.out.println("ttt" + GraphicsWorld.carX + lastX);
+                    random();
+                    /*if (false & waitinForDel.size() > 16) {
+                        toD = ((Integer)waitinForDel.elementAt(0)).intValue();
+                        for(int i = 0; i < toD; i++) {
+                            gCanvas.l.removeSegment(0);
+                        }
+                        waitinForDel.removeElementAt(0);
+                        toD = 0;
+                    }*/
+                    if (numberOfLoggedStructs >= structLog.length) {
+                        if (GraphicsWorld.carX > 8000 & gCanvas.flying > 1) {
+                            resetPosition();
+                        }
+                    }
+                }
+                
+                if (t <= 10) {
+                    t++;
+                } else {
+                    w.refreshPos();
+                    GraphicsWorld.points = Math.max(GraphicsWorld.points, savedPoints + (GraphicsWorld.carX-zeroPoint)/POINTS_DIVIDER);
+                    t = 1;
+                }
+            }
+            try {
+                if (!needSpeed) {
+                    Thread.sleep(200);
+                } else {
+                    if (t > 9) {
+                        needSpeed = false;
+                    }
+                }
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
             }
         }
-        return false;
-    }
-    
-    public void start() {
-        ready = false;
-        rand = new Random();
-        stopped = false;
-        waitinForReset = true;
-        resume();
-        Main.print("gen:start()");
-        (new Thread(this, "world generator")).start();
-        //thread = new Thread(this);
-        //thread.start();
-    }
-    public void stop() {
-        stopped = true;
-    }
-    public void resume() {
-        paused = false;
-    }
-    public void pause() {
-        paused = true;
-    }
-    public boolean isReady() {
-        return ready;
-    }
-    public int getLowestY() {
-        return lowestY;
-    }
-    public void resetToQue() {
-        waitinForReset = true;
-    }
-    private void reset() {
-        ready = false;
-        needSpeed = true;
-        waitinForReset = false;
-        Main.print("gen:reset()");
-        prevR = 1;
-        i = 2;
-        lastX = -7900;
-        lastY = 0;
-        reseted = true;
-        //waitinForDel = new Vector();
-        try {
-            cleanWorld();
-        } catch (NullPointerException e) {
-            
-        }
-        savedPoints = 0;
-        toD = 0;
-        line(lastX - 600, lastY - 100, lastX, lastY);
-        t = 2;
-        GraphicsWorld.points = 0;
-        w.addCar();
-        ready = true;
     }
     
     private void random() {
@@ -222,9 +163,321 @@ public class WorldGen implements Runnable {
         lowestY = Math.max(lastY, lowestY);
     }
     
+    public void start() {
+        ready = false;
+        rand = new Random();
+        stopped = false;
+        waitinForRestart = true;
+        resume();
+        Main.print("gen:start()");
+        (new Thread(this, "world generator")).start();
+    }
+    public void pause() {
+        paused = true;
+    }
+    public void resume() {
+        paused = false;
+    }
+    public void stop() {
+        stopped = true;
+    }
+    
+    private void restart() {
+        ready = false;
+        needSpeed = true;
+        waitinForRestart = false;
+        Main.print("gen:reset()");
+        prevR = 1;
+        i = 2;
+        lastX = -7900;
+        lastY = 0;
+        reseted = true;
+        //waitinForDel = new Vector();
+        try {
+            cleanWorld();
+        } catch (NullPointerException e) {
+            
+        }
+        savedPoints = 0;
+        toD = 0;
+        line(lastX - 600, lastY - 100, lastX, lastY);
+        t = 2;
+        GraphicsWorld.points = 0;
+        w.addCar();
+        ready = true;
+    }
+    public void restartToQue() {
+        waitinForRestart = true;
+    }
+    private void cleanWorld() {
+        gCanvas.paused = true;
+        Constraint[] constraints = w.getConstraints();
+        toD = w.getConstraintCount();
+        //Main.print("toD:" + toD);
+        while (w.getConstraintCount() > 0) {
+            w.removeConstraint(constraints[0]);
+        }
+        rmAllBodies();
+        rmSegs();
+        constraints = null;
+        //waitinForDel.removeAllElements();
+        toD = 0;
+        gCanvas.paused = false;
+    }
+    private void rmSegs() {
+        toD = lndscp.segmentCount();
+        //Main.print("toD:" + toD);
+        while (lndscp.segmentCount() > 0) {
+            lndscp.removeSegment(0);
+        }
+    }
+    private void rmBodies() {
+        Body[] bodies = w.getBodies();
+        toD = w.getBodyCount();
+        //Main.print("toD:" + toD);
+        int to = w.getBodyCount();
+        for (int i = to - 1; i >= 0; i--) {
+            if (bodies[i] != w.carbody & bodies[i] != w.leftwheel & bodies[i] != w.rightwheel)
+            w.removeBody(bodies[i]);
+        }
+        bodies = null;
+    }
+    private void rmAllBodies() {
+        Body[] bodies = w.getBodies();
+        toD = w.getBodyCount();
+        //Main.print("toD:" + toD);
+        while (w.getBodyCount() > 0) {
+            w.removeBody(bodies[0]);
+        }
+        bodies = null;
+    }
+    public boolean isReady() {
+        return ready;
+    }
+    public int getLowestY() {
+        return lowestY;
+    }
+    
+    private void structlogger(int[] a) {
+        if (!resettingPosition) {
+            if (numberOfLoggedStructs >= structLog.length) {
+                //structLog.removeElementAt(0);
+                
+            } else {
+                numberOfLoggedStructs++;
+            }
+            //structLog.addElement(a);
+            
+            int index = (ringLogTail) % structLog.length;
+            structLog[index] = a;
+            Main.print(structLog[index][0]);
+            Main.print(index);
+            if (ringLogTail >= structLog.length - 1) {
+                ringLogTail = 0;
+            } else {
+                ringLogTail++;
+            }
+        }
+    }
+    
+    private int[] structlog_getElementAt(int i) {
+        return structLog[(i+ringLogTail)%structLog.length];
+    }
+    
+    private void resetPosition() {
+        
+        // world cycling
+        
+        ready = false;
+        resettingPosition = true;
+        needSpeed = true;
+        int prevLastX = lastX;
+        lastX = -8000;
+        
+        Main.print("REGEN");
+        
+        rmSegs();
+        //rmBodies();
+        reproduce();
+        
+        //w.carbody.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        moveBodies(lastX - prevLastX);
+        zeroPoint = w.carbody.positionFX().xAsInt();
+        //w.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        //w.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
+        
+        savedPoints += (prevLastX - lastX) / POINTS_DIVIDER;
+
+        resettingPosition = false;
+        needSpeed = false;
+        ready = true;
+    }
+    
+    private void reproduce() {
+        Main.print("REPRODUCE:" + numberOfLoggedStructs);
+        //for (int i = 0; i < structLog.size(); i++) {
+        for (int i = 0; i < numberOfLoggedStructs; i++) {
+            //Main.print("REPR:0");
+            int[] struct = structlog_getElementAt(i);
+            //Main.print("REPR:1");
+            int structID = struct[0];
+
+            int y = struct[2];
+            lastY = y;
+            //Main.print("REPRODUCE:" + structID);
+            if (structID == 0) {
+                int r = struct[3];
+                int sn = struct[4];
+                int va = struct[5];
+                circ1(lastX, y, r, sn, va);
+                Main.print("circ1");
+            }
+            if (structID == 1) {
+                int l = struct[3];
+                floorStat(lastX, y, l);
+                Main.print("flStat");
+            }
+            if (structID == 2) { // {2, l, y}
+                int l = struct[3];
+                abyss(lastX, y, l);
+                Main.print("abyss");
+            }
+            if (structID == 3) {
+                int l = struct[3];
+                int halfperiods = struct[4];
+                int offset = struct[5];
+                int amp = struct[6];
+                sin(lastX, y, l, halfperiods, offset, amp);
+                Main.print("sin");
+            }
+            if (structID == 4) {
+                int r = struct[3];
+                int sn = struct[4];
+                circ2(lastX, y, r, sn);
+                Main.print("circ2");
+            }
+            if (structID == 5) {
+                int n = struct[3];
+                dotline(lastX, y, n);
+                Main.print("dotline");
+            }
+            if (structID >= stdStructsNumber + floorStatWheightInRandom) {
+                placeMGStructByRelativeID(structID);
+            }
+            //WorldGen.lastX = lastX;
+            //structLog.removeElementAt(0);
+        }
+        //numberOfLoggedStructs = 0;
+        //ringLogTail = 0;
+    }
+    
+    private void moveBodies(int dx) {
+        Body[] bodies = w.getBodies();
+        for (int i = 0; i < w.getBodyCount(); i++) {
+            bodies[i].translate(FXVector.newVector(dx, 0), 0);
+        }
+    }
     
     
     
+    
+    
+    void placeMGStructByRelativeID(int relID) {
+        int id = relID - floorStatWheightInRandom - stdStructsNumber;
+        if (!resettingPosition) {
+            int[] log = {relID, lastX, lastY};
+            structlogger(log);
+        }
+        placeMGStructByID(id);
+    }
+    
+    void placeMGStructByID(int id) {
+        Main.print("byID" + id);
+        placeMGStruct(id);
+    }
+    
+    void placeMGStruct(int id) {
+        short[][] data = mgStruct.structBuffer[id];
+        Main.print("placemg" + mgStruct.structSizes[id]);
+        for (int i = 1; i < mgStruct.structSizes[id]; i++) {
+            placePrimitive(data[i]);
+        }
+        lastX+=data[0][1];
+        lastY+=data[0][2];
+    }
+    
+    void placePrimitive(short[] data) {
+        short id = data[0];
+        for (int i = 0; i < data.length; i++) {
+            System.out.print(data[i] + " ");
+        }
+        System.out.println(" - prim placed");
+        if (id == 2) {
+            line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
+        } else if (id == 3) {
+            arc(data[1]+lastX, data[2]+lastY, data[3], data[4], data[5], data[6] / 10, data[7] / 10);
+        } else if (id == 4 & !resettingPosition) {
+            int x1 = data[1];
+            int y1 = data[2];
+            int x2 = data[3];
+            int y2 = data[4];
+            int dx = x2 - x1;
+            int dy = y2 - y1;
+            
+            /*int l;
+            if (dy == 0) {
+                l = dx;
+            } else if (dx == 0) {
+                l = dy;
+            } else {
+                l = distance(x1, y1, x2, y2);
+            }*/
+            int platfH = data[5];
+            int platfL = data[6];
+            int spacing = data[7];
+            int l = data[8];
+            int ang = data[9];
+            Shape rect = Shape.createRectangle(platfL, platfH);
+            rect.setMass(1);
+            rect.setFriction(0);
+            rect.setElasticity(50);
+            dx/=(l/platfL);
+            int spX = spacing * dx / l;
+            dy/=(l/platfL);
+            int spY = spacing * dy / l;
+            int plLX = platfL * dx / l;
+            int plLY = platfL * dy / l;
+            System.out.println("dx=" + dx + "dy=" + dy);
+            for (int i = 0; i < l / platfL; i++) {
+                Body fallinPlatf = new Body(lastX + x1 + i*(dx+spX) - plLX/2, lastY + y1 + i*(dy+spY) - plLY/2, rect, true);
+                fallinPlatf.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
+                fallinPlatf.setDynamic(false);
+                //fallinPlatf.setInteracting(false);
+                w.addBody(fallinPlatf);
+            }
+            
+        } else if (id == 5) {
+            arc(data[1]+lastX, data[2]+lastY, data[3], 360, 0);
+        }
+        
+        
+        
+        /*for (int i = f0off+sl/2; i < 60; i+=sl) {
+            Body fallinPlatf = new Body(x+r+Mathh.cos(i+f0off)*(r+platfHeight/2)/1000, y-r+Mathh.sin(i+f0off)*(r+platfHeight/2)/1000, rect, true);
+            fallinPlatf.setDynamic(false);
+            fallinPlatf.setRotationDeg(i+f0off-90);
+            w.addBody(fallinPlatf);
+        }
+        rect = Shape.createRectangle(l2, platfHeight);
+        rect.setMass(1);
+        rect.setFriction(0);
+        rect.setElasticity(50);
+        */
+        
+        
+    }
+    
+        
     /*******************************************
      * 
      * 
@@ -433,328 +686,4 @@ public class WorldGen implements Runnable {
      *******************************************/
     
     
-        
-    
-    
-
-    public void run() {
-        t = 1;
-        Main.print("gen:run()");
-        while(mnCanvas.wg) {
-            if (!paused) {
-                if (waitinForReset) {
-                    reset();
-                }
-                
-                if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
-                    ///System.out.println("ttt" + GraphicsWorld.carX + lastX);
-                    random();
-                    /*if (false & waitinForDel.size() > 16) {
-                        toD = ((Integer)waitinForDel.elementAt(0)).intValue();
-                        for(int i = 0; i < toD; i++) {
-                            gCanvas.l.removeSegment(0);
-                        }
-                        waitinForDel.removeElementAt(0);
-                        toD = 0;
-                    }*/
-                    if (numberOfLoggedStructs >= structLog.length) {
-                        if (GraphicsWorld.carX > 8000 & gCanvas.flying > 1) {
-                            resetPosition();
-                        }
-                    }
-                }
-                
-                if (t <= 10) {
-                    t++;
-                } else {
-                    w.refreshPos();
-                    GraphicsWorld.points = Math.max(GraphicsWorld.points, savedPoints + (GraphicsWorld.carX-zeroPoint)/POINTS_DIVIDER);
-                    t = 1;
-                }
-            }
-            try {
-                if (!needSpeed) {
-                    Thread.sleep(200);
-                } else {
-                    if (t > 9) {
-                        needSpeed = false;
-                    }
-                }
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-    
-    
-    
-    private void structlogger(int[] a) {
-        if (!resettingPosition) {
-            if (numberOfLoggedStructs >= structLog.length) {
-                //structLog.removeElementAt(0);
-                
-            } else {
-                numberOfLoggedStructs++;
-            }
-            //structLog.addElement(a);
-            
-            int index = (ringLogTail) % structLog.length;
-            structLog[index] = a;
-            Main.print(structLog[index][0]);
-            Main.print(index);
-            if (ringLogTail >= structLog.length - 1) {
-                ringLogTail = 0;
-            } else {
-                ringLogTail++;
-            }
-        }
-    }
-    
-    private int[] structlog_getElementAt(int i) {
-        return structLog[(i+ringLogTail)%structLog.length];
-    }
-    
-    private void resetPosition() {
-        
-        // world cycling
-        
-        ready = false;
-        resettingPosition = true;
-        needSpeed = true;
-        int prevLastX = lastX;
-        lastX = -8000;
-        
-        Main.print("REGEN");
-        
-        rmSegs();
-        //rmBodies();
-        reproduce();
-        
-        //w.carbody.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
-        moveBodies(lastX - prevLastX);
-        zeroPoint = w.carbody.positionFX().xAsInt();
-        //w.leftwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
-        //w.rightwheel.translate(FXVector.newVector(lastX - prevLastX, 0), 0);
-        
-        savedPoints += (prevLastX - lastX) / POINTS_DIVIDER;
-
-        resettingPosition = false;
-        needSpeed = false;
-        ready = true;
-    }
-    
-    private void cleanWorld() {
-        gCanvas.paused = true;
-        Constraint[] constraints = w.getConstraints();
-        toD = w.getConstraintCount();
-        //Main.print("toD:" + toD);
-        while (w.getConstraintCount() > 0) {
-            w.removeConstraint(constraints[0]);
-        }
-        rmAllBodies();
-        rmSegs();
-        constraints = null;
-        //waitinForDel.removeAllElements();
-        toD = 0;
-        gCanvas.paused = false;
-    }
-    private void rmSegs() {
-        toD = lndscp.segmentCount();
-        //Main.print("toD:" + toD);
-        while (lndscp.segmentCount() > 0) {
-            lndscp.removeSegment(0);
-        }
-    }
-    private void rmBodies() {
-        Body[] bodies = w.getBodies();
-        toD = w.getBodyCount();
-        //Main.print("toD:" + toD);
-        int to = w.getBodyCount();
-        for (int i = to - 1; i >= 0; i--) {
-            if (bodies[i] != w.carbody & bodies[i] != w.leftwheel & bodies[i] != w.rightwheel)
-            w.removeBody(bodies[i]);
-        }
-        bodies = null;
-    }
-    private void rmAllBodies() {
-        Body[] bodies = w.getBodies();
-        toD = w.getBodyCount();
-        //Main.print("toD:" + toD);
-        while (w.getBodyCount() > 0) {
-            w.removeBody(bodies[0]);
-        }
-        bodies = null;
-    }
-    private void moveBodies(int dx) {
-        Body[] bodies = w.getBodies();
-        for (int i = 0; i < w.getBodyCount(); i++) {
-            bodies[i].translate(FXVector.newVector(dx, 0), 0);
-        }
-    }
-    private void reproduce() {
-        Main.print("REPRODUCE:" + numberOfLoggedStructs);
-        //for (int i = 0; i < structLog.size(); i++) {
-        for (int i = 0; i < numberOfLoggedStructs; i++) {
-            //Main.print("REPR:0");
-            int[] struct = structlog_getElementAt(i);
-            //Main.print("REPR:1");
-            int structID = struct[0];
-
-            int y = struct[2];
-            lastY = y;
-            //Main.print("REPRODUCE:" + structID);
-            if (structID == 0) {
-                int r = struct[3];
-                int sn = struct[4];
-                int va = struct[5];
-                circ1(lastX, y, r, sn, va);
-                Main.print("circ1");
-            }
-            if (structID == 1) {
-                int l = struct[3];
-                floorStat(lastX, y, l);
-                Main.print("flStat");
-            }
-            if (structID == 2) { // {2, l, y}
-                int l = struct[3];
-                abyss(lastX, y, l);
-                Main.print("abyss");
-            }
-            if (structID == 3) {
-                int l = struct[3];
-                int halfperiods = struct[4];
-                int offset = struct[5];
-                int amp = struct[6];
-                sin(lastX, y, l, halfperiods, offset, amp);
-                Main.print("sin");
-            }
-            if (structID == 4) {
-                int r = struct[3];
-                int sn = struct[4];
-                circ2(lastX, y, r, sn);
-                Main.print("circ2");
-            }
-            if (structID == 5) {
-                int n = struct[3];
-                dotline(lastX, y, n);
-                Main.print("dotline");
-            }
-            if (structID >= stdStructsNumber + floorStatWheightInRandom) {
-                placeMGStructByRelativeID(structID);
-            }
-            //WorldGen.lastX = lastX;
-            //structLog.removeElementAt(0);
-        }
-        //numberOfLoggedStructs = 0;
-        //ringLogTail = 0;
-    }
-    
-    /*void placeStructAsReproduced(int[] struct) {
-        
-    }*/
-    
-    void mgTest() {
-        placeMGStruct(5);
-    }
-    
-    void placeMGStructByRelativeID(int relID) {
-        int id = relID - floorStatWheightInRandom - stdStructsNumber;
-        if (!resettingPosition) {
-            int[] log = {relID, lastX, lastY};
-            structlogger(log);
-        }
-        placeMGStructByID(id);
-    }
-    
-    void placeMGStructByID(int id) {
-        Main.print("byID" + id);
-        placeMGStruct(id);
-    }
-    
-    void placeMGStruct(int id) {
-        short[][] data = mgStruct.structBuffer[id];
-        Main.print("placemg" + mgStruct.structSizes[id]);
-        for (int i = 1; i < mgStruct.structSizes[id]; i++) {
-            placePrimitive(data[i]);
-        }
-        lastX+=data[0][1];
-        lastY+=data[0][2];
-    }
-    
-    void placePrimitive(short[] data) {
-        short id = data[0];
-        for (int i = 0; i < data.length; i++) {
-            System.out.print(data[i] + " ");
-        }
-        System.out.println(" - prim placed");
-        if (id == 2) {
-            line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
-        } else if (id == 3) {
-            arc(data[1]+lastX, data[2]+lastY, data[3], data[4], data[5], data[6] / 10, data[7] / 10);
-        } else if (id == 4 & !resettingPosition) {
-            int x1 = data[1];
-            int y1 = data[2];
-            int x2 = data[3];
-            int y2 = data[4];
-            int dx = x2 - x1;
-            int dy = y2 - y1;
-            
-            /*int l;
-            if (dy == 0) {
-                l = dx;
-            } else if (dx == 0) {
-                l = dy;
-            } else {
-                l = distance(x1, y1, x2, y2);
-            }*/
-            int platfH = data[5];
-            int platfL = data[6];
-            int spacing = data[7];
-            int l = data[8];
-            int ang = data[9];
-            Shape rect = Shape.createRectangle(platfL, platfH);
-            rect.setMass(1);
-            rect.setFriction(0);
-            rect.setElasticity(50);
-            dx/=(l/platfL);
-            int spX = spacing * dx / l;
-            dy/=(l/platfL);
-            int spY = spacing * dy / l;
-            int plLX = platfL * dx / l;
-            int plLY = platfL * dy / l;
-            System.out.println("dx=" + dx + "dy=" + dy);
-            for (int i = 0; i < l / platfL; i++) {
-                Body fallinPlatf = new Body(lastX + x1 + i*(dx+spX) - plLX/2, lastY + y1 + i*(dy+spY) - plLY/2, rect, true);
-                fallinPlatf.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
-                fallinPlatf.setDynamic(false);
-                //fallinPlatf.setInteracting(false);
-                w.addBody(fallinPlatf);
-            }
-            
-        } else if (id == 5) {
-            arc(data[1]+lastX, data[2]+lastY, data[3], 360, 0);
-        }
-        
-        
-        
-        /*for (int i = f0off+sl/2; i < 60; i+=sl) {
-            Body fallinPlatf = new Body(x+r+Mathh.cos(i+f0off)*(r+platfHeight/2)/1000, y-r+Mathh.sin(i+f0off)*(r+platfHeight/2)/1000, rect, true);
-            fallinPlatf.setDynamic(false);
-            fallinPlatf.setRotationDeg(i+f0off-90);
-            w.addBody(fallinPlatf);
-        }
-        rect = Shape.createRectangle(l2, platfHeight);
-        rect.setMass(1);
-        rect.setFriction(0);
-        rect.setElasticity(50);
-        */
-        
-        
-    }
-    
-    int distance(int x1, int y1, int x2, int y2) {
-        int dx = x1 - x2;
-        int dy = y1 - y2;
-        return (int) Math.sqrt(dx * dx + dy * dy);
-    }
 }

@@ -8,8 +8,10 @@ package mobileapplication3;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.io.file.FileSystemRegistry;
 
 /**
  *
@@ -17,37 +19,81 @@ import javax.microedition.io.file.FileConnection;
  */
 public class MgStruct {
 
-    short supportedFileVer = 0;
-    short secondSupportedFileVer = 1;
-    int[] args = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10};
+    static short supportedFileVer = 0;
+    static short secondSupportedFileVer = 1;
+    static int[] args = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10};
 
-    int bufSizeInCells = 0;
-    int[] structSizes = new int[32];
-    //int bufSizeInShort = 0;
-    short[][][] structBuffer = new short[32][][];
-    int structBufSizeInCells = 0;
-    boolean changed = true;
-
-    /*public void writeFile() {
-        short data[] = {0, 1, 50, 50, 100, 150, 2, 50, 50, 30, 90, 60, 100, 100, 0};
-        try {
-            FileConnection fc = (FileConnection) Connector.open("file:///root1/Levels/test.mgstruct");
-            if (!fc.exists()) {
-                fc.create();
-            }
-            OutputStream os = fc.openOutputStream();
-            DataOutputStream dos = new DataOutputStream(os);
-            for (int i = 0; i < data.length; i++) {
-                dos.writeShort(data[i]);
-            }
-            dos.close();
-            os.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+    static int bufSizeInCells = 0;
+    static int[] structSizes = new int[32];
+    static short[][][] structBuffer = new short[32][][];
+    static int structBufSizeInCells = 0;
+    static boolean isInited = false;
+    
+    String prefix = "file:///";
+    String root = "C:/";
+    String sep = "/";
+    
+    public MgStruct() {
+        if (!isInited) {
+            //load();
         }
-    }*/
+        isInited = true;
+    }
+    
+    void load() {
+        structBuffer = new short[32][][];
+        try {
+                String path = System.getProperty("fileconn.dir.photos");
+                readFilesInFolder(path);
+                path = System.getProperty("fileconn.dir.graphics");
+                readFilesInFolder(path);
+            } catch (SecurityException ex) {
+                ex.printStackTrace();
+            } catch (IllegalArgumentException ex) {
+                ex.printStackTrace();
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+            }
+            Enumeration roots = FileSystemRegistry.listRoots();
+            while (roots.hasMoreElements()) {
+                root = (String) roots.nextElement();
+                String path = prefix + root;
+                try {
+                    readFilesInFolder(path);
+                    path = prefix + root + "other" + sep;
+                    readFilesInFolder(path);
+                } catch (SecurityException ex) {
+                } catch (IllegalArgumentException ex) {
+                }
+            }
+    }
+    
+    boolean readFilesInFolder(String path) {
+        if (path != null) {
+            path += "MGStructs" + sep;
+            Main.print(path);
+            try {
+                FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+                if (fc.exists() & fc.isDirectory()) {
+                    Enumeration list =  fc.list();
+                    while (list.hasMoreElements()) {
+                        readFile(path + list.nextElement());
+                    }
+                    return true;
+                }
+            } catch (IOException ex) {
+                //Main.showAlert(ex);
+                //ex.printStackTrace();
+            } catch (IllegalArgumentException ex) {
+                //Main.showAlert(ex);
+                //ex.printStackTrace();
+            }
+        }
+        return false;
+    }
+    
     public void readFile(String path) {
-        System.out.println("file path: " + path);
+        Main.print(path);
         try {
             FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
             DataInputStream dis = fc.openDataInputStream();

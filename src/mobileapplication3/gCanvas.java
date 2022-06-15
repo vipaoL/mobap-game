@@ -506,7 +506,7 @@ public class gCanvas extends Canvas implements Runnable {
         worldgen = new WorldGen(w);
         if (mnCanvas.wg) {
             worldgen.start();
-            worldgen.resetToQue();
+            worldgen.restartToQue();
         } else {
             w.addCar();
         }

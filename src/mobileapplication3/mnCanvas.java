@@ -37,6 +37,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     private GenericMenu menu = new GenericMenu();
     public static boolean music = false;
     public static boolean extStructs = false;
+    MgStruct mgStruct = new MgStruct();
     
     String DEFAULT_LEVEL = "";
 
@@ -78,6 +79,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         menu.loadStatemap(statemap);
         if (extStructs) {
             menu.setStateFor(1, 2);
+            menuOptions[2] = "Reload";
         }
         menu.setSpecialOption(menuOptions.length - 3);
         paused = false;
@@ -258,7 +260,9 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
         if (selected == 2) {
             menu.setStateFor(1, 2);
+            mgStruct.load();
             extStructs = true;
+            menuOptions[2] = "Reload";
         }
         if (selected == 3) {
             stopped = true;
