@@ -12,12 +12,9 @@ import at.emini.physics2D.Landscape;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Random;
-import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
@@ -648,8 +645,8 @@ public class WorldGen implements Runnable {
             //WorldGen.lastX = lastX;
             //structLog.removeElementAt(0);
         }
-        numberOfLoggedStructs = 0;
-        ringLogTail = 0;
+        //numberOfLoggedStructs = 0;
+        //ringLogTail = 0;
     }
     
     /*void placeStructAsReproduced(int[] struct) {
