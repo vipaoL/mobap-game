@@ -30,6 +30,8 @@ public class GraphicsWorld extends World {
     public static int viewField = 10;
     public static int points = 0;
     int fontH = 50;
+    int prevAng = 0;
+    int ang = 0;
 
     public GraphicsWorld(World w) {
         super(w);
@@ -128,10 +130,12 @@ public class GraphicsWorld extends World {
             drawBodies(g); //bodies, exclude car wheels
             drawCar(g); //car wheels
             drawConstraints(g);
+            countFlips();
         } catch (NullPointerException ex) {
             int l = scWidth * 2 / 3;
             int h = scHeight / 24;
             g.drawRect(scWidth / 2 - l / 2, scHeight * 2 / 3, l, h);
+            g.fillRect(scWidth / 2 - l / 2, scHeight * 2 / 3, l/5, h);
         }
     }
 
@@ -242,5 +246,59 @@ public class GraphicsWorld extends World {
             zoomOut += 1;
         }
         zoomOut += zoomBase;
+    }
+    
+    boolean flipWaiting = false;
+    boolean backFlipWaiting = false;
+    boolean step2Done = false;
+    
+    int backFlipsCount = 0;
+    
+    void countFlips() {
+        if (gCanvas.flying < 1) { // cancel when ran into the ground
+            flipWaiting = false;
+            backFlipWaiting = false;
+            step2Done = false;
+            backFlipsCount = 0;
+            return;
+        }
+        int ang = carbody.rotation2FX();
+        if (!flipWaiting & !backFlipWaiting) {
+            if (ang < 13176794 | ang > 92237561) {
+                if (carbody.rotationVelocity2FX() >= 0) {
+                    backFlipWaiting = true; // step 1
+                } else {
+                    flipWaiting = true; // step 1
+                }
+            }
+        } else {
+            if (!step2Done) {
+                if (!(ang < 13176794 | ang > 92237561))
+                    step2Done = true;
+            } else {
+                if ((ang < 13176794 | ang > 92237561)) {
+                    if (carbody.rotationVelocity2FX() >= 0) {
+                        if (backFlipWaiting) {
+                            backFlipsCount++;
+                            if (backFlipsCount > 1) {
+                                points += 1;
+                                backFlipsCount = 0;
+                                gCanvas.indicateFlip();
+                            }
+                        }
+                    } else {
+                        if (flipWaiting) {
+                            points += 1;
+                            gCanvas.indicateFlip();
+                        }
+                        backFlipsCount = 0;
+                        //FXUtil.
+                    }
+                    flipWaiting = false;
+                    backFlipWaiting = false;
+                    step2Done = false;
+                }
+            }
+        }
     }
 }

@@ -66,6 +66,7 @@ public class gCanvas extends Canvas implements Runnable {
     int carVelocitySqr;
     boolean pauseTouched = false;
     boolean menuTouched = false;
+    static int flipIndicator = 255; // for coloring
 
     public gCanvas() {
         setFullScreenMode(true);
@@ -407,11 +408,21 @@ public class gCanvas extends Canvas implements Runnable {
             }
         }
         if (mnCanvas.wg) {
-            g.setColor(255, 255, 255);
+            g.setColor(flipIndicator, flipIndicator, 255);
             g.setFont(largefont);
             g.drawString(String.valueOf(w.points), w.halfScWidth, w.scHeight - mFontH * 3 / 2,
                     Graphics.HCENTER | Graphics.TOP);     //points
+            if (flipIndicator < 255) {
+                flipIndicator+=64;           // coloring
+                if (flipIndicator >= 255) {
+                    flipIndicator = 255;
+                }
+            }
         }
+    }
+    
+    public static void indicateFlip() {
+        flipIndicator = 0;
     }
 
     protected void keyReleased(int keyCode) {
