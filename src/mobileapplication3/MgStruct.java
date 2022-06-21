@@ -42,6 +42,7 @@ public class MgStruct {
     
     void load() {
         structBuffer = new short[32][][];
+        structBufSizeInCells = 0;
         try {
                 String path = System.getProperty("fileconn.dir.photos");
                 readFilesInFolder(path);
