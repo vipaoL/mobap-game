@@ -80,7 +80,7 @@ public class MgStruct {
                     while (list.hasMoreElements()) {
                         String name = list.nextElement().toString();
                         if (!name.startsWith("-")) readFile(path + name);
-                        else Main.print("struct file /" + name + "\" is disabled by name prefix \"-\"");
+                        else Main.print("struct file \"" + name + "\" is disabled by name prefix \"-\"");
                     }
                     return true;
                 }
