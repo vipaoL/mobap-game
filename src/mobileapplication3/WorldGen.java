@@ -615,6 +615,10 @@ public class WorldGen implements Runnable {
             int[] h = {2, x, y, l};
             structlogger(h);
         }
+        int prLength = 1000;
+        line(x, y, x + prLength, y);
+        lastX += prLength;
+        x += prLength;
         int ang = 60; // springboard angle
         int r = l / 8;
         arc(x, y-r, r, ang, 90 - ang, 15, 10);
@@ -669,8 +673,9 @@ public class WorldGen implements Runnable {
             toD += 1;
         }
     }
-    void line(int x1, int y1, int x2, int y2) {
+    /*int*/void line(int x1, int y1, int x2, int y2) {
         lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), u);
+        //return x2 - x1;
         //waitinForDel.addElement(new Integer(1));
     }
     private void line1(int x1, int y1, int x2, int y2) {

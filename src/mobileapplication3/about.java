@@ -23,8 +23,8 @@ public class about extends GameCanvas implements Runnable {
     int qrSide = 0;
     int qrMargin = 0;
     int delay = 0;
-    String url = "https://github.com/ViPaOl/mobap-game/";
-    String urlPrew = "github: /ViPaOl/mobap-game";
+    String url = "https://github.com/vipaoL/mobap-game";
+    String urlPrew = "github: vipaoL/mobap-game";
     String[] strings = {"J2ME game on emini", "physics engine"};
     String[] menuOpts = {urlPrew, "Version: " + Main.thiss.getAppProperty("MIDlet-Version"), "Back"};
     int scW = getWidth();
