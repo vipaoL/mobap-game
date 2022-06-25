@@ -78,7 +78,9 @@ public class MgStruct {
                 if (fc.exists() & fc.isDirectory()) {
                     Enumeration list =  fc.list();
                     while (list.hasMoreElements()) {
-                        readFile(path + list.nextElement());
+                        String name = list.nextElement().toString();
+                        if (!name.startsWith("-")) readFile(path + name);
+                        else Main.print("struct file /" + name + "\" is disabled by name prefix \"-\"");
                     }
                     return true;
                 }

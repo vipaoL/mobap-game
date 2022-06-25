@@ -65,7 +65,7 @@ public class WorldGen implements Runnable {
             Main.print(i);
         }*/
         
-        Main.print("read completed");
+        //Main.print("read completed");
     }
     
     public void run() {
