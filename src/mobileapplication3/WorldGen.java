@@ -445,11 +445,11 @@ public class WorldGen implements Runnable {
             int spX = spacing * dx / l;
             dy/=(l/platfL);
             int spY = spacing * dy / l;
-            int plLX = platfL * dx / l;
-            int plLY = platfL * dy / l;
             System.out.println("dx=" + dx + "dy=" + dy);
+            int offsetX = platfL/2 * Mathh.cos(ang) / 1000;
+            int offsetY = platfL/2 * Mathh.sin(ang) / 1000;
             for (int i = 0; i < l / platfL; i++) {
-                Body fallinPlatf = new Body(lastX + x1 + i*(dx+spX) - plLX/2, lastY + y1 + i*(dy+spY) - plLY/2, rect, true);
+                Body fallinPlatf = new Body(lastX + x1 + i*(dx+spX) + offsetX, lastY + y1 + i*(dy+spY) + offsetY, rect, true);
                 fallinPlatf.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
                 fallinPlatf.setDynamic(false);
                 //fallinPlatf.setInteracting(false);
