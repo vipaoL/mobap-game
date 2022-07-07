@@ -117,6 +117,17 @@ public class GenericMenu {
     boolean inited = false;
     public boolean handleKeyStates(int keyStates) {
         isSelectAlreadyPressed = isSelectPressed;
+        if (delayAfterShowing > 0) {
+            delayAfterShowing--;
+            inited = false;
+            return false;
+        } else {
+            if (!inited) {
+                inited = true;
+                delay = 0;
+                isSelectAlreadyPressed = false;
+            }
+        }
         if (delay < 1) {
             isSelectPressed = ((keyStates & (GameCanvas.RIGHT_PRESSED | GameCanvas.FIRE_PRESSED)) != 0);
             delay = 5;
@@ -146,17 +157,8 @@ public class GenericMenu {
         }
         if (keyStates == 0) {
             delay = 0;
+            isSelectPressed = false;
             isSelectAlreadyPressed = false;
-        }
-        if (delayAfterShowing > 0) {
-            delayAfterShowing--;
-            return false;
-        } else {
-            if (!inited) {
-                inited = true;
-                delay = 0;
-                isSelectAlreadyPressed = false;
-            }
         }
         return isSelectPressed & !isSelectAlreadyPressed;
     }
