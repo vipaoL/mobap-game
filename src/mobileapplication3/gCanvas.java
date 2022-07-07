@@ -33,6 +33,7 @@ public class gCanvas extends Canvas implements Runnable {
     //private World world;
     //private Thread thread;
     static boolean stopped = false;
+    public static boolean isDrawingNow = true;
     boolean accel = false;
     //public Body centrCor = new Body(0, -390, centroidCorrector, true);
     //public Body boll = new Body(300, -200, ball2, true);
@@ -130,6 +131,7 @@ public class gCanvas extends Canvas implements Runnable {
                 showNotify();
             }
             if (!paused && worldgen.isReady()) {
+                isDrawingNow = true;
                 start = System.currentTimeMillis();
                 try {
                     contacts[0] = w.getContactsForBody(w.leftwheel);
@@ -310,6 +312,8 @@ public class gCanvas extends Canvas implements Runnable {
                 
                 w.tick();
                 repaint();
+                
+                isDrawingNow = false;
 
                 sleep = millis - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);

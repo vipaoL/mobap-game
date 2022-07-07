@@ -90,7 +90,9 @@ public class WorldGen implements Runnable {
                     }*/
                     if (numberOfLoggedStructs >= structLog.length) {
                         if (GraphicsWorld.carX > 8000 & gCanvas.flying > 1) {
-                            resetPosition();
+                            if (!gCanvas.isDrawingNow) {
+                                resetPosition();
+                            }
                         }
                     }
                 }
@@ -292,7 +294,7 @@ public class WorldGen implements Runnable {
         resettingPosition = true;
         needSpeed = true;
         int prevLastX = lastX;
-        lastX = -8000;
+        lastX = -14000;
         
         Main.print("REGEN");
         
