@@ -97,7 +97,7 @@ public class WorldGen implements Runnable {
                     }
                 }
                 
-                if (false & t <= 10) {
+                if (t <= 10) {
                     t++;
                 } else {
                     w.refreshPos();
