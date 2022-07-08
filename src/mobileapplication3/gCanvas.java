@@ -411,12 +411,12 @@ public class gCanvas extends Canvas implements Runnable {
                 g.drawString(pausehint[i], scW*5/6, i * sFontH + scH / 12 - sFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
             }
         }
-        if (mnCanvas.wg & DebugMenu.dontCountFlips) {
+        if (mnCanvas.wg) {
             g.setColor(flipIndicator, flipIndicator, 255);
             g.setFont(largefont);
             g.drawString(String.valueOf(w.points), w.halfScWidth, w.scHeight - mFontH * 3 / 2,
                     Graphics.HCENTER | Graphics.TOP);     //points
-            if (flipIndicator < 255) {
+            if (flipIndicator < 255 & !DebugMenu.dontCountFlips) {
                 flipIndicator+=64;           // coloring
                 if (flipIndicator >= 255) {
                     flipIndicator = 255;
