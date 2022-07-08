@@ -18,7 +18,7 @@ public class GenericMenu {
     
     private int x0, y0, w, h, fontH, tick = 0, k, delay = 5, delayAfterShowing = 5, firstReachable, lastReachable, specialOption = -1;
     int selected;
-    private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040, pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00, colUnreachable = 0x00888888, colUnreachableEnabled = 0x00ccff00;
+    private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040, pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00, colUnreachable = 0x00888888, colReachableEnabled = 0x00ccff00;
     String[] options;
     private boolean pressed, firstload = true, isSpecialOptionActivated = false, isSelectPressed = false, isSelectAlreadyPressed = false, isStatemapEnabled = false, dontLoadStateMap = false;
     private Font font;
@@ -46,7 +46,7 @@ public class GenericMenu {
             
             if (isStatemapEnabled) { // coloring other options depending on theirs state (if we have this info)
                 if (stateMap[i] == OPTIONTYPE_REACHABLE_ENABLED) {
-                    g.setColor(colUnreachableEnabled);
+                    g.setColor(colReachableEnabled);
                 } else if (stateMap[i] == OPTIONTYPE_UNREACHABLE) {
                     g.setColor(colUnreachable);
                 }
@@ -108,9 +108,11 @@ public class GenericMenu {
     public boolean handlePointer(int x, int y) {
         int selected = y / k;
         if (!isOptionAvailable(selected)) {
+            pressed = false;
             return false;
         }
         this.selected = selected;
+        pressed = true;
         return true;
     }
     
@@ -289,8 +291,8 @@ public class GenericMenu {
     public void setPressedColor(int color_hex) {
         pressedColor = color_hex;
     }
-    public void setIsPressedNow(boolean isPressed) {
-        pressed = isPressed;
+    public void setColorEnabledOption(int color_hex) {
+        colReachableEnabled = color_hex;
     }
     public void setSpecialOptnActColor(int colorActivated) {
         specialOptionActivatedColor = colorActivated;

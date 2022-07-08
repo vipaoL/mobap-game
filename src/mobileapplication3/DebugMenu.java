@@ -17,8 +17,8 @@ public class DebugMenu extends GameCanvas implements Runnable {
     
     private static final int millis = 50;
     private GenericMenu menu = new GenericMenu();
-    private String[] menuOpts = {"Enable debug options", "-----", "closer worldgen trigger", "show X-coordinate", "show speedometer", "cheat(*)", "music", "show font size", ".mgstruct only", "back"};
-    private final int[] statemap = {0, -1, 0, 0, 0, 0, 0, 0, 0, 0};
+    private String[] menuOpts = {"Enable debug options", "-----", "closer worldgen trigger", "show X-coordinate", "show speedometer", "cheat(*)", "music", "show font size", ".mgstruct only", "don't count flips", "back"};
+    private final int[] statemap = {0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     boolean stopped = false;
     int scW = 0;
     int scH;
@@ -29,6 +29,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
     public static boolean music = false;
     public static boolean fontSize = false;
     public static boolean mgstructOnly = false;
+    public static boolean dontCountFlips = false;
     
     public DebugMenu() {
         super(true);
@@ -101,6 +102,9 @@ public class DebugMenu extends GameCanvas implements Runnable {
         if (selected == 8) {
             mgstructOnly = !mgstructOnly;
         }
+        if (selected == 9) {
+            dontCountFlips = !dontCountFlips;
+        }
         if (selected == menuOpts.length - 1) {
             stopped = true;
             Main.set(new mnCanvas());
@@ -118,6 +122,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             menu.setEnabledFor(music, 6);
             menu.setEnabledFor(fontSize, 7);
             menu.setEnabledFor(mgstructOnly, 8);
+            menu.setEnabledFor(dontCountFlips, 9);
         } else {
             for (int i = 2; i < menuOpts.length - 1; i++) {
                 menu.setStateFor(-1, i);
@@ -131,7 +136,6 @@ public class DebugMenu extends GameCanvas implements Runnable {
         }
     }
     protected void pointerPressed(int x, int y) {
-        menu.setIsPressedNow(true);
         menu.handlePointer(x, y);
     }
 
@@ -140,7 +144,6 @@ public class DebugMenu extends GameCanvas implements Runnable {
     }
 
     protected void pointerReleased(int x, int y) {
-        menu.setIsPressedNow(false);
         if (menu.handlePointer(x, y)) {
             selectPressed();
         }

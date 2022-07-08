@@ -59,23 +59,6 @@ public class about extends GameCanvas implements Runnable {
         delay = 5;
         showNotify();
         stopped = false;
-        /*if (mnCanvas.debug) {
-            mnCanvas.music = true;
-        }
-        Player midiPlayer = null;
-        try {
-            midiPlayer = Manager.createPlayer(getClass().getResourceAsStream("/a.mid"), "audio/midi");
-        } catch (Exception e) {
-          System.err.println(e);
-        }
-        try {
-            if (midiPlayer != null & mnCanvas.music) {
-                midiPlayer.start();
-            }
-        } catch (Exception e) {
-          System.err.println(e);
-        }*/
-
     }
 
     protected void showNotify() {
@@ -172,52 +155,10 @@ public class about extends GameCanvas implements Runnable {
         canvH = scH - offset2;
         menu.paint(g);
         menu.tick();
-        /*int l =  strings.length - strsOnTop;
-        for (int i = 0; i < l; i++) {
-            if (i == selected) {
-                g.setColor(255, 64, 64);
-                offset = Mathh.sin(tick * 360 / 10);
-            } else {
-                g.setColor(255, 255, 255);
-                offset = 0;
-            }
-            g.setFont(font);
-            k = (canvH + canvH / (l + 1)) / (l + 1);
-            g.drawString(strings[i+strsOnTop], scW / 2, k * (i + 1) - font.getHeight() / 2 - canvH / (l + 1) / 2 + offset * Font.getDefaultFont().getHeight() / 8000 + offset2, Graphics.HCENTER | Graphics.TOP);
-        }
-        if (tick > 9) {
-            tick = 0;
-        } else {
-            tick++;
-        }*/
-        //flushGraphics();
     }
 
     private void input() {
         int keyStates = getKeyStates();
-        /*if (delay < 1) {
-            delay = 5;
-            if ((keyStates & (RIGHT_PRESSED | FIRE_PRESSED)) != 0) {
-                selectPressed();
-            } else if ((keyStates & UP_PRESSED) != 0) {
-                if (selected > 0) {
-                    selected--;
-                } else {
-                    selected = strings.length - 3;
-                }
-            } else if ((keyStates & DOWN_PRESSED) != 0) {
-                if (selected < strings.length - 3) {
-                    selected++;
-                } else {
-                    selected = 0;
-                }
-            }
-        } else {
-            delay--;
-        }
-        if (keyStates == 0) {
-            delay = 0;
-        }*/
         if (menu.handleKeyStates(keyStates)) {
             selectPressed();
         }
@@ -234,45 +175,17 @@ public class about extends GameCanvas implements Runnable {
     }
 
     protected void pointerPressed(int x, int y) {
-        //k = scH / menuOptions.length;
-        /*selected = (y-offset2) / k;
-        //selected = menuOptions.length * (y + fontH) / scH;
-        if (selected <= 0) {
-            selected = 0;
-        }
-        if (selected > 2) {
-            selected = 2;
-        }*/
-        menu.setIsPressedNow(true);
         menu.handlePointer(x, y - offset2);
     }
 
     protected void pointerDragged(int x, int y) {
-        /*selected = (y-offset2) / k;
-        //selected = menuOptions.length * (y + fontH) / scH;
-        if (selected <= 0) {
-            selected = 0;
-        }
-        if (selected > 2) {
-            selected = 2;
-        }*/
         menu.handlePointer(x, y - offset2);
     }
 
     protected void pointerReleased(int x, int y) {
-        menu.setIsPressedNow(false);
         if (menu.handlePointer(x, y - offset2)) {
             selectPressed();
         }
-        /*selected = (y-offset2) / k;
-        //selected = menuOptions.length * y / scH;
-        if (selected <= 0) {
-            selected = 0;
-        } else if (selected > 2) {
-            selected = 2;
-        } else {
-            selectPressed();
-        }*/
     }
     void openLink() {
         Main.print(url);

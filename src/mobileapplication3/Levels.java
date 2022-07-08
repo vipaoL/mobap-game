@@ -116,32 +116,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     public void paint(Graphics g) {
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, scW, scH);
-        /*g.setColor(255, 255, 255);
-        int offset = 0;
-        for (int i = 0; i < v.size(); i++) {
-            if (i == selected) {
-                g.setColor(255, 64, 64);
-                offset = Mathh.sin(tick * 360 / 10);
-            } else {
-                g.setColor(255, 255, 255);
-                offset = 0;
-            }
-            g.setFont(font);
-
-            if (i == 4) {
-                font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-            }
-            k = (scH + scH / (v.size() + 1)) / (v.size() + 1);
-            g.drawString((String) v.elementAt(i), scW / 2, k * (i + 1) - font.getHeight() / 2 - scH / (v.size() + 1) / 2 + offset * Font.getDefaultFont().getHeight() / 8000 + font.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
-        }
-        if (mnCanvas.debug) {
-            g.drawString(String.valueOf(v.size()), 0, 0, 0);
-        }
-        if (tick > 9) {
-            tick = 0;
-        } else {
-            tick++;
-        }*/
         menu.paint(g);
         menu.tick();
     }
@@ -273,33 +247,14 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     }
 
     protected void pointerPressed(int x, int y) {
-        /*selected = y / k;
-        //selected = v.size() * y / scH;
-        if (selected == 0) {
-            selected = 1;
-        }*/
-        menu.setIsPressedNow(true);
         menu.handlePointer(x, y);
     }
 
     protected void pointerDragged(int x, int y) {
-        /*selected = y / k;
-        //selected = v.size() * y / scH;
-        if (selected == 0) {
-            selected = 1;
-        }*/
         menu.handlePointer(x, y);
     }
 
     protected void pointerReleased(int x, int y) {
-        /*selected = y / k;
-        //selected = v.size() * y / scH;
-        if (selected == 0) {
-            selected = 1;
-        } else {
-            selectPressed();
-        }*/
-        menu.setIsPressedNow(false);
         if (menu.handlePointer(x, y)) {
             selectPressed();
         }
@@ -309,10 +264,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
         selected = menu.selected;
         stopped = true;
         if (selected == v.size() - 1) {
-            //runner = null;
-            mnCanvas m = new mnCanvas();
-            Main.set(m);
-            m.start();
+            Main.set(new mnCanvas());
         } else {
             try {
                 startLevel((String) v.elementAt(selected));

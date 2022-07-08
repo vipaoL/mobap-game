@@ -255,7 +255,7 @@ public class GraphicsWorld extends World {
     int backFlipsCount = 0;
     
     void countFlips() {
-        if (gCanvas.flying < 1) { // cancel when ran into the ground
+        if (gCanvas.flying < 1 | DebugMenu.dontCountFlips) { // cancel when ran into the ground
             flipWaiting = false;
             backFlipWaiting = false;
             step2Done = false;

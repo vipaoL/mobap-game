@@ -40,33 +40,34 @@ public class MgStruct {
         isInited = true;
     }
     
-    void load() {
+    boolean load() {
         structBuffer = new short[32][][];
         structBufSizeInCells = 0;
         try {
-                String path = System.getProperty("fileconn.dir.photos");
+            String path = System.getProperty("fileconn.dir.photos");
+            readFilesInFolder(path);
+            path = System.getProperty("fileconn.dir.graphics");
+            readFilesInFolder(path);
+        } catch (SecurityException ex) {
+            ex.printStackTrace();
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+        Enumeration roots = FileSystemRegistry.listRoots();
+        while (roots.hasMoreElements()) {
+            root = (String) roots.nextElement();
+            String path = prefix + root;
+            try {
                 readFilesInFolder(path);
-                path = System.getProperty("fileconn.dir.graphics");
+                path = prefix + root + "other" + sep;
                 readFilesInFolder(path);
             } catch (SecurityException ex) {
-                ex.printStackTrace();
             } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
-            } catch (NullPointerException ex) {
-                ex.printStackTrace();
             }
-            Enumeration roots = FileSystemRegistry.listRoots();
-            while (roots.hasMoreElements()) {
-                root = (String) roots.nextElement();
-                String path = prefix + root;
-                try {
-                    readFilesInFolder(path);
-                    path = prefix + root + "other" + sep;
-                    readFilesInFolder(path);
-                } catch (SecurityException ex) {
-                } catch (IllegalArgumentException ex) {
-                }
-            }
+        }
+        return structBufSizeInCells > 0;
     }
     
     boolean readFilesInFolder(String path) {
