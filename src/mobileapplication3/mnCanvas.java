@@ -181,11 +181,16 @@ public class mnCanvas extends GameCanvas implements Runnable {
             Main.set(new Levels());
         }
         if (selected == 4) {
+            stopped = true;
             Main.set(new about());
         }
         if (selected == 5) {
+            stopped = true;
             Main.set(new DebugMenu());
         }
-        if (selected == 6) Main.exit();
+        if (selected == 6) {
+            stopped = true;
+            Main.exit();
+        }
     }
 }

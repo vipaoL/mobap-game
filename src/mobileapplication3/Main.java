@@ -76,10 +76,10 @@ public class Main extends MIDlet {
                 ex1.printStackTrace();
             }
             Alert alert = new Alert("Oh no!", text, alertImage, AlertType.ERROR);
-            alert.setTimeout(3000);
-            //thiss.display.setCurrent(alert, current);
-            } catch(IllegalArgumentException ex) {
-            ex.printStackTrace();
+            //alert.setTimeout(3000);
+            Display.getDisplay(thiss).setCurrent(alert);
+        } catch(IllegalArgumentException ex) {
+        ex.printStackTrace();
         }
     }
     
