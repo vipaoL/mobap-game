@@ -19,32 +19,33 @@ import javax.microedition.lcdui.game.GameCanvas;
  * @author vipaol
  */
 public class about extends GameCanvas implements Runnable {
-    Image qr;
-    int qrSide = 0;
-    int qrMargin = 0;
-    int delay = 0;
     String url = "https://github.com/vipaoL/mobap-game";
     String urlPrew = "github: vipaoL/mobap-game";
     String[] strings = {"J2ME game on emini", "physics engine"};
     String[] menuOpts = {urlPrew, "Version: " + Main.thiss.getAppProperty("MIDlet-Version"), "Back"};
+    int counter = 5;
     int scW = getWidth();
     int scH = getHeight();
-    int counter = 5;
-    Graphics g;
+    int qrOffsetH = 0;
+    int menuBtnsOffsetH = 0;
+    int qrSide = 0;
+    int qrMargin = 0;
+    private static int fontSizeCache = -1;
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     int fontH = font.getHeight();
     Font font2 = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     int font2H = font2.getHeight();
     Font font3 = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int font3H = font3.getHeight();
-    boolean paused = false;
-    int offset2 = 0;
 
+    boolean paused = false;
     boolean stopped = false;
+    
+    Graphics g;
+    Image qr;
     
 
     private static final int millis = 50;
-    int offset = 0;
     
     private GenericMenu menu = new GenericMenu();
 
@@ -56,16 +57,16 @@ public class about extends GameCanvas implements Runnable {
 
     public void start() {
         g = getGraphics();
-        delay = 5;
         showNotify();
         stopped = false;
     }
 
     protected void showNotify() {
-        qrMargin = fontH/2;
         scW = getWidth();
         scH = getHeight();
+        
         qrSide = scH - font3H - font2H * (strings.length + menuOpts.length);
+        qrMargin = fontH/2;
         if (qrSide > scW - qrMargin*2) {
             qrSide = scW - qrMargin*2;
         }
@@ -86,8 +87,10 @@ public class about extends GameCanvas implements Runnable {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         fontH = font.getHeight();
-        offset2 = font2H + fontH * strings.length + qrSide + qrMargin * 2;
-        menu.loadParams(0, offset2, scW, scH - offset2, menuOpts, 0, 2, 2);
+        qrOffsetH = font2H + fontH * strings.length + qrMargin;
+        menuBtnsOffsetH = qrOffsetH + qrSide + qrMargin;
+        menu.loadParams(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH, menuOpts, 0, 2, 2, fontSizeCache);
+        fontSizeCache = menu.getFontSize();
         paused = false;
     }
 
@@ -124,35 +127,30 @@ public class about extends GameCanvas implements Runnable {
             }
         }
     }
-
+    
     public void paint(Graphics g) {
-        int canvH = scH;
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, scW, scH);
         g.setColor(255, 255, 255);
         g.setFont(font2);
         g.drawString("About:", scW/2, 0, Graphics.HCENTER | Graphics.TOP);
-        int offset2 = font2H;
+        int offset = font2H;
         for (int i = 0; i < strings.length; i++) {
             g.setFont(font);
-            g.drawString(strings[i], scW/2, offset2, Graphics.HCENTER | Graphics.TOP);
-            offset2+=fontH;
+            g.drawString(strings[i], scW/2, offset, Graphics.HCENTER | Graphics.TOP);
+            offset+=fontH;
         }
-        offset2+=qrMargin;
         
         try {
-            g.drawImage(qr, scW / 2, offset2, Graphics.HCENTER | Graphics.TOP);
+            g.drawImage(qr, scW / 2, qrOffsetH, Graphics.HCENTER | Graphics.TOP);
         } catch (NullPointerException ex) {
-            g.drawLine(qrMargin, offset2, scW - qrMargin, offset2);
-            g.drawLine(qrMargin, offset2 + qrSide, scW - qrMargin, offset2 + qrSide);
-            g.drawLine(qrMargin, offset2, qrMargin, offset2 + qrSide);
-            g.drawLine(scW - qrMargin, offset2, scW - qrMargin, offset2 + qrSide);
+            g.drawLine(qrMargin, qrOffsetH, scW - qrMargin, qrOffsetH);
+            g.drawLine(qrMargin, qrOffsetH + qrSide, scW - qrMargin, qrOffsetH + qrSide);
+            g.drawLine(qrMargin, qrOffsetH, qrMargin, qrOffsetH + qrSide);
+            g.drawLine(scW - qrMargin, qrOffsetH, scW - qrMargin, qrOffsetH + qrSide);
             g.setFont(font3);
-            g.drawString("Your ad could be here.", scW / 2, offset2 + (qrSide - font3H) / 2, Graphics.HCENTER|Graphics.TOP);
+            g.drawString("Your ad could be here.", scW / 2, qrOffsetH + (qrSide - font3H) / 2, Graphics.HCENTER|Graphics.TOP);
         }
-        offset = 0;
-        offset2 += qrSide + qrMargin;
-        canvH = scH - offset2;
         menu.paint(g);
         menu.tick();
     }
@@ -175,15 +173,15 @@ public class about extends GameCanvas implements Runnable {
     }
 
     protected void pointerPressed(int x, int y) {
-        menu.handlePointer(x, y - offset2);
+        menu.handlePointer(x, y - menuBtnsOffsetH);
     }
 
     protected void pointerDragged(int x, int y) {
-        menu.handlePointer(x, y - offset2);
+        menu.handlePointer(x, y - menuBtnsOffsetH);
     }
 
     protected void pointerReleased(int x, int y) {
-        if (menu.handlePointer(x, y - offset2)) {
+        if (menu.handlePointer(x, y - menuBtnsOffsetH)) {
             selectPressed();
         }
     }

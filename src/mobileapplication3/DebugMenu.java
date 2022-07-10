@@ -20,8 +20,8 @@ public class DebugMenu extends GameCanvas implements Runnable {
     private String[] menuOpts = {"Enable debug options", "-----", "closer worldgen trigger", "show X-coordinate", "show speedometer", "cheat(*)", "music", "show font size", ".mgstruct only", "don't count flips", "back"};
     private final int[] statemap = {0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     boolean stopped = false;
-    int scW = 0;
-    int scH;
+    private int scW = 0, scH;
+    private static int fontSizeCache = -1;
     public static boolean closerWorldgen = false;
     public static boolean xCoord = false;
     public static boolean speedo = false;
@@ -48,7 +48,8 @@ public class DebugMenu extends GameCanvas implements Runnable {
                 scW = getWidth();
                 scH = getHeight();
                 System.out.println(statemap != null);
-                menu.loadParams(scW, scH, menuOpts, statemap);
+                menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
+                fontSizeCache = menu.getFontSize();
                 menu.setSpecialOption(0);
                 refreshStates();
             }

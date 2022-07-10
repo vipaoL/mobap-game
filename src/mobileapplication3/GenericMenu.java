@@ -20,7 +20,7 @@ public class GenericMenu {
     int selected;
     private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040, pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00, colUnreachable = 0x00888888, colReachableEnabled = 0x00ccff00;
     String[] options;
-    private boolean pressed, firstload = true, isSpecialOptionActivated = false, isSelectPressed = false, isSelectAlreadyPressed = false, isStatemapEnabled = false, dontLoadStateMap = false;
+    private boolean pressed, firstload = true, isSpecialOptionActivated = false, isSelectPressed = false, isSelectAlreadyPressed = false, isStatemapEnabled = false, dontLoadStateMap = false, fontFound = false;
     private Font font;
     private int[] stateMap = null;
     public static final int OPTIONTYPE_UNREACHABLE = -1;
@@ -91,6 +91,7 @@ public class GenericMenu {
             }
         }
         fontH = font.getHeight();
+        fontFound = true;
     }
     
     private boolean isOptionAvailable(int n) {
@@ -236,20 +237,37 @@ public class GenericMenu {
         loadParams(0, 0, w, h, options, 0, options.length - 1, options.length - 1);
         loadStatemap(statemap);
     }
+    public void loadParams(int w, int h, String[] options, int[] statemap, int fontSize) {
+        dontLoadStateMap = true;
+        loadParams(0, 0, w, h, options, 0, options.length - 1, options.length - 1, null, fontSize);
+        loadStatemap(statemap);
+    }
     public void loadParams(int w, int h, Vector options, int firstReachable, int lastReachable, int defaultSelected) {
+        loadParams(0, 0, w, h, this.options, firstReachable, lastReachable, defaultSelected, -1);
+    }
+    public void loadParams(int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected) {
+        loadParams(0, 0, w, h, options, firstReachable, lastReachable, defaultSelected);
+    }
+    public void loadParams(int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int fontSize) {
+        loadParams(0, 0, w, h, options, firstReachable, lastReachable, defaultSelected);
+    }
+    public void loadParams(int w, int h, Vector options, int firstReachable, int lastReachable, int defaultSelected, int fontSize) {
         String[] optsArray = new String[options.size()];
         for (int i = 0; i < options.size(); i++) {
             optsArray[i] = (String) options.elementAt(i);
         }
         loadParams(0, 0, w, h, optsArray, firstReachable, lastReachable, defaultSelected);
     }
-    public void loadParams(int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected) {
-        loadParams(0, 0, w, h, options, firstReachable, lastReachable, defaultSelected);
-    }
     public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected) {
         loadParams(x0, y0, w, h, options, firstReachable, lastReachable, defaultSelected, null);
     }
+    public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int fontSize) {
+        loadParams(x0, y0, w, h, options, firstReachable, lastReachable, defaultSelected, null, fontSize);
+    }
     public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int[] optionStateMap) {
+        loadParams(x0, y0, w, h, options, firstReachable, lastReachable, defaultSelected, optionStateMap, -1);
+    }
+    public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int[] optionStateMap, int fontSize) {
         this.x0 = x0;
         this.y0 = y0;
         this.w = w;
@@ -261,7 +279,14 @@ public class GenericMenu {
         k = (h + h / (options.length + 1)) / (options.length + 1);
         this.firstReachable = firstReachable;
         this.lastReachable = lastReachable;
-        findOptimalFont();
+        if (fontSize == -1) {
+            findOptimalFont();
+        } else {
+            Main.print(fontSize);
+            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
+            fontH = font.getHeight();
+            fontFound = true;
+        }
         if (firstload) {
             selected = defaultSelected;
             firstload = false;
@@ -315,6 +340,13 @@ public class GenericMenu {
             return;
         }
         stateMap[i] = state;
+    }
+    public int getFontSize() {
+        if (fontFound) {
+            return font.getSize();
+        } else {
+            return -1;
+        }
     }
     public void tick() {
         if (tick > 9) {

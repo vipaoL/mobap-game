@@ -42,9 +42,9 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     int scW = this.getWidth();
     int scH = this.getHeight();
     int tick = 0;
-    int k = 20;
     int selected = 1;
     int delay = 10;
+    private static int fontSizeCache = -1;
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     boolean paused = false;
     private GenericMenu menu = new GenericMenu();
@@ -105,7 +105,8 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
                 }
             }
         }
-        menu.loadParams(scW, scH, v, 1, v.size() - 1, selected);
+        menu.loadParams(scW, scH, v, 1, v.size() - 1, selected, fontSizeCache);
+        fontSizeCache = menu.getFontSize();
         paused = false;
     }
 

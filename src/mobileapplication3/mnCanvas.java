@@ -25,14 +25,15 @@ public class mnCanvas extends GameCanvas implements Runnable {
     static int selected = 1;
     int scW = getWidth();
     int scH = getHeight();
-    public static boolean debug = false;
-    Graphics g;
+    private static int fontSizeCache = -1;
     Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int fontH = font.getHeight();
     boolean paused = false;
-    private GenericMenu menu = new GenericMenu();
+    public static boolean debug = false;
     public static boolean music = false;
     public static boolean extStructs = false;
+    Graphics g;
+    private GenericMenu menu = new GenericMenu();
     MgStruct mgStruct = new MgStruct();
 
     boolean stopped = false;
@@ -54,7 +55,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         scH = getHeight();
         g = getGraphics();
         g.setColor(0, 0, 0);
-        g.fillRect(0, 0, scW, scH);
+        g.fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));
         
         if (font.getHeight() * menuOptions.length > scH) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
@@ -63,7 +64,8 @@ public class mnCanvas extends GameCanvas implements Runnable {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         fontH = font.getHeight();
-        menu.loadParams(scW, scH, menuOptions, 1, menuOptions.length - 2, selected);
+        menu.loadParams(scW, scH, menuOptions, 1, menuOptions.length - 2, selected, fontSizeCache);
+        fontSizeCache = menu.getFontSize();
         menu.loadStatemap(statemap);
         if (extStructs) {
             menu.setStateFor(1, 2);
