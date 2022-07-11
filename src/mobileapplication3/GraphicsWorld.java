@@ -250,28 +250,43 @@ public class GraphicsWorld extends World {
     
     boolean flipWaiting = false;
     boolean backFlipWaiting = false;
+    boolean step1Done = false;
     boolean step2Done = false;
     
     int backFlipsCount = 0;
+    int upperAng = 0;
     
     void countFlips() {
-        if (gCanvas.flying < 1 | DebugMenu.dontCountFlips) { // cancel when ran into the ground
-            flipWaiting = false;
-            backFlipWaiting = false;
-            step2Done = false;
-            backFlipsCount = 0;
+        if (DebugMenu.dontCountFlips) {
             return;
         }
+        if (carbody.rotationVelocity2FX() >= 0) {
+            if (flipWaiting) {
+                flipWaiting = false;
+                step1Done = false;
+                step2Done = false;
+            }
+            backFlipWaiting = true;
+        } else {
+            if (backFlipWaiting) {
+                backFlipsCount = 0;
+                backFlipWaiting = false;
+                step1Done = false;
+                step2Done = false;
+            }
+            flipWaiting = true;
+        }
         int ang = carbody.rotation2FX();
-        if (!flipWaiting & !backFlipWaiting) {
+        if (!step1Done) {
             if (ang < 13176794 | ang > 92237561) {
-                if (carbody.rotationVelocity2FX() >= 0) {
-                    backFlipWaiting = true; // step 1
-                } else {
-                    flipWaiting = true; // step 1
-                }
+                step1Done = true;
             }
         } else {
+            if (gCanvas.flying < 1) { // cancel when touched the ground
+                step2Done = false;
+                backFlipsCount = 0;
+                return;
+            }
             if (!step2Done) {
                 if (!(ang < 13176794 | ang > 92237561))
                     step2Done = true;
@@ -280,6 +295,7 @@ public class GraphicsWorld extends World {
                     if (carbody.rotationVelocity2FX() >= 0) {
                         if (backFlipWaiting) {
                             backFlipsCount++;
+                            //System.out.println("backFlipsCount" + backFlipsCount);
                             if (backFlipsCount > 1) {
                                 points += 1;
                                 backFlipsCount = 0;
@@ -294,8 +310,7 @@ public class GraphicsWorld extends World {
                         backFlipsCount = 0;
                         //FXUtil.
                     }
-                    flipWaiting = false;
-                    backFlipWaiting = false;
+                    step1Done = false;
                     step2Done = false;
                 }
             }

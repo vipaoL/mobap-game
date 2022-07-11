@@ -338,7 +338,26 @@ public class gCanvas extends Canvas implements Runnable {
 
     protected void paint(Graphics g) {
         w.draw(g);
-        if (mnCanvas.debug) {               //  debug text
+        drawGUI(g);
+    }
+    
+    private void drawGUI(Graphics g) {
+        if (firstStart & hintCountdown > 0) {
+            int color = 255 * hintCountdown / 60;
+            g.setColor(color/2, color, color/2);
+            g.fillRect(0, 0, scW/3, scH/6);
+            g.fillRect(scW*2/3, 0, scW/3, scH/6);
+            g.setColor(0, 0, color);
+            g.setFont(smallfont);
+            for (int i = 0; i < menuhint.length; i++) {
+                g.drawString(menuhint[i], scW/6, i * sFontH + scH / 12 - sFontH*menuhint.length/2, Graphics.HCENTER | Graphics.TOP);
+            }
+            for (int i = 0; i < pausehint.length; i++) {
+                g.drawString(pausehint[i], scW*5/6, i * sFontH + scH / 12 - sFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
+            }
+        }
+        
+        if (mnCanvas.debug) {               //  debug
             int debugTextOffset = 0;
             if (DebugMenu.speedo) {
                 switch (speed) {
@@ -358,18 +377,25 @@ public class gCanvas extends Canvas implements Runnable {
                 setFont(smallfont, g);
                 g.fillRect(0, debugTextOffset, currentFont.getHeight() * 5, currentFont.getHeight());
                 g.setColor(255, 255, 255);
-                //text += " " + speedMultipiler;
                 g.drawString(String.valueOf(carVelocitySqr), 0, debugTextOffset, 0);
-                debugTextOffset+=currentFont.getHeight();
-                //text = "";
+                debugTextOffset += currentFont.getHeight();
             }
             if (DebugMenu.xCoord) {
                 g.setColor(255, 255, 255);
                 g.drawString(String.valueOf(w.carbody.positionFX().xAsInt()), 0, debugTextOffset, 0); 
+                debugTextOffset += currentFont.getHeight();
             }
-            //g.drawString(String.valueOf(w.carbody.rotationVelocity2FX()), 0, 0, 0);
+            if (DebugMenu.showAngle) {
+                if (flying > 0) {
+                    g.setColor(0, 0, 255);
+                } else {
+                    g.setColor(255, 255, 255);
+                }
+                g.drawString(String.valueOf(FXUtil.angleInDegrees2FX(w.carbody.rotation2FX())), 0, debugTextOffset, 0);
+                debugTextOffset += currentFont.getHeight();
+            }
         }
-        if (gameoverCountdown > 1) {
+        if (gameoverCountdown > 1) { // game over screen
             g.setFont(largefont);
             g.setColor(255, 0, 0);
             g.drawString("!", scW / 2, scH / 3 + largefont.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
@@ -381,7 +407,20 @@ public class gCanvas extends Canvas implements Runnable {
                 g.fillRect(0, scH - scH*i/7/2, scW, scH - 1);
             }
         }
-        if (paused & !worldgen.resettingPosition) {
+        if (mnCanvas.wg) { // points
+            g.setColor(flipIndicator, flipIndicator, 255);
+            g.setFont(largefont);
+            g.drawString(String.valueOf(w.points), w.halfScWidth, w.scHeight - mFontH * 3 / 2,
+                    Graphics.HCENTER | Graphics.TOP);
+            
+            if (flipIndicator < 255 & !DebugMenu.dontCountFlips) { // coloring when flip
+                flipIndicator+=64;
+                if (flipIndicator >= 255) {
+                    flipIndicator = 255;
+                }
+            }
+        }
+        if (paused & !worldgen.resettingPosition) { // pause screen
             g.setColor(0, 0, 255);
             int d = 6 * scH / 240;
             for (int i = 0; i <= scH; i++) {
@@ -396,32 +435,6 @@ public class gCanvas extends Canvas implements Runnable {
             g.setFont(largefont);
             g.setColor(255, 255, 255);
             g.drawString("PAUSED", scW / 2, scH / 3 + largefont.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
-        }
-        if (firstStart & hintCountdown > 0) {
-            int color = 255 * hintCountdown / 60;
-            g.setColor(color/2, color, color/2);
-            g.fillRect(0, 0, scW/3, scH/6);
-            g.fillRect(scW*2/3, 0, scW/3, scH/6);
-            g.setColor(0, 0, color);
-            g.setFont(smallfont);
-            for (int i = 0; i < menuhint.length; i++) {
-                g.drawString(menuhint[i], scW/6, i * sFontH + scH / 12 - sFontH*menuhint.length/2, Graphics.HCENTER | Graphics.TOP);
-            }
-            for (int i = 0; i < pausehint.length; i++) {
-                g.drawString(pausehint[i], scW*5/6, i * sFontH + scH / 12 - sFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
-            }
-        }
-        if (mnCanvas.wg) {
-            g.setColor(flipIndicator, flipIndicator, 255);
-            g.setFont(largefont);
-            g.drawString(String.valueOf(w.points), w.halfScWidth, w.scHeight - mFontH * 3 / 2,
-                    Graphics.HCENTER | Graphics.TOP);     //points
-            if (flipIndicator < 255 & !DebugMenu.dontCountFlips) {
-                flipIndicator+=64;           // coloring
-                if (flipIndicator >= 255) {
-                    flipIndicator = 255;
-                }
-            }
         }
     }
     
