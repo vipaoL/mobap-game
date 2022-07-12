@@ -174,14 +174,20 @@ public class GraphicsWorld extends World {
         Landscape landscape = getLandscape();
         //g.setColor(0x00ff00);
         for (int i = 0; i < landscape.segmentCount(); i++) {
-            int stPoint = xToPX(landscape.startPoint(i).xAsInt());
-            int endPoint = xToPX(landscape.endPoint(i).xAsInt());
-            if (stPoint < scWidth | endPoint > 0) {
+            int stPointX = xToPX(landscape.startPoint(i).xAsInt());
+            int stPointY = yToPX(landscape.startPoint(i).yAsInt());
+            int endPointX = xToPX(landscape.endPoint(i).xAsInt());
+            int endPointY = yToPX(landscape.endPoint(i).yAsInt());
+            if (stPointX < scWidth | endPointX > 0) {
                 g.drawLine(
-                        stPoint,
-                        yToPX(landscape.startPoint(i).yAsInt()),
-                        endPoint,
-                        yToPX(landscape.endPoint(i).yAsInt()));
+                        stPointX,
+                        stPointY,
+                        endPointX,
+                        endPointY);
+                if (DebugMenu.showLinePoints) {
+                    g.fillArc(stPointX - 2, stPointY - 2, 4, 4, 0, 360);
+                    g.fillArc(endPointX - 2, endPointY - 2, 4, 4, 0, 360);
+                }
             }
         }
     }

@@ -27,7 +27,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
         "music",
         "show font size",
         ".mgstruct only",
-        "don't count flips",
+        "show points of lines",
         "show car rotation",
         "back"};
     private final int[] statemap = new int[menuOpts.length];
@@ -43,6 +43,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
     public static boolean mgstructOnly = false;
     public static boolean dontCountFlips = false;
     public static boolean showAngle = false;
+    public static boolean showLinePoints = false;
     
     public DebugMenu() {
         super(true);
@@ -118,7 +119,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             mgstructOnly = !mgstructOnly;
         }
         if (selected == 9) {
-            dontCountFlips = !dontCountFlips;
+            showLinePoints = !showLinePoints;
         }
         if (selected == 10) {
             showAngle = !showAngle;
@@ -140,7 +141,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             menu.setEnabledFor(music, 6);
             menu.setEnabledFor(fontSize, 7);
             menu.setEnabledFor(mgstructOnly, 8);
-            menu.setEnabledFor(dontCountFlips, 9);
+            menu.setEnabledFor(showLinePoints, 9);
             menu.setEnabledFor(showAngle, 10);
         } else {
             for (int i = 2; i < menuOpts.length - 1; i++) {

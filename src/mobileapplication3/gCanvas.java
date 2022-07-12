@@ -420,7 +420,7 @@ public class gCanvas extends Canvas implements Runnable {
                 }
             }
         }
-        if (paused & !worldgen.resettingPosition) { // pause screen
+        if (paused & !worldgen.isResettingPosition) { // pause screen
             g.setColor(0, 0, 255);
             int d = 6 * scH / 240;
             for (int i = 0; i <= scH; i++) {
@@ -482,7 +482,6 @@ public class gCanvas extends Canvas implements Runnable {
     public void openMenu() {
         firstStart = false;
         mnCanvas.wg = false;
-        worldgen.stop();
         stopped = true;
         Main.set(new mnCanvas());
     }
@@ -524,13 +523,9 @@ public class gCanvas extends Canvas implements Runnable {
 
     public void restart() {
         gameoverCountdown = 0;
-        if (worldgen != null) {
-            worldgen.stop();
-        }
         worldgen = new WorldGen(w);
         if (mnCanvas.wg) {
             worldgen.start();
-            worldgen.restartToQue();
         } else {
             w.addCar();
         }
