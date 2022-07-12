@@ -204,7 +204,7 @@ public class AboutScreen extends GameCanvas implements Runnable {
         if (selected == 1) {
             counter+=1;
             if (counter == 20) {
-                MenuCanvas.wg = true;
+                MenuCanvas.isWorldgenEnabled = true;
                 GameplayCanvas test = new GameplayCanvas();
                 World test3 = new World();
                 test3.setGravity(FXVector.newVector(10, 100));

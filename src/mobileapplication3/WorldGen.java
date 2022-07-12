@@ -60,7 +60,7 @@ public class WorldGen implements Runnable {
     public void run() {
         tick = 1;
         Main.print("gen:run()");
-        while(MenuCanvas.wg) {
+        while(MenuCanvas.isWorldgenEnabled) {
             if (!paused) {
                 if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) { // 
                     random();

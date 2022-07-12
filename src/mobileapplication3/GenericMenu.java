@@ -61,7 +61,7 @@ public class GenericMenu {
             int y = y0 + k * (i + 1) - fontH / 2 - h / (options.length + 1) / 2 + offset*Font.getDefaultFont().getHeight() / 8000;
             g.drawString(options[i], x, y, Graphics.HCENTER | Graphics.TOP); // draw option on (x, y) //
             
-            if (MenuCanvas.debug & DebugMenu.fontSize) {
+            if (DebugMenu.isDebugEnabled & DebugMenu.fontSize) {
                 g.drawString(String.valueOf(font.getSize()), x0, y0, 0); // display text size (for debug)
             }
         }

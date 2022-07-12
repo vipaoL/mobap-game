@@ -41,7 +41,7 @@ public class GraphicsWorld extends World {
 
     public void addCar() {
         int x = 0;
-        if (MenuCanvas.wg) {
+        if (MenuCanvas.isWorldgenEnabled) {
             x = -8000;
         }
         addCar(x, -400, FXUtil.TWO_PI_2FX / 360 * 30, null);
@@ -117,12 +117,12 @@ public class GraphicsWorld extends World {
             offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
 
             viewField = scWidth * zoomOut / 1000;
-            if (MenuCanvas.debug & DebugMenu.closerWorldgen) {
+            if (DebugMenu.isDebugEnabled & DebugMenu.closerWorldgen) {
                 viewField /= 4;
             }
 
             g.setColor(0x4444ff);
-            if (MenuCanvas.debug) {
+            if (DebugMenu.isDebugEnabled) {
                 g.setColor(255, 255, 255);
             }
             drawLandscape(g);

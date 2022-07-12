@@ -114,7 +114,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         Contact[][] contacts = new Contact[3][];
         //paused = firstStart;
         //world.setTimestepFX(FXUtil.toFX(16));
-        if (MenuCanvas.debug & DebugMenu.music) {
+        if (DebugMenu.isDebugEnabled & DebugMenu.music) {
             Sound sound = new Sound();
             sound.startBgMusic();
         }
@@ -357,7 +357,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
             }
         }
         
-        if (MenuCanvas.debug) {               //  debug
+        if (DebugMenu.isDebugEnabled) {               // draw some debug info if debug is enabled
             int debugTextOffset = 0;
             if (DebugMenu.speedo) {
                 switch (speed) {
@@ -399,7 +399,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
             g.setFont(largefont);
             g.setColor(255, 0, 0);
             g.drawString("!", scW / 2, scH / 3 + largefont.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
-            if (!MenuCanvas.debug) {
+            if (!DebugMenu.isDebugEnabled) {
                 g.setColor(191, 191, 191);
             }
             for (int i = 1; i < gameoverCountdown; i++) {
@@ -407,7 +407,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 g.fillRect(0, scH - scH*i/7/2, scW, scH - 1);
             }
         }
-        if (MenuCanvas.wg) { // points
+        if (MenuCanvas.isWorldgenEnabled) { // points
             g.setColor(flipIndicator, flipIndicator, 255);
             g.setFont(largefont);
             g.drawString(String.valueOf(w.points), w.halfScWidth, w.scHeight - mFontH * 3 / 2,
@@ -427,7 +427,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 //g.drawLine(0, i * d - 1, w, -w + i*d - 1);
                 //g.drawLine(0, i * d, w, -w + i*d);
                 //g.drawLine(0, -w + i*d, w, i * d);
-                if (MenuCanvas.debug) {
+                if (DebugMenu.isDebugEnabled) {
                     g.setColor(255 * i / scH % 255, 0, 0);
                 }
                 g.drawLine(scW / 2, 0, d * i, scH);
@@ -468,7 +468,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
             r = true;
         } else 
         if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
-            if (MenuCanvas.debug & DebugMenu.cheat) {
+            if (DebugMenu.isDebugEnabled & DebugMenu.cheat) {
                 FXVector pos = w.carbody.positionFX();
                 int carX = pos.xAsInt();
                 int carY = pos.yAsInt();
@@ -481,7 +481,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
 
     public void openMenu() {
         firstStart = false;
-        MenuCanvas.wg = false;
+        MenuCanvas.isWorldgenEnabled = false;
         stopped = true;
         Main.set(new MenuCanvas());
     }
@@ -524,7 +524,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
     public void restart() {
         gameoverCountdown = 0;
         worldgen = new WorldGen(w);
-        if (MenuCanvas.wg) {
+        if (MenuCanvas.isWorldgenEnabled) {
             worldgen.start();
         } else {
             w.addCar();
