@@ -60,15 +60,15 @@ public class WorldGen implements Runnable {
     public void run() {
         tick = 1;
         Main.print("gen:run()");
-        while(mnCanvas.wg) {
+        while(MenuCanvas.wg) {
             if (!paused) {
                 if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) { // 
                     random();
                 }
                 
                 if (numberOfLoggedStructs >= structLog.length) {
-                        if (GraphicsWorld.carX > 8000 & gCanvas.flying > 1) {
-                            if (!gCanvas.isDrawingNow) {
+                        if (GraphicsWorld.carX > 8000 & GameplayCanvas.flying > 1) {
+                            if (!GameplayCanvas.isDrawingNow) {
                                 resetPosition();
                             }
                         }
@@ -176,7 +176,7 @@ public class WorldGen implements Runnable {
         isReady = true;
     }
     private void cleanWorld() {
-        gCanvas.paused = true;
+        GameplayCanvas.paused = true;
         Constraint[] constraints = w.getConstraints();
         while (w.getConstraintCount() > 0) {
             w.removeConstraint(constraints[0]);
@@ -184,7 +184,7 @@ public class WorldGen implements Runnable {
         rmAllBodies();
         rmSegs();
         constraints = null;
-        gCanvas.paused = false;
+        GameplayCanvas.paused = false;
     }
     private void rmSegs() {
         while (lndscp.segmentCount() > 0) {

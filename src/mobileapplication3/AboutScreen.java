@@ -18,7 +18,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class about extends GameCanvas implements Runnable {
+public class AboutScreen extends GameCanvas implements Runnable {
     String url = "https://github.com/vipaoL/mobap-game";
     String urlPrew = "github: vipaoL/mobap-game";
     String[] strings = {"J2ME game on emini", "physics engine"};
@@ -49,7 +49,7 @@ public class about extends GameCanvas implements Runnable {
     
     private GenericMenu menu = new GenericMenu();
 
-    public about() {
+    public AboutScreen() {
         super(true);
         setFullScreenMode(true);
         (new Thread(this, "about canvas")).start();
@@ -204,8 +204,8 @@ public class about extends GameCanvas implements Runnable {
         if (selected == 1) {
             counter+=1;
             if (counter == 20) {
-                mnCanvas.wg = true;
-                gCanvas test = new gCanvas();
+                MenuCanvas.wg = true;
+                GameplayCanvas test = new GameplayCanvas();
                 World test3 = new World();
                 test3.setGravity(FXVector.newVector(10, 100));
                 GraphicsWorld test2 = new GraphicsWorld(test3);
@@ -216,7 +216,7 @@ public class about extends GameCanvas implements Runnable {
         }
         if (selected == 2) {
             stopped = true;
-            Main.set(new mnCanvas());
+            Main.set(new MenuCanvas());
         }
     }
 

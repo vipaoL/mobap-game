@@ -25,7 +25,7 @@ public class Sound {
         } catch (MediaException ex) {
             ex.printStackTrace();
         }
-        if (midiPlayer != null & mnCanvas.music) {
+        if (midiPlayer != null & MenuCanvas.music) {
             try {
                 midiPlayer.start();
             } catch (MediaException ex) {

@@ -16,7 +16,7 @@ import javax.microedition.lcdui.Graphics;
  *
  * @author vipaol
  */
-public class gCanvas extends Canvas implements Runnable {
+public class GameplayCanvas extends Canvas implements Runnable {
 
     int KEY_ACTION_RIGHT = -7;
     int KEY_ACTION_LEFT = -6;
@@ -69,7 +69,7 @@ public class gCanvas extends Canvas implements Runnable {
     boolean menuTouched = false;
     static int flipIndicator = 255; // for coloring
 
-    public gCanvas() {
+    public GameplayCanvas() {
         setFullScreenMode(true);
         scW = getWidth();
         scH = getHeight();
@@ -114,7 +114,7 @@ public class gCanvas extends Canvas implements Runnable {
         Contact[][] contacts = new Contact[3][];
         //paused = firstStart;
         //world.setTimestepFX(FXUtil.toFX(16));
-        if (mnCanvas.debug & DebugMenu.music) {
+        if (MenuCanvas.debug & DebugMenu.music) {
             Sound sound = new Sound();
             sound.startBgMusic();
         }
@@ -357,7 +357,7 @@ public class gCanvas extends Canvas implements Runnable {
             }
         }
         
-        if (mnCanvas.debug) {               //  debug
+        if (MenuCanvas.debug) {               //  debug
             int debugTextOffset = 0;
             if (DebugMenu.speedo) {
                 switch (speed) {
@@ -399,7 +399,7 @@ public class gCanvas extends Canvas implements Runnable {
             g.setFont(largefont);
             g.setColor(255, 0, 0);
             g.drawString("!", scW / 2, scH / 3 + largefont.getHeight() / 2, Graphics.HCENTER | Graphics.TOP);
-            if (!mnCanvas.debug) {
+            if (!MenuCanvas.debug) {
                 g.setColor(191, 191, 191);
             }
             for (int i = 1; i < gameoverCountdown; i++) {
@@ -407,7 +407,7 @@ public class gCanvas extends Canvas implements Runnable {
                 g.fillRect(0, scH - scH*i/7/2, scW, scH - 1);
             }
         }
-        if (mnCanvas.wg) { // points
+        if (MenuCanvas.wg) { // points
             g.setColor(flipIndicator, flipIndicator, 255);
             g.setFont(largefont);
             g.drawString(String.valueOf(w.points), w.halfScWidth, w.scHeight - mFontH * 3 / 2,
@@ -427,7 +427,7 @@ public class gCanvas extends Canvas implements Runnable {
                 //g.drawLine(0, i * d - 1, w, -w + i*d - 1);
                 //g.drawLine(0, i * d, w, -w + i*d);
                 //g.drawLine(0, -w + i*d, w, i * d);
-                if (mnCanvas.debug) {
+                if (MenuCanvas.debug) {
                     g.setColor(255 * i / scH % 255, 0, 0);
                 }
                 g.drawLine(scW / 2, 0, d * i, scH);
@@ -468,7 +468,7 @@ public class gCanvas extends Canvas implements Runnable {
             r = true;
         } else 
         if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
-            if (mnCanvas.debug & DebugMenu.cheat) {
+            if (MenuCanvas.debug & DebugMenu.cheat) {
                 FXVector pos = w.carbody.positionFX();
                 int carX = pos.xAsInt();
                 int carY = pos.yAsInt();
@@ -481,9 +481,9 @@ public class gCanvas extends Canvas implements Runnable {
 
     public void openMenu() {
         firstStart = false;
-        mnCanvas.wg = false;
+        MenuCanvas.wg = false;
         stopped = true;
-        Main.set(new mnCanvas());
+        Main.set(new MenuCanvas());
     }
 
     protected void pointerPressed(int x, int y) {
@@ -524,7 +524,7 @@ public class gCanvas extends Canvas implements Runnable {
     public void restart() {
         gameoverCountdown = 0;
         worldgen = new WorldGen(w);
-        if (mnCanvas.wg) {
+        if (MenuCanvas.wg) {
             worldgen.start();
         } else {
             w.addCar();

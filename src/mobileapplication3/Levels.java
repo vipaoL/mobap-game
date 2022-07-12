@@ -214,7 +214,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     }
     
     public void startLevel(String path) {
-        gCanvas gameCanvas = new gCanvas();
+        GameplayCanvas gameCanvas = new GameplayCanvas();
         gameCanvas.setWorld(readWorldFile(path));
         Main.set(gameCanvas);
     }
@@ -265,7 +265,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
         selected = menu.selected;
         stopped = true;
         if (selected == v.size() - 1) {
-            Main.set(new mnCanvas());
+            Main.set(new MenuCanvas());
         } else {
             try {
                 startLevel((String) v.elementAt(selected));

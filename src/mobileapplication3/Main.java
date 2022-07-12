@@ -19,7 +19,7 @@ public class Main extends MIDlet {
 
     //public static GraphicsWorld gameWorld;
     //public static mCanvas gameCanvas;
-    mnCanvas menuCanvas;
+    MenuCanvas menuCanvas;
     //static Levels levelPicker;
     static int sWidth = 240;
     static int sHeight = 320;
@@ -31,7 +31,7 @@ public class Main extends MIDlet {
     
 
     public Main() {
-        menuCanvas = new mnCanvas();
+        menuCanvas = new MenuCanvas();
         sWidth = menuCanvas.getWidth();
         sHeight = menuCanvas.getHeight();
         thiss = this;

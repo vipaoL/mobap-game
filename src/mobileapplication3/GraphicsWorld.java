@@ -41,7 +41,7 @@ public class GraphicsWorld extends World {
 
     public void addCar() {
         int x = 0;
-        if (mnCanvas.wg) {
+        if (MenuCanvas.wg) {
             x = -8000;
         }
         addCar(x, -400, FXUtil.TWO_PI_2FX / 360 * 30, null);
@@ -117,12 +117,12 @@ public class GraphicsWorld extends World {
             offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
 
             viewField = scWidth * zoomOut / 1000;
-            if (mnCanvas.debug & DebugMenu.closerWorldgen) {
+            if (MenuCanvas.debug & DebugMenu.closerWorldgen) {
                 viewField /= 4;
             }
 
             g.setColor(0x4444ff);
-            if (mnCanvas.debug) {
+            if (MenuCanvas.debug) {
                 g.setColor(255, 255, 255);
             }
             drawLandscape(g);
@@ -288,7 +288,7 @@ public class GraphicsWorld extends World {
                 step1Done = true;
             }
         } else {
-            if (gCanvas.flying < 1) { // cancel when touched the ground
+            if (GameplayCanvas.flying < 1) { // cancel when touched the ground
                 step2Done = false;
                 backFlipsCount = 0;
                 return;
@@ -305,13 +305,13 @@ public class GraphicsWorld extends World {
                             if (backFlipsCount > 1) {
                                 points += 1;
                                 backFlipsCount = 0;
-                                gCanvas.indicateFlip();
+                                GameplayCanvas.indicateFlip();
                             }
                         }
                     } else {
                         if (flipWaiting) {
                             points += 1;
-                            gCanvas.indicateFlip();
+                            GameplayCanvas.indicateFlip();
                         }
                         backFlipsCount = 0;
                         //FXUtil.

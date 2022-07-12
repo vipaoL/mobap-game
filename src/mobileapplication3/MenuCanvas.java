@@ -19,7 +19,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class mnCanvas extends GameCanvas implements Runnable {
+public class MenuCanvas extends GameCanvas implements Runnable {
     String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Debug", "Exit", "-"};
     private final int[] statemap = {0, 0, 0, 0, 0, 0, 0, 0};
     static int selected = 1;
@@ -42,7 +42,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
     
     public static boolean wg = false;
 
-    public mnCanvas() {
+    public MenuCanvas() {
         super(false);
         setFullScreenMode(true);
         scW = getWidth();
@@ -137,7 +137,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         try {
             stopped = true;
             PhysicsFileReader reader = new PhysicsFileReader("/void.phy");
-            gCanvas gameCanvas = new gCanvas();
+            GameplayCanvas gameCanvas = new GameplayCanvas();
             gameCanvas.setWorld(new GraphicsWorld(World.loadWorld(reader)));
             reader.close();
             Main.set(gameCanvas);
@@ -184,7 +184,7 @@ public class mnCanvas extends GameCanvas implements Runnable {
         }
         if (selected == 4) {
             stopped = true;
-            Main.set(new about());
+            Main.set(new AboutScreen());
         }
         if (selected == 5) {
             stopped = true;

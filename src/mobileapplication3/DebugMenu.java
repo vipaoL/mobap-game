@@ -94,8 +94,8 @@ public class DebugMenu extends GameCanvas implements Runnable {
     void selectPressed() {
         int selected = menu.selected;
         if (selected == 0) {
-            mnCanvas.debug = !mnCanvas.debug;
-            menu.setIsSpecialOptnActivated(mnCanvas.debug);
+            MenuCanvas.debug = !MenuCanvas.debug;
+            menu.setIsSpecialOptnActivated(MenuCanvas.debug);
         }
         if (selected == 2) {
             closerWorldgen = !closerWorldgen;
@@ -126,14 +126,14 @@ public class DebugMenu extends GameCanvas implements Runnable {
         }
         if (selected == menuOpts.length - 1) {
             stopped = true;
-            Main.set(new mnCanvas());
+            Main.set(new MenuCanvas());
         } else {
             refreshStates();
         }
     }
     void refreshStates() {
-        menu.setIsSpecialOptnActivated(mnCanvas.debug);
-        if (mnCanvas.debug) {
+        menu.setIsSpecialOptnActivated(MenuCanvas.debug);
+        if (MenuCanvas.debug) {
             menu.setEnabledFor(closerWorldgen, 2);
             menu.setEnabledFor(xCoord, 3);
             menu.setEnabledFor(speedo, 4);
