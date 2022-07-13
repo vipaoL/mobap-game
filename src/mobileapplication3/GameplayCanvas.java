@@ -48,6 +48,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
     Font currentFont = largefont;
     int scW = 2;
     int scH = 2;
+    int maxScSide;
     boolean leftContacts = false;
     boolean rightContacts = false;
     static boolean paused = false;
@@ -81,6 +82,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
     protected void showNotify() {
         scW = getWidth();
         scH = getHeight();
+        maxScSide = Math.max(scW, scH);
         Main.sWidth = scW;
         Main.sHeight = scH;
         w.refreshScreenParameters();
@@ -300,10 +302,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
                         g.setColor(0, 255, 0);
                         break;
                     case 1:
-                        g.setColor(64, 64, 0);
-                        break;
-                    case 2:
-                        g.setColor(255, 64, 0);
+                        g.setColor(255, 255, 0);
                         break;
                     default:
                         g.setColor(255, 0, 0);

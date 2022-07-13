@@ -139,6 +139,36 @@ public class GraphicsWorld extends World {
                 currColLandscape = colLandscape;
             }
             
+            if (GameplayCanvas.uninterestingDebug) {
+                currColLandscape = 0x0000ff;
+                /*for (int i = 0; i < scHeight / 8; i++) {
+                    g.setColor(0, Math.abs(255 * (i+1 - scHeight / 4) / (scHeight / 4)), 0);
+                    int y1 = Math.abs(i * 8 + carY) % scHeight;
+                    int y2 = Math.abs((scHeight - i) * 8 + carY) % scHeight;
+                    g.drawLine(0, Math.abs(scHeight - y1 * 2), scWidth, Math.abs(scHeight - y2 * 2));
+                */
+                //g.setColor(0, 63, 0);
+                g.setColor(63, 0, 31);
+                for (int i = 0; i < scWidth / 4; i++) {
+                    int x1 = scWidth / 2; 
+                    int x2 = (i - scWidth / 8) * 64 + scWidth / 2;
+                    g.drawLine(x1, scHeight * 2 / 3, x2, scHeight);
+                }
+                g.setColor(63, 31, 0);
+                //g.setColor(0, 63, 0);
+                int iterations = 6;
+                int r = Math.min(scWidth, scHeight) / 4;
+                g.fillArc(scWidth / 2 - r, scHeight * 2 / 5 - r, r * 2, r * 2, 0, 360);
+                g.setColor(0, 0, 0);
+                //g.setColor(63, 0, 31);
+                for (int i = 0; i < iterations; i++) {
+                    int y = + i * r / iterations + scHeight * 2 / 5 - r / 12;
+                    g.drawLine(0, y-1, scWidth, y-1);
+                    g.drawLine(0, y, scWidth, y);
+                    g.drawLine(0, y+1, scWidth, y+1);
+                }
+            }
+            
             // draw landscape
             if (!DebugMenu.isDebugEnabled) {
                 g.setColor(currColLandscape);
