@@ -23,31 +23,21 @@ public class GameplayCanvas extends Canvas implements Runnable {
 
     boolean r = false;
 
-    int waiting = 0;
     int hintCountdown = 60;
     String[] menuhint = {"menu:", "here(touch),", "9, #"};
     String[] pausehint = {"pause:", "here(touch),", "right soft btn"};
     static boolean firstStart = true;
     int ang = 0;
     private final int millis = 50;
-    //private World world;
-    //private Thread thread;
     static boolean stopped = false;
     public static boolean isDrawingNow = true;
     boolean accel = false;
-    //public Body centrCor = new Body(0, -390, centroidCorrector, true);
-    //public Body boll = new Body(300, -200, ball2, true);
     Vector waitingForDynamic = new Vector();
     Vector waitingTime = new Vector();
     static int flying = 0;
     int motorTdOff = 50;
-    boolean debug = false;
-    //String text = "text";
+    public static boolean uninterestingDebug = false;
     int prevX = 0;
-    //Motor leftmotor;
-    //Motor rightmotor;
-    //Motor carbodymotor;
-    //public static Landscape l;
     int gameoverCountdown = 0;
     Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     int sFontH = smallfont.getHeight();
@@ -95,10 +85,12 @@ public class GameplayCanvas extends Canvas implements Runnable {
         Main.sHeight = scH;
         w.refreshScreenParameters();
         stopped = false;
+        worldgen.resume();
     }
 
     protected void hideNotify() {
         paused = true;
+        worldgen.pause();
     }
 
     /*public synchronized void end() {
@@ -112,20 +104,19 @@ public class GameplayCanvas extends Canvas implements Runnable {
         int tenFX = FXUtil.toFX(10);
         gameoverCountdown = 0;
         Contact[][] contacts = new Contact[3][];
-        //paused = firstStart;
-        //world.setTimestepFX(FXUtil.toFX(16));
         if (DebugMenu.isDebugEnabled & DebugMenu.music) {
             Sound sound = new Sound();
             sound.startBgMusic();
         }
         
-        while(false & w == null) {
+        while(!worldgen.isReady()) {
             try {
-                Thread.sleep(50);
+                Thread.sleep(20);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
         }
+        
         while (!stopped) {
             if (scW != getWidth()) {
                 showNotify();
@@ -133,19 +124,13 @@ public class GameplayCanvas extends Canvas implements Runnable {
             if (!paused && worldgen.isReady()) {
                 isDrawingNow = true;
                 start = System.currentTimeMillis();
-                try {
-                    contacts[0] = w.getContactsForBody(w.leftwheel);
-                    contacts[1] = w.getContactsForBody(w.rightwheel);
-                    contacts[2] = w.getContactsForBody(w.carbody);
-                    ang = 360 - FXUtil.angleInDegrees2FX(w.carbody.rotation2FX());
-                    leftContacts = contacts[0][0] != null;
-                    rightContacts = contacts[1][0] != null;
-                } catch (NullPointerException ex) {
-                    contacts[0] = new Contact[0];
-                    contacts[1] = new Contact[0];
-                    contacts[2] = new Contact[0];
-                }
-                if ((!leftContacts & !rightContacts) & !debug) {
+                contacts[0] = w.getContactsForBody(w.leftwheel);
+                contacts[1] = w.getContactsForBody(w.rightwheel);
+                contacts[2] = w.getContactsForBody(w.carbody);
+                ang = 360 - FXUtil.angleInDegrees2FX(w.carbody.rotation2FX());
+                leftContacts = contacts[0][0] != null;
+                rightContacts = contacts[1][0] != null;
+                if ((!leftContacts & !rightContacts)) {
                     flying += 1;
                 } else {
                     flying = 0;
@@ -154,99 +139,49 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 FXVector velFX = w.carbody.velocityFX();
                 carVelocitySqr = velFX.xAsInt() * velFX.xAsInt() + velFX.yAsInt() * velFX.yAsInt();
                 if (carVelocitySqr > 1000000) {
-                            speedMultipiler = 2;
-                            speed = 3;
-                            //m = 0;
-                        } else {
-                            speedMultipiler = 20;
-                            speed = 0;
-                            if (carVelocitySqr > 100000) {
-                                speed = 1;
-                                //m = 0;
-                                speedMultipiler = 15;
-                                if (carVelocitySqr > 500000) {
-                                    //speedMultipiler = 8;
-                                    speed = 2;
-                                }
-                            }
-                        }
+                    speedMultipiler = 2;
+                    speed = 2;
+                } else if (carVelocitySqr > 100000) {
+                    speed = 1;
+                    speedMultipiler = 15;
+                } else {
+                    speedMultipiler = 20;
+                    speed = 0;
+                }
+                
+                if (uninterestingDebug) {
+                    flying = 0;
+                    speedMultipiler = 30;
+                }
 
                 if (accel) {
                     motorTdOff = 0;
-                    if (flying > 2 & !debug) {
+                    if (flying > 2) {
                         if (w.carbody.rotationVelocity2FX() > 50000000) {
                             w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/16000));
                         } else {
                             w.carbody.applyTorque(FXUtil.toFX(-10000));
                         }
-                    } else {/*
-                        FXVector velFX = w.carbody.velocityFX();
-                        carVelocitySqr = velFX.xAsInt() * velFX.xAsInt() + velFX.yAsInt() * velFX.yAsInt();
-                        
-                        //int carVelocitySqr = 0;
-                        //leftwheel.applyTorque(FXUtil.toFX(-40000));
-                        //int m = 8;
-                        if (carVelocitySqr > 1600000) {
-                            speedMultipiler = 2;
-                            speed = 3;
-                            //m = 0;
-                        } else {
-                            speedMultipiler = 4;
-                            speed = 0;
-                            if (carVelocitySqr > 5000) {
-                                speed = 1;
-                                //m = 0;
-                                speedMultipiler = 12;
-                                if (carVelocitySqr > 400000) {
-                                    speedMultipiler = 8;
-                                    speed = 2;
-                                }
-                            }
-                        }*/
-                        //carbody.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 75) * m), tenFX), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang - 75) * m), tenFX)));
-                        //rightwheel.applyTorque(FXUtil.toFX(-40000));
-                        //boll.applyTorque(FXUtil.toFX(-40000));
-
+                    } else {
                         int FXSinAngM = 0;
                         int FXCosAngM = 0;
-                        
-                        if (debug) {
-                            ang += 15;
-                        }
 
                         FXSinAngM = FXUtil.divideFX(FXUtil.toFX(Mathh.sin(ang - 15) * speedMultipiler), tenFX * 5);
                         FXCosAngM = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 15) * speedMultipiler), tenFX * 5);
-                        
-                        //carbody.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 75) * carVelocitySqr), tenFX * 8000), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang - 75) * carVelocitySqr), tenFX * 8000)));
                         w.carbody.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
 
 
-                        if (leftContacts & rightContacts) {
-                            //leftwheel.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
-                            //rightwheel.applyMomentum(new FXVector(FXCosAngM, -FXCosAngM));
-
-                        } else {
-                            if (leftContacts) {
-                                //leftwheel.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
-                            }
-                            if (rightContacts & !debug) {
-                                w.carbody.applyTorque(FXUtil.toFX(-4000));
-                                //rightwheel.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 15) * speedMultipiler), tenFX * 5), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang - 15) * speedMultipiler), tenFX * 5)));
-                                ////leftwheel.applyMomentum(new FXVector(FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang) * speedMultipiler), tenFX * 5), FXUtil.divideFX(-FXUtil.toFX(Mathh.sin(ang) * speedMultipiler), tenFX * 5)));
-                            }
-                            //carbody.applyForce(new FXVector(FXUtil.toFX(sin(ang)), FXUtil.toFX(cos(ang))), 100);
-                            if (w.getContactsForBody(w.carbody)[0] != null & !debug) {
-                                w.carbody.applyTorque(FXUtil.toFX(-4000));
-                            }
+                        if ((!leftContacts & w.getContactsForBody(w.carbody)[0] != null) | rightContacts) {
+                            w.carbody.applyTorque(FXUtil.toFX(-4000));
                         }
                     }
                 } else {
-                    if (motorTdOff < 40 | debug) {
+                    if (motorTdOff < 40 & !uninterestingDebug) {
                         try {
                             if (w.carbody.angularVelocity2FX() > 0) {
                                 w.carbody.applyTorque(FXUtil.toFX(w.carbody.angularVelocity2FX() / 4000));
                             }
-                            if (flying < 2 & !debug) {
+                            if (flying < 2) {
                                 w.carbody.applyMomentum(new FXVector(-w.carbody.velocityFX().xFX/5, -w.carbody.velocityFX().yFX/5));
                             }
                             motorTdOff++;
@@ -256,14 +191,14 @@ public class GameplayCanvas extends Canvas implements Runnable {
                     }
                 }
 
-                waiting = waitingForDynamic.size();
                 for (int j = 0; j < 3; j++) {
                     for (int i = 0; i < contacts[j].length; i++) {
                         if (contacts[j][i] != null) {
                             Body body = contacts[j][i].body1();
-                            if (!waitingForDynamic.contains(body)) {
+                            if (!waitingForDynamic.contains(body) & body != w.carbody & body != w.leftwheel & body != w.rightwheel) {
                                 waitingForDynamic.addElement(body);
                                 waitingTime.addElement(new Integer(20));
+                                if (uninterestingDebug) w.removeBody(body);
                             }
                         }
                     }
@@ -289,10 +224,10 @@ public class GameplayCanvas extends Canvas implements Runnable {
                         if (gameoverCountdown < 8) {
                             gameoverCountdown++;
                         } else {
-                            if (!debug) {
-                                openMenu();
-                            } else {
+                            if (uninterestingDebug) {
                                 restart();
+                            } else {
+                                openMenu();
                             }
                         }
                     } else {
@@ -302,10 +237,10 @@ public class GameplayCanvas extends Canvas implements Runnable {
                             gameoverCountdown = 0;
                         }
                     }
-                    for (int i = 0; i < w.getBodyCount(); i++) {
-                        Body[] bs = w.getBodies();
-                        if (bs[i].positionFX().yAsInt() > 20000 + worldgen.getLowestY()) {
-                            w.removeBody(bs[i]);
+                    for (int i = 0; i < w.getBodyCount(); i++) { // removing all that fell out the world or got too left
+                        Body[] bodies = w.getBodies();
+                        if (bodies[i].positionFX().yAsInt() > 20000 + worldgen.getLowestY() | w.carbody.positionFX().xAsInt() - bodies[i].positionFX().xAsInt() > GraphicsWorld.viewField * 2) {
+                            w.removeBody(bodies[i]);
                         }
                     }
                 }

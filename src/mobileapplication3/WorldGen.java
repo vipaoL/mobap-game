@@ -28,7 +28,7 @@ public class WorldGen implements Runnable {
     private int nextStructRandomId;
     private int lastX = -8000;
     private int lastY = 0;
-    private int segmentsNum = 36; // how many lines will draw up a circle
+    private int segmentsNum = 36;       // how many lines will draw up a circle
     private int segmentLen = 360 / segmentsNum;
     private int tick = 0;
     public boolean isResettingPosition = false;
@@ -67,21 +67,22 @@ public class WorldGen implements Runnable {
                 }
                 
                 if (numberOfLoggedStructs >= structLog.length) {
-                        if (GraphicsWorld.carX > 8000 & GameplayCanvas.flying > 1) {
-                            if (!GameplayCanvas.isDrawingNow) {
-                                resetPosition();
-                            }
+                    if (GraphicsWorld.carX > 8000 & (GameplayCanvas.flying > 1 | GameplayCanvas.uninterestingDebug)) {
+                        if (!GameplayCanvas.isDrawingNow) {
+                            resetPosition();
                         }
                     }
+                }
+                
+                w.refreshPos();
+                if (GraphicsWorld.carX > nextPointsCounterTargetX) {
+                    nextPointsCounterTargetX += POINTS_DIVIDER;
+                    GraphicsWorld.points++;
+                }
                 
                 if (tick <= 10) {
                     tick++;
                 } else {
-                    w.refreshPos();
-                    if (GraphicsWorld.carX > nextPointsCounterTargetX) {
-                        nextPointsCounterTargetX += POINTS_DIVIDER;
-                        GraphicsWorld.points++;
-                    }
                     tick = 1;
                 }
             }
@@ -89,7 +90,7 @@ public class WorldGen implements Runnable {
                 if (!needSpeed) {
                     Thread.sleep(200);
                 } else {
-                    if (tick > 9) {
+                    if (tick > 9 & !isResettingPosition) {
                         needSpeed = false;
                     }
                 }
@@ -107,13 +108,16 @@ public class WorldGen implements Runnable {
                 a=0;
             }
             a += mgStruct.structBufSizeInCells;
-            nextStructRandomId = rand.nextInt(a); //0-9
+            nextStructRandomId = rand.nextInt(a); // 10: 0-9
             if (DebugMenu.mgstructOnly) {
                nextStructRandomId+=stdStructsNumber + floorStatWheightInRandom;
             }
         }
         prevStructRandomId = nextStructRandomId;
         Main.print("id"+nextStructRandomId);
+        if (lastY > 5000 | lastY < -5000) { // will correct height if it is too high or too low
+            floor(lastX, lastY, 1000 + rand.nextInt(4) * 100, (rand.nextInt(7) - 3) * 100);
+        } else
         if (nextStructRandomId == 0) {
             circ1(lastX, lastY, 400, 15, 120);
         } else if (nextStructRandomId == 1) {
@@ -121,7 +125,7 @@ public class WorldGen implements Runnable {
             int amp = 15 + rand.nextInt(15);
             sin(lastX, lastY, l, l / 180, 0, amp);
         } else if (nextStructRandomId == 2) {
-            floor(lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(6) - 3) * 100);
+            floor(lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(7) - 3) * 100);
         } else if (nextStructRandomId == 3) {
             circ2(lastX, lastY, 1000, 20);
         } else if (nextStructRandomId == 4) {
@@ -536,13 +540,17 @@ public class WorldGen implements Runnable {
             int[] h = {3, l, y, l, halfperiods, offset, amp};
             structlogger(h);
         }
-        int sn = l/20;
-        int sl = l/sn;
-        for(int i = sl; i <= l; i+=sl) {
-            line1(x + (i-sl), y + amp * Mathh.sin(180*(i-sl)/l*halfperiods+offset) / 1000, x + i, y + amp*Mathh.sin(180*i/l*halfperiods+offset)/1000);
+        if (amp == 0) {
+            line(x, y, x + l, y);
+        } else {
+            int sn = l/20;
+            int sl = l/sn;
+            for(int i = sl; i <= l; i+=sl) {
+                line1(x + (i-sl), y + amp * Mathh.sin(180*(i-sl)/l*halfperiods+offset) / 1000, x + i, y + amp*Mathh.sin(180*i/l*halfperiods+offset)/1000);
+            }
+            lastY = y + Mathh.sin(offset+180*halfperiods) * amp / 1000;
         }
         lastX += l;
-        lastY = y + Mathh.sin(offset+180*halfperiods) * amp / 1000;
     }
     private void arc(int x, int y, int r, int ang, int of) {
         while (of < 0) {

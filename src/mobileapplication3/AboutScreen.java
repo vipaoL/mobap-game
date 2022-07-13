@@ -23,7 +23,7 @@ public class AboutScreen extends GameCanvas implements Runnable {
     String urlPrew = "github: vipaoL/mobap-game";
     String[] strings = {"J2ME game on emini", "physics engine"};
     String[] menuOpts = {urlPrew, "Version: " + Main.thiss.getAppProperty("MIDlet-Version"), "Back"};
-    int counter = 5;
+    int counter = 17;
     int scW = getWidth();
     int scH = getHeight();
     int qrOffsetH = 0;
@@ -210,7 +210,7 @@ public class AboutScreen extends GameCanvas implements Runnable {
                 test3.setGravity(FXVector.newVector(10, 100));
                 GraphicsWorld test2 = new GraphicsWorld(test3);
                 test.setWorld(test2);
-                test.debug = true;
+                test.uninterestingDebug = true;
                 Main.set(test);
             }
         }
@@ -220,6 +220,7 @@ public class AboutScreen extends GameCanvas implements Runnable {
         }
     }
 
+    // for scaling qr code to screen size
     public Image scale(Image original, int newWidth, int newHeight) {
 
         int[] rawInput = new int[original.getHeight() * original.getWidth()];

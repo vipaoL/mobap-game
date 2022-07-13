@@ -16,6 +16,9 @@ import javax.microedition.lcdui.Graphics;
  */
 public class GraphicsWorld extends World {
 
+    int colBg = 0x000000;
+    int colLandscape = 0x4444ff;
+    int colBodies = 0xffffff;
     int scWidth = 64;
     int halfScWidth = 32;
     int scHeight = 320;
@@ -32,6 +35,9 @@ public class GraphicsWorld extends World {
     int fontH = 50;
     int prevAng = 0;
     int ang = 0;
+    int currColBg = colBg;
+    int currColLandscape = colLandscape;
+    int currColBodies = colBodies;
 
     public GraphicsWorld(World w) {
         super(w);
@@ -106,30 +112,46 @@ public class GraphicsWorld extends World {
     }
 
     public void draw(Graphics g) {
-        g.setColor(0, 0, 0);
+        // fill background
+        g.setColor(currColBg);
         g.fillRect(0, 0, scWidth, scHeight);
         try {
             carX = carbody.positionFX().xAsInt();
             carY = carbody.positionFX().yAsInt();
 
+            // zooming and moving virtual camera
             calculateZoomOut();
             offsetX = -carX * 1000 / zoomOut + scWidth / 3;
             offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
 
+            // for timely track generation and deleting waste objects
             viewField = scWidth * zoomOut / 1000;
             if (DebugMenu.isDebugEnabled & DebugMenu.closerWorldgen) {
                 viewField /= 4;
             }
 
-            g.setColor(0x4444ff);
-            if (DebugMenu.isDebugEnabled) {
+            // some very boring code
+            if (points > 291 & points < 293) {
+                currColBg = 0x2f92cd;
+                currColLandscape = 0xffffff;
+            } else if (points > 293 & points < 300) {
+                currColBg = colBg;
+                currColLandscape = colLandscape;
+            }
+            
+            // draw landscape
+            if (!DebugMenu.isDebugEnabled) {
+                g.setColor(currColLandscape);
+            } else {
                 g.setColor(255, 255, 255);
             }
             drawLandscape(g);
-            g.setColor(255, 255, 255);
-            drawBodies(g); //bodies, exclude car wheels
-            drawCar(g); //car wheels
-            drawConstraints(g);
+            
+            g.setColor(currColBodies);
+            drawBodies(g); // bodies, exclude car wheels
+            drawCar(g); // car wheels
+            drawConstraints(g); // disabled
+            
             countFlips();
         } catch (NullPointerException ex) {
             int l = scWidth * 2 / 3;
@@ -151,10 +173,12 @@ public class GraphicsWorld extends World {
 
     public void drawBody(Graphics g, Body b) {
         FXVector[] positions = b.getVertices();
-        if (positions.length == 1) {
+        
+        if (positions.length == 1) { // if shape of this body is a circle
             int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
             g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
-        } else {
+        }
+        else { // if not a circle, then a polygon
             for (int i = 0; i < positions.length - 1; i++) {
                 g.drawLine(xToPX(positions[i].xAsInt()),
                         yToPX(positions[i].yAsInt()),
@@ -195,7 +219,7 @@ public class GraphicsWorld extends World {
     private void drawConstraints(Graphics g) {
         int constraintCount = getConstraintCount();
         Constraint[] constraints = getConstraints();
-        for (int i = 0; i < constraintCount; i++) {
+        for (int i = 0; false & i < constraintCount; i++) {
             if (constraints[i] instanceof Spring) {
                 Spring spring = (Spring) constraints[i];
                 g.drawLine(xToPX(spring.getPoint1().xAsInt()),
@@ -208,11 +232,9 @@ public class GraphicsWorld extends World {
 
     void drawWheel(Graphics g, Body b) {
         int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
-        //int radius = 15;
-        //.drawString(text, 0, 0, 20);
-        g.setColor(0, 0, 0);
+        g.setColor(currColBg);
         g.fillArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
-        g.setColor(255, 255, 255);
+        g.setColor(currColBodies);
         g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
     }
 
@@ -288,7 +310,7 @@ public class GraphicsWorld extends World {
                 step1Done = true;
             }
         } else {
-            if (GameplayCanvas.flying < 1) { // cancel when touched the ground
+            if (GameplayCanvas.flying < 1 & !GameplayCanvas.uninterestingDebug) { // cancel when touched the ground
                 step2Done = false;
                 backFlipsCount = 0;
                 return;
