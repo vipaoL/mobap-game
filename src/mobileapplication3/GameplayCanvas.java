@@ -416,6 +416,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
     public void openMenu() {
         firstStart = false;
         MenuCanvas.isWorldgenEnabled = false;
+        uninterestingDebug = false;
         stopped = true;
         Main.set(new MenuCanvas());
     }

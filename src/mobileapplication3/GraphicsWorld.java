@@ -112,6 +112,7 @@ public class GraphicsWorld extends World {
         WorldGen.zeroPoint = spawnX;
     }
 
+    static boolean bg = false;
     public void draw(Graphics g) {
         // fill background
         g.setColor(currColBg);
@@ -140,7 +141,7 @@ public class GraphicsWorld extends World {
                 currColLandscape = colLandscape;
             }
             
-            if (GameplayCanvas.uninterestingDebug) {
+            if (bg) {
                 currColLandscape = 0x0000ff;
                 /*for (int i = 0; i < scHeight / 8; i++) {
                     g.setColor(0, Math.abs(255 * (i+1 - scHeight / 4) / (scHeight / 4)), 0);
@@ -179,8 +180,8 @@ public class GraphicsWorld extends World {
             drawLandscape(g);
             
             g.setColor(currColBodies);
-            drawBodies(g); // bodies, exclude car wheels
-            drawCar(g); // car wheels
+            drawBodies(g); // draw bodies, exclude car wheels
+            drawCar(g); // draw car wheels
             drawConstraints(g); // disabled
             
             countFlips();

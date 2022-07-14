@@ -74,4 +74,7 @@ public class Mathh {
         int dy = y1 - y2;
         return (int) Math.sqrt(dx * dx + dy * dy);
     }
+    static boolean strictIneq(int leftBound, int a, int rightBound) {
+        return ((leftBound < a) & (a < rightBound));
+    }
 }

@@ -58,7 +58,7 @@ public class WorldGen implements Runnable {
         while(MenuCanvas.isWorldgenEnabled) {
             if (!paused) {
                 if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) { // 
-                    random();
+                    placeNext();
                 }
                 
                 if (numberOfLoggedStructs >= structLog.length) {
@@ -95,48 +95,57 @@ public class WorldGen implements Runnable {
         }
     }
     
-    private void random() {
-        Main.print("gen:random()");
+    private void placeNext() {
+        int idsCount;
+        if (DebugMenu.mgstructOnly) {
+            idsCount = mgStruct.structBufSizeInCells;
+        } else {
+            idsCount = stdStructsNumber + floorStatWheightInRandom + mgStruct.structBufSizeInCells;;
+        }
         while (nextStructRandomId == prevStructRandomId) {
-            int a = stdStructsNumber + floorStatWheightInRandom;
-            if (DebugMenu.mgstructOnly) {
-                a=0;
-            }
-            a += mgStruct.structBufSizeInCells;
-            nextStructRandomId = rand.nextInt(a); // 10: 0-9
-            if (DebugMenu.mgstructOnly) {
-               nextStructRandomId+=stdStructsNumber + floorStatWheightInRandom;
-            }
+            nextStructRandomId = rand.nextInt(idsCount); // 10: 0-9
         }
         prevStructRandomId = nextStructRandomId;
-        Main.print("id"+nextStructRandomId);
+        if (DebugMenu.mgstructOnly) {
+            nextStructRandomId+=stdStructsNumber + floorStatWheightInRandom;
+        }
+        
+        Main.print("structId"+nextStructRandomId);
         if (lastY > 5000 | lastY < -5000) { // will correct height if it is too high or too low
             floor(lastX, lastY, 1000 + rand.nextInt(4) * 100, (rand.nextInt(7) - 3) * 100);
-        } else
-        if (nextStructRandomId == 0) {
-            circ1(lastX, lastY, 400, 15, 120);
-        } else if (nextStructRandomId == 1) {
-            int l = 720 + rand.nextInt(8) * 180;
-            int amp = 15 + rand.nextInt(15);
-            sin(lastX, lastY, l, l / 180, 0, amp);
-        } else if (nextStructRandomId == 2) {
-            floor(lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(7) - 3) * 100);
-        } else if (nextStructRandomId == 3) {
-            circ2(lastX, lastY, 1000, 20);
-        } else if (nextStructRandomId == 4) {
-            int l = 6000;
-            l = rand.nextInt(6) * 1000;
-            abyss(lastX, lastY, l);
-        } else if (nextStructRandomId == 5) {
-            int n = rand.nextInt(6) + 5;
-            dotline(lastX, lastY, n);
-        } else if (nextStructRandomId > stdStructsNumber - 1 & nextStructRandomId < stdStructsNumber + floorStatWheightInRandom) {
-            floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
         } else {
-            placeMGStructByRelativeID(nextStructRandomId);
+            switch(nextStructRandomId) {
+                case 0:
+                    circ1(lastX, lastY, 400, 15, 120);
+                    break;
+                case 1:
+                    int l = 720 + rand.nextInt(8) * 180;
+                    int amp = 15 + rand.nextInt(15);
+                    sin(lastX, lastY, l, l / 180, 0, amp);
+                    break;
+                case 2:
+                    floor(lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(7) - 3) * 100);
+                    break;
+                case 3:
+                    circ2(lastX, lastY, 1000, 20);
+                    break;
+                case 4:
+                    abyss(lastX, lastY, rand.nextInt(6) * 1000);
+                    break;
+                case 5:
+                    int n = rand.nextInt(6) + 5;
+                    dotline(lastX, lastY, n);
+                    break;
+                default:
+                    if (Mathh.strictIneq(stdStructsNumber - 1,/*<*/ nextStructRandomId,/*<*/ stdStructsNumber + floorStatWheightInRandom)) {
+                        floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
+                    } else {
+                        placeMGStructByRelativeID(nextStructRandomId);
+                    }
+                    break;
+            }
         }
-        Main.print("lastX" + lastX);
-        isResettingPosition = false;
+        Main.print("lastX", lastX);
         lowestY = Math.max(lastY, lowestY);
     }
     
@@ -258,7 +267,7 @@ public class WorldGen implements Runnable {
     }
     
     private void reproduce() {
-        Main.print("REPRODUCE:" + numberOfLoggedStructs);
+        Main.print("REPRODUCE:", numberOfLoggedStructs);
         for (int i = 0; i < numberOfLoggedStructs; i++) {
             int[] struct = structlog_getElementAt(i);
             int structID = struct[0];
@@ -344,10 +353,6 @@ public class WorldGen implements Runnable {
     
     void placePrimitive(short[] data) {
         short id = data[0];
-        for (int i = 0; i < data.length; i++) {
-            System.out.print(data[i] + " ");
-        }
-        System.out.println(" - prim placed");
         if (id == 2) {
             line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
         } else if (id == 3) {
@@ -373,7 +378,6 @@ public class WorldGen implements Runnable {
             int spX = spacing * dx / l;
             dy/=(l/platfL);
             int spY = spacing * dy / l;
-            System.out.println("dx=" + dx + "dy=" + dy);
             int offsetX = platfL/2 * Mathh.cos(ang) / 1000;
             int offsetY = platfL/2 * Mathh.sin(ang) / 1000;
             for (int i = 0; i < l / platfL; i++) {

@@ -209,6 +209,7 @@ public class AboutScreen extends GameCanvas implements Runnable {
                 World test3 = new World();
                 test3.setGravity(FXVector.newVector(10, 100));
                 GraphicsWorld test2 = new GraphicsWorld(test3);
+                GraphicsWorld.bg = true;
                 test.setWorld(test2);
                 test.uninterestingDebug = true;
                 Main.set(test);

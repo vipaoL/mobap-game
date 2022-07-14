@@ -87,19 +87,15 @@ public class Main extends MIDlet {
         System.gc();
     }
 
-    public static void print(String text, int category) {
-        if (category == printCategory_info) {
-            text = "info: " + text;
-        }
-        if (category == printCategory_err) {
-            text = "ERROR: " + text;
-        }
-        System.out.println(text);
+    public static void print(String text, int value) {
+        print(text + value);
     }
     public static void print(int i) {
-        print("" + i);
+        print(String.valueOf(i));
     }
     public static void print(String text) {
-        print(text, printCategory_info);
+        if (DebugMenu.isDebugEnabled) {
+            System.out.println("info:" + text);
+        }
     }
 }

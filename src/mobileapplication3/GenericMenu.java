@@ -173,58 +173,62 @@ public class GenericMenu {
         Main.print(keyCode);
         boolean pressed = false;
         int selected = -1;
-        if (keyCode == GameCanvas.KEY_NUM1) {
-            selected = 0;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_NUM2) {
-            selected = 1;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_NUM3) {
-            selected = 2;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_NUM4) {
-            selected = 3;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_NUM5) {
-            selected = 4;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_NUM6) {
-            selected = 5;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_NUM7) {
-            selected = 6;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_NUM8) {
-            selected = 7;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_NUM9) {
-            selected = 8;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_STAR) {
-            selected = 9;
-            pressed = true;
-        }
-        if (keyCode == GameCanvas.KEY_POUND) {
-            selected = 10;
-            pressed = true;
+        switch (keyCode) {
+            case GameCanvas.KEY_NUM1:
+                selected = 0;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_NUM2:
+                selected = 1;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_NUM3:
+                selected = 2;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_NUM4:
+                selected = 3;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_NUM5:
+                selected = 4;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_NUM6:
+                selected = 5;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_NUM7:
+                selected = 6;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_NUM8:
+                selected = 7;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_NUM9:
+                selected = 8;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_STAR:
+                selected = 9;
+                pressed = true;
+                break;
+            case GameCanvas.KEY_POUND:
+                selected = 10;
+                pressed = true;
+                break;
+            case -6: // left soft button
+                return true;
+            default:
+                break;
         }
         selected += firstReachable;
-        if (keyCode == GameCanvas.KEY_NUM0 | keyCode == -7) {
-            selected = lastReachable;
+        if (keyCode == GameCanvas.KEY_NUM0 | keyCode == -7/*right soft button*/) {
+            selected = lastReachable; // back
             pressed = true;
         }
-        if (keyCode == -6) {
-            return true;
-        }
+        
         if (pressed) {
             if (isOptionAvailable(selected)) {
                 this.selected = selected;
