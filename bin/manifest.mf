@@ -1,4 +1,5 @@
-MIDlet-1: mobap-game,/driver.png,mobileapplication3.Main
+MIDlet-1: mobapp-game,/icon.png,mobileapplication3.Main
+Nokia-Scaleable-Icon: /icon.png
 MIDlet-Vendor: vipaoL
 MIDlet-Version: 0.8.1
 MIDlet-Name: mobapp-game
