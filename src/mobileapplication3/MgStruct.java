@@ -22,11 +22,12 @@ public class MgStruct {
     static short supportedFileVer = 0;
     static short secondSupportedFileVer = 1;
     static int[] args = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10};
+    static final int structArrayBufferSize = 32;
 
-    static int bufSizeInCells = 0;
-    static int[] structSizes = new int[32];
-    static short[][][] structBuffer = new short[32][][];
+    static short[][][] structBuffer = new short[structArrayBufferSize][][];
+    static int[] structSizes = new int[structArrayBufferSize];
     static int structBufSizeInCells = 0;
+    private int bufSizeInCells = 0;
     static boolean isInited = false;
     
     String prefix = "file:///";
@@ -35,13 +36,17 @@ public class MgStruct {
     
     public MgStruct() {
         if (!isInited) {
-            //load();
+            for (int i = 1; readRes("/" + i + ".mgstruct"); i++) {
+                Main.print(i);
+            }
+
+            Main.print("MGStruct:read completed");
         }
         isInited = true;
     }
     
     boolean load() {
-        structBuffer = new short[32][][];
+        structBuffer = new short[structArrayBufferSize][][];
         structBufSizeInCells = 0;
         try {
             String path = System.getProperty("fileconn.dir.photos");
@@ -117,6 +122,8 @@ public class MgStruct {
             is.close();
             return true;
         } catch (IOException ex) {
+            return false;
+        } catch (NullPointerException ex) {
             return false;
         }
     }

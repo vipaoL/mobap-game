@@ -117,7 +117,11 @@ public class DebugMenu extends GameCanvas implements Runnable {
             fontSize = !fontSize;
         }
         if (selected == 8) {
-            mgstructOnly = !mgstructOnly;
+            if (MgStruct.structBufSizeInCells != 0) {
+                mgstructOnly = !mgstructOnly;
+            } else {
+                mgstructOnly = false;
+            }
         }
         if (selected == 9) {
             showLinePoints = !showLinePoints;

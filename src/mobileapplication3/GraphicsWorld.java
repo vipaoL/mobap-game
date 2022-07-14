@@ -109,6 +109,7 @@ public class GraphicsWorld extends World {
             int rVel2FX = ((Integer) vel[1]).intValue();
             carbody.angularVelocity2FX(rVel2FX);
         }
+        WorldGen.zeroPoint = spawnX;
     }
 
     public void draw(Graphics g) {
@@ -150,19 +151,19 @@ public class GraphicsWorld extends World {
                 //g.setColor(0, 63, 0);
                 g.setColor(63, 0, 31);
                 for (int i = 0; i < scWidth / 4; i++) {
-                    int x1 = scWidth / 2; 
-                    int x2 = (i - scWidth / 8) * 64 + scWidth / 2;
-                    g.drawLine(x1, scHeight * 2 / 3, x2, scHeight);
+                    int x2 = -((i * 64 + (carX - WorldGen.zeroPoint) / 16) % (scWidth * 16) - scWidth * 8)/*  *64/8  */;
+                    int x1 = x2 / 32;
+                    g.drawLine(x1 + scWidth / 2, scHeight * 2 / 3, x2 + scWidth / 2, scHeight);
                 }
                 g.setColor(63, 31, 0);
                 //g.setColor(0, 63, 0);
-                int iterations = 6;
+                int lines = 6;
                 int r = Math.min(scWidth, scHeight) / 4;
                 g.fillArc(scWidth / 2 - r, scHeight * 2 / 5 - r, r * 2, r * 2, 0, 360);
                 g.setColor(0, 0, 0);
                 //g.setColor(63, 0, 31);
-                for (int i = 0; i < iterations; i++) {
-                    int y = + i * r / iterations + scHeight * 2 / 5 - r / 12;
+                for (int i = 0; i < lines; i++) {
+                    int y = + i * r / lines + scHeight * 2 / 5 - r / 12;
                     g.drawLine(0, y-1, scWidth, y-1);
                     g.drawLine(0, y, scWidth, y);
                     g.drawLine(0, y+1, scWidth, y+1);

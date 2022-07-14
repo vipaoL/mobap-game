@@ -71,19 +71,19 @@ public class GenericMenu {
         font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
         
         // height
-        if (font.getHeight() * options.length > h) {
+        if (font.getHeight() * options.length >= h - h/16) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
         }
-        if (font.getHeight() * options.length > h) {
+        if (font.getHeight() * options.length >= h - h/16) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         
         // width
         if (font.getSize() != Font.SIZE_SMALL) {
             for (int i = 0; i < options.length - 1; i++) {
-                if (font.stringWidth((String) options[i]) >= w) {
+                if (font.stringWidth((String) options[i]) >= w - w/16) {
                     font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-                    if (font.stringWidth((String) options[i]) >= w) {
+                    if (font.stringWidth((String) options[i]) >= w - w/16) {
                         font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
                         break;
                     }
@@ -96,6 +96,9 @@ public class GenericMenu {
     
     private boolean isOptionAvailable(int n) {
         if (isStatemapEnabled) {
+            if (n >= stateMap.length) {
+                return false;
+            }
             if (stateMap[n] == -1) {
                 return false;
             }
@@ -167,6 +170,7 @@ public class GenericMenu {
     }
     
     public boolean handleKeyPressed(int keyCode) {
+        Main.print(keyCode);
         boolean pressed = false;
         int selected = -1;
         if (keyCode == GameCanvas.KEY_NUM1) {
@@ -214,6 +218,13 @@ public class GenericMenu {
             pressed = true;
         }
         selected += firstReachable;
+        if (keyCode == GameCanvas.KEY_NUM0 | keyCode == -7) {
+            selected = lastReachable;
+            pressed = true;
+        }
+        if (keyCode == -6) {
+            return true;
+        }
         if (pressed) {
             if (isOptionAvailable(selected)) {
                 this.selected = selected;

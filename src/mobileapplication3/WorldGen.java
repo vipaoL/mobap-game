@@ -26,6 +26,7 @@ public class WorldGen implements Runnable {
     
     private int prevStructRandomId;
     private int nextStructRandomId;
+    public static int zeroPoint = 0;
     private int lastX = -8000;
     private int lastY = 0;
     private int segmentsNum = 36;       // how many lines will draw up a circle
@@ -49,12 +50,6 @@ public class WorldGen implements Runnable {
     public WorldGen(GraphicsWorld w) {
         this.w = w;
         lndscp = w.getLandscape();
-        
-        /*for (int i = 1; i < 0 & mgStruct.readRes("/" + i + ".mgstruct"); i++) {
-            Main.print(i);
-        }*/
-        
-        //Main.print("read completed");
     }
     
     public void run() {
@@ -253,6 +248,7 @@ public class WorldGen implements Runnable {
         reproduce();
         
         moveBodies(lastX - prevLastX);
+        zeroPoint = w.carbody.positionFX().xAsInt();
         
         nextPointsCounterTargetX -= (prevLastX - lastX);
 
