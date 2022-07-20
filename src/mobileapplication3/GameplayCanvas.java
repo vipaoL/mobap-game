@@ -421,6 +421,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
         Main.set(new MenuCanvas());
     }
 
+    int pointerX = 0;
+    int pointerY = 0;
     protected void pointerPressed(int x, int y) {
         if (x > scW * 2 / 3 & y < scH / 6) {
             pauseTouched = true;
@@ -429,11 +431,17 @@ public class GameplayCanvas extends Canvas implements Runnable {
         } else {
             accel = true;
         }
+        pointerX = x;
+        pointerY = y;
     }
     
     protected void pointerDragged(int x, int y) {
-        pauseTouched = false;
-        menuTouched = false;
+        if (pointerX != x | pointerY != y) {
+            pauseTouched = false;
+            menuTouched = false;
+        }
+        pointerX = x;
+        pointerY = y;
     }
 
     protected void pointerReleased(int x, int y) {
