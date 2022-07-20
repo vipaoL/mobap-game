@@ -30,7 +30,7 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     
     Graphics g;
     private GenericMenu menu = new GenericMenu(); // some generic code for drawing menus
-    MgStruct mgStruct = new MgStruct(); // for loading external structures
+    MgStruct mgStruct; // for loading external structures
 
     private static final int millis = 50; // time for one frame. 1000ms / 50ms = 20(FPS)
     
@@ -161,6 +161,7 @@ public class MenuCanvas extends GameCanvas implements Runnable {
         }
         if (selected == 2) { // Ext Structs / Reload
             menu.setStateFor(1, 2);
+            mgStruct = new MgStruct();
             if (mgStruct.load()) {
                 areExtStructsLoaded = true;
                 menuOptions[2] = "Reload";
