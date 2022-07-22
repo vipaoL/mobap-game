@@ -67,6 +67,9 @@ public class Main extends MIDlet {
         showAlert(ex.toString());
     }
     public static void showAlert(String text) {
+        showAlert(text, -1);
+    }
+    public static void showAlert(String text, int duration) {
         try {
             //AlertType.ERROR.playSound(thiss.display);
             Image alertImage = null;
@@ -76,11 +79,14 @@ public class Main extends MIDlet {
                 ex1.printStackTrace();
             }
             Alert alert = new Alert("Oh no!", text, alertImage, AlertType.ERROR);
-            //alert.setTimeout(3000);
+            if (duration > 0) {
+                alert.setTimeout(duration);
+            }
             Display.getDisplay(thiss).setCurrent(alert);
         } catch(IllegalArgumentException ex) {
         ex.printStackTrace();
         }
+        set(current);
     }
     
     public static void clear() {

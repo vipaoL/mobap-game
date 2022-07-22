@@ -98,9 +98,9 @@ public class WorldGen implements Runnable {
     private void placeNext() {
         int idsCount;
         if (DebugMenu.mgstructOnly) {
-            idsCount = mgStruct.structBufSizeInCells;
+            idsCount = mgStruct.loadedStructsNumber;
         } else {
-            idsCount = stdStructsNumber + floorStatWheightInRandom + mgStruct.structBufSizeInCells;;
+            idsCount = stdStructsNumber + floorStatWheightInRandom + mgStruct.loadedStructsNumber;;
         }
         while (nextStructRandomId == prevStructRandomId) {
             nextStructRandomId = rand.nextInt(idsCount); // 10: 0-9
@@ -337,13 +337,8 @@ public class WorldGen implements Runnable {
     }
     
     void placeMGStructByID(int id) {
-        Main.print("byID" + id);
-        placeMGStruct(id);
-    }
-    
-    void placeMGStruct(int id) {
         short[][] data = mgStruct.structBuffer[id];
-        Main.print("placemg" + mgStruct.structSizes[id]);
+        Main.print("placing struct, id=" + mgStruct.structSizes[id]);
         for (int i = 1; i < mgStruct.structSizes[id]; i++) {
             placePrimitive(data[i]);
         }
@@ -353,6 +348,7 @@ public class WorldGen implements Runnable {
     
     void placePrimitive(short[] data) {
         short id = data[0];
+        Main.print("placing element, id=" + id);
         if (id == 2) {
             line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
         } else if (id == 3) {

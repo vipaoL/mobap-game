@@ -26,9 +26,10 @@ public class MgStruct {
 
     static short[][][] structBuffer = new short[structArrayBufferSize][][];
     static int[] structSizes = new int[structArrayBufferSize];
-    static int structBufSizeInCells = 0;
+    static int loadedStructsNumber = 0;
     private int bufSizeInCells = 0;
     static boolean isInited = false;
+    static int loadedStructsFromResNumber = 0;
     
     String prefix = "file:///";
     String root = "C:/";
@@ -40,14 +41,15 @@ public class MgStruct {
                 Main.print(i);
             }
 
-            Main.print("MGStruct:read completed");
+            Main.print("MGStruct:read completed. loaded " + loadedStructsNumber);
+            loadedStructsFromResNumber = loadedStructsNumber;
         }
         isInited = true;
     }
     
     boolean load() {
-        structBuffer = new short[structArrayBufferSize][][];
-        structBufSizeInCells = 0;
+        //structBuffer = new short[structArrayBufferSize][][];
+        loadedStructsNumber = loadedStructsFromResNumber;
         try {
             String path = System.getProperty("fileconn.dir.photos");
             readFilesInFolder(path);
@@ -72,7 +74,7 @@ public class MgStruct {
             } catch (IllegalArgumentException ex) {
             }
         }
-        return structBufSizeInCells > 0;
+        return loadedStructsNumber > 0;
     }
     
     boolean readFilesInFolder(String path) {
@@ -143,18 +145,18 @@ public class MgStruct {
                 for (int c = 0; true; c++) {
                     short id = dis.readShort();
                     if (id == 0) {
-                        Main.print("break");
+                        //Main.print("break");
                         break;
                     }
                     short[] data = new short[args[id] + 1]; // {2, 0, 0, 100, 0} // - e.g.: line
                     data[0] = id;
                     for (int i = 0; i < args[id]; i++) {
                         data[i + 1] = dis.readShort();
-                        Main.print(id + "data" + data[i + 1]);
+                        //Main.print(id + "data" + data[i + 1]);
                     }
                     buffer[c] = data;
                     bufSizeInCells++;
-                    Main.print(". ");
+                    //Main.print(". ");
                 }
                 saveStructToBuffer(buffer);
                 dis.close();
@@ -177,9 +179,10 @@ public class MgStruct {
         changed = true;
     }*/
     void saveStructToBuffer(short[][] data) {
-        structBuffer[structBufSizeInCells] = data;
-        structSizes[structBufSizeInCells] = bufSizeInCells;
-        structBufSizeInCells++;
+        Main.print("savivg new structure with id=" + loadedStructsNumber);
+        structBuffer[loadedStructsNumber] = data;
+        structSizes[loadedStructsNumber] = bufSizeInCells;
+        loadedStructsNumber++;
         bufSizeInCells = 0;
     }
 }

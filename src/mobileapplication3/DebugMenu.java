@@ -112,12 +112,16 @@ public class DebugMenu extends GameCanvas implements Runnable {
         }
         if (selected == 6) {
             music = !music;
+            if (music) {
+                Sound sound = new Sound();
+                sound.startBgMusic();
+            }
         }
         if (selected == 7) {
             fontSize = !fontSize;
         }
         if (selected == 8) {
-            if (MgStruct.structBufSizeInCells != 0) {
+            if (MgStruct.loadedStructsNumber > 0) {
                 mgstructOnly = !mgstructOnly;
             } else {
                 mgstructOnly = false;
@@ -145,7 +149,8 @@ public class DebugMenu extends GameCanvas implements Runnable {
             menu.setEnabledFor(cheat, 5);
             menu.setEnabledFor(music, 6);
             menu.setEnabledFor(fontSize, 7);
-            menu.setEnabledFor(mgstructOnly, 8);
+            //menu.setEnabledFor(mgstructOnly, 8);
+            menu.setStateFor(-1, 8); // set ".mgstruct only" as inactive button. it's buggy
             menu.setEnabledFor(showLinePoints, 9);
             menu.setEnabledFor(showAngle, 10);
         } else {

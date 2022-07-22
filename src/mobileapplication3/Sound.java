@@ -24,6 +24,8 @@ public class Sound {
             ex.printStackTrace();
         } catch (MediaException ex) {
             ex.printStackTrace();
+        } catch (IllegalArgumentException ex) {
+            Main.showAlert("Can't load music. You need to repack the game and place your .mid music named as \"a.mid\" into it", 10000);
         }
         if (midiPlayer != null & DebugMenu.music) {
             try {

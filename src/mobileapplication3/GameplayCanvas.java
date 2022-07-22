@@ -21,11 +21,9 @@ public class GameplayCanvas extends Canvas implements Runnable {
     int KEY_ACTION_RIGHT = -7;
     int KEY_ACTION_LEFT = -6;
 
-    boolean r = false;
-
-    int hintCountdown = 60;
-    String[] menuhint = {"menu:", "here(touch),", "9, #"};
-    String[] pausehint = {"pause:", "here(touch),", "right soft btn"};
+    int hintCountdown = 120;
+    String[] menuhint = {"MENU:", "here(touch),", "9, #"};
+    String[] pausehint = {"PAUSE:", "here(touch),", "right soft btn"};
     static boolean firstStart = true;
     int ang = 0;
     private final int millis = 50;
@@ -267,9 +265,6 @@ public class GameplayCanvas extends Canvas implements Runnable {
                     ex.printStackTrace();
                 }
             }
-            if (hintCountdown > 0) {
-                hintCountdown--;
-            }
         }
     }
 
@@ -280,18 +275,19 @@ public class GameplayCanvas extends Canvas implements Runnable {
     
     private void drawGUI(Graphics g) {
         if (firstStart & hintCountdown > 0) {
-            int color = 255 * hintCountdown / 60;
+            int color = 255 * hintCountdown / 120;
             g.setColor(color/2, color, color/2);
             g.fillRect(0, 0, scW/3, scH/6);
             g.fillRect(scW*2/3, 0, scW/3, scH/6);
             g.setColor(0, 0, color);
-            g.setFont(smallfont);
+            g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL));
             for (int i = 0; i < menuhint.length; i++) {
                 g.drawString(menuhint[i], scW/6, i * sFontH + scH / 12 - sFontH*menuhint.length/2, Graphics.HCENTER | Graphics.TOP);
             }
             for (int i = 0; i < pausehint.length; i++) {
                 g.drawString(pausehint[i], scW*5/6, i * sFontH + scH / 12 - sFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
             }
+            hintCountdown--;
         }
         
         if (DebugMenu.isDebugEnabled) {               // draw some debug info if debug is enabled
@@ -316,7 +312,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
             }
             if (DebugMenu.xCoord) {
                 g.setColor(255, 255, 255);
-                g.drawString(String.valueOf(w.carbody.positionFX().xAsInt()), 0, debugTextOffset, 0); 
+                g.drawString(GraphicsWorld.carX + " " + GraphicsWorld.carY, 0, debugTextOffset, 0); 
                 debugTextOffset += currentFont.getHeight();
             }
             if (DebugMenu.showAngle) {
@@ -379,7 +375,6 @@ public class GameplayCanvas extends Canvas implements Runnable {
     protected void keyReleased(int keyCode) {
         int gameAction = getGameAction(keyCode);
         accel = false;
-        r = false;
         if (flying > 0) {
             flying = Math.max(5, flying);
         }
@@ -399,7 +394,6 @@ public class GameplayCanvas extends Canvas implements Runnable {
         } else
         if (keyCode == KEY_POUND | gameAction == GAME_D) {
             openMenu();
-            r = true;
         } else 
         if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
             if (DebugMenu.isDebugEnabled & DebugMenu.cheat) {
