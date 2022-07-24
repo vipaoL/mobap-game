@@ -41,8 +41,8 @@ public class GraphicsWorld extends World {
 
     public GraphicsWorld(World w) {
         super(w);
+        Main.log("world:constructor");
         refreshScreenParameters();
-        Main.print(getAreaStartFX());
     }
 
     public void addCar() {
@@ -289,6 +289,7 @@ public class GraphicsWorld extends World {
     }
 
     void refreshScreenParameters() {
+        Main.log("world:refreshing screen params");
         fontH = Font.getDefaultFont().getHeight();
         scWidth = Main.sWidth;
         halfScWidth = scWidth / 2;
@@ -342,7 +343,7 @@ public class GraphicsWorld extends World {
                 step1Done = true;
             }
         } else {
-            if (GameplayCanvas.flying < 1 & !GameplayCanvas.uninterestingDebug) { // cancel when touched the ground
+            if (GameplayCanvas.timeFlying < 1 & !GameplayCanvas.uninterestingDebug) { // cancel when touched the ground
                 step2Done = false;
                 backFlipsCount = 0;
                 return;

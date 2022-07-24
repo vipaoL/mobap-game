@@ -39,22 +39,23 @@ public class WorldGen implements Runnable {
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX = lastX + POINTS_DIVIDER;
     private int lowestY = 0;
-    private boolean paused;
+    private boolean paused = false;
     private boolean needSpeed = true;
     private boolean isReady = true;
     private Random rand;
     private GraphicsWorld w;
     private Landscape lndscp;
-    private MgStruct mgStruct = new MgStruct();
+    private MgStruct mgStruct;
     
     public WorldGen(GraphicsWorld w) {
+        Main.log("wg:constructor");
         this.w = w;
         lndscp = w.getLandscape();
     }
     
     public void run() {
         tick = 1;
-        Main.print("gen:run()");
+        Main.log("wg:run()");
         while(MenuCanvas.isWorldgenEnabled) {
             if (!paused) {
                 if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) { // 
@@ -62,7 +63,7 @@ public class WorldGen implements Runnable {
                 }
                 
                 if (numberOfLoggedStructs >= structLog.length) {
-                    if (GraphicsWorld.carX > 8000 & (GameplayCanvas.flying > 1 | GameplayCanvas.uninterestingDebug)) {
+                    if (GraphicsWorld.carX > 8000 & (GameplayCanvas.timeFlying > 1 | GameplayCanvas.uninterestingDebug)) {
                         if (!GameplayCanvas.isDrawingNow) {
                             resetPosition();
                         }
@@ -93,6 +94,7 @@ public class WorldGen implements Runnable {
                 ex.printStackTrace();
             }
         }
+        Main.log("wg stopped.");
     }
     
     private void placeNext() {
@@ -110,7 +112,7 @@ public class WorldGen implements Runnable {
             nextStructRandomId+=stdStructsNumber + floorStatWheightInRandom;
         }
         
-        Main.print("structId"+nextStructRandomId);
+        Main.log("placing: id=", nextStructRandomId);
         if (lastY > 5000 | lastY < -5000) { // will correct height if it is too high or too low
             floor(lastX, lastY, 1000 + rand.nextInt(4) * 100, (rand.nextInt(7) - 3) * 100);
         } else {
@@ -145,42 +147,50 @@ public class WorldGen implements Runnable {
                     break;
             }
         }
-        Main.print("lastX", lastX);
+        Main.log("lastX=", lastX);
         lowestY = Math.max(lastY, lowestY);
     }
     
     public void start() {
         isReady = false;
+        Main.log("wg:start()");
         rand = new Random();
+        Main.log("wg:loading mgstruct");
+        mgStruct = new MgStruct();
         restart();
         resume();
-        Main.print("gen:start()");
         (new Thread(this, "world generator")).start();
     }
     public void pause() {
+        Main.log("wg paused");
         paused = true;
     }
     public void resume() {
+        Main.log("wg resumed");
         paused = false;
     }
     
     private void restart() {
         isReady = false;
         needSpeed = true;
-        Main.print("gen:reset()");
+        Main.log("wg:restart()");
         prevStructRandomId = 1;
         nextStructRandomId = 2;
         lastX = -7900;
         lastY = 0;
         try {
+            Main.log("wg:cleaning world");
             cleanWorld();
         } catch (NullPointerException e) {
             
         }
+        Main.log("wg:adding start platform");
         line(lastX - 600, lastY - 100, lastX, lastY);
         tick = 2;
         GraphicsWorld.points = 0;
+        Main.log("wg:adding car");
         w.addCar();
+        Main.log("wg ready.");
         isReady = true;
     }
     private void cleanWorld() {
@@ -230,8 +240,8 @@ public class WorldGen implements Runnable {
             
             int index = (ringLogTail) % structLog.length;
             structLog[index] = a;
-            Main.print(structLog[index][0]);
-            Main.print(index);
+            //Main.log(structLog[index][0]);
+            //Main.log(index);
             if (ringLogTail >= structLog.length - 1) {
                 ringLogTail = 0;
             } else {
@@ -251,7 +261,7 @@ public class WorldGen implements Runnable {
         int prevLastX = lastX;
         lastX = -14000;
         
-        Main.print("REGEN");
+        Main.log("resetting pos");
         
         rmSegs();
         reproduce();
@@ -267,7 +277,7 @@ public class WorldGen implements Runnable {
     }
     
     private void reproduce() {
-        Main.print("REPRODUCE:", numberOfLoggedStructs);
+        Main.log("to reproduce: ", numberOfLoggedStructs);
         for (int i = 0; i < numberOfLoggedStructs; i++) {
             int[] struct = structlog_getElementAt(i);
             int structID = struct[0];
@@ -279,17 +289,17 @@ public class WorldGen implements Runnable {
                 int sn = struct[4];
                 int va = struct[5];
                 circ1(lastX, y, r, sn, va);
-                Main.print("circ1");
+                Main.log("placing circ1");
             }
             if (structID == 1) {
                 int l = struct[3];
                 floorStat(lastX, y, l);
-                Main.print("flStat");
+                Main.log("placing flStat");
             }
             if (structID == 2) { // {2, l, y}
                 int l = struct[3];
                 abyss(lastX, y, l);
-                Main.print("abyss");
+                Main.log("placing abyss");
             }
             if (structID == 3) {
                 int l = struct[3];
@@ -297,18 +307,18 @@ public class WorldGen implements Runnable {
                 int offset = struct[5];
                 int amp = struct[6];
                 sin(lastX, y, l, halfperiods, offset, amp);
-                Main.print("sin");
+                Main.log("placing sin");
             }
             if (structID == 4) {
                 int r = struct[3];
                 int sn = struct[4];
                 circ2(lastX, y, r, sn);
-                Main.print("circ2");
+                Main.log("placing circ2");
             }
             if (structID == 5) {
                 int n = struct[3];
                 dotline(lastX, y, n);
-                Main.print("dotline");
+                Main.log("placing dotline");
             }
             if (structID >= stdStructsNumber + floorStatWheightInRandom) {
                 placeMGStructByRelativeID(structID);
@@ -338,7 +348,11 @@ public class WorldGen implements Runnable {
     
     void placeMGStructByID(int id) {
         short[][] data = mgStruct.structBuffer[id];
-        Main.print("placing struct, id=" + mgStruct.structSizes[id]);
+        if (mgStruct.structSizes[id] < 1) {
+            Main.log("placing mgstruct cancelled, length=", mgStruct.structSizes[id]);
+            return;
+        }
+        Main.log("placing mgstruct, id=", id);
         for (int i = 1; i < mgStruct.structSizes[id]; i++) {
             placePrimitive(data[i]);
         }
@@ -348,7 +362,7 @@ public class WorldGen implements Runnable {
     
     void placePrimitive(short[] data) {
         short id = data[0];
-        Main.print("placing element, id=" + id);
+        //Main.print("placing element, id=", id);
         if (id == 2) {
             line(data[1] + lastX, data[2] + lastY, data[3] + lastX, data[4] + lastY);
         } else if (id == 3) {

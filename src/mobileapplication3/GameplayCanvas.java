@@ -22,21 +22,23 @@ public class GameplayCanvas extends Canvas implements Runnable {
     int KEY_ACTION_LEFT = -6;
 
     int hintCountdown = 120;
-    String[] menuhint = {"MENU:", "here(touch),", "9, #"};
-    String[] pausehint = {"PAUSE:", "here(touch),", "right soft btn"};
-    static boolean firstStart = true;
-    int ang = 0;
+    String[] menuhint = {"MENU:", "here(touch),", "D, #"};
+    String[] pausehint = {"PAUSE:", "here(touch), *,", "B, right soft"};
+    int TEN_FX = FXUtil.toFX(10);
+    
+    // for displaying hints only on first start
+    static boolean isFirstStart = true;
+    int carAngle = 0;
     private final int millis = 50;
     static boolean stopped = false;
     public static boolean isDrawingNow = true;
     boolean accel = false;
     Vector waitingForDynamic = new Vector();
     Vector waitingTime = new Vector();
-    static int flying = 0;
-    int motorTdOff = 50;
+    static int timeFlying = 0;
+    int timeMotorTurnedOff = 50;
     public static boolean uninterestingDebug = false;
-    int prevX = 0;
-    int gameoverCountdown = 0;
+    int gameoverCountdown;
     Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     int sFontH = smallfont.getHeight();
     Font mediumfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
@@ -44,8 +46,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
     Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int lFontH = largefont.getHeight();
     Font currentFont = largefont;
-    int scW = 2;
-    int scH = 2;
+    int scW;
+    int scH;
     int maxScSide;
     boolean leftContacts = false;
     boolean rightContacts = false;
@@ -57,40 +59,53 @@ public class GameplayCanvas extends Canvas implements Runnable {
     boolean pauseTouched = false;
     boolean menuTouched = false;
     static int flipIndicator = 255; // for coloring
+    boolean isWorldLoaded = false;
 
     public GameplayCanvas() {
+        Main.log("gcanvas constructor");
         setFullScreenMode(true);
-        scW = getWidth();
-        scH = getHeight();
+        //scW = getWidth();
+        //scH = getHeight();
+        //repaint();
+        Main.log("gcanvas:starting thread");
+        (new Thread(this, "game canvas")).start();
     }
     public GraphicsWorld w;
 
     public void setWorld(GraphicsWorld world) {
         stopped = false;
-        Main.print("gamecanvas:setWorld()");
+        Main.log("gamecanvas:setWorld()");
         this.w = world;
         w.setGravity(FXVector.newVector(0, 250));
-        //l = world.getLandscape();
         restart();
-        (new Thread(this, "game canvas")).start();
+        isWorldLoaded = true;
     }
     
     
 
     protected void showNotify() {
+        Main.log("showNotify");
         scW = getWidth();
         scH = getHeight();
         maxScSide = Math.max(scW, scH);
         Main.sWidth = scW;
         Main.sHeight = scH;
-        w.refreshScreenParameters();
+        if (isWorldLoaded) {
+            w.refreshScreenParameters();
+        }
         stopped = false;
-        worldgen.resume();
+        if (worldgen != null) {
+            worldgen.resume();
+        }
     }
 
     protected void hideNotify() {
+        Main.log("hideNotify");
         paused = true;
-        worldgen.pause();
+        if (worldgen != null) {
+            worldgen.pause();
+        }
+        repaint();
     }
 
     /*public synchronized void end() {
@@ -98,18 +113,37 @@ public class GameplayCanvas extends Canvas implements Runnable {
     }*/
 
     public void run() {
+        Main.log("gcanvas:thread started");
+        // while world is loading, draw loading screen
+        while (!isWorldLoaded) {
+            repaint();
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+        Main.log("thread:world loaded");
+        
+        w.refreshScreenParameters();
+        
         long sleep = 0;
         long start = 0;
         int tick = 0;
-        int tenFX = FXUtil.toFX(10);
         gameoverCountdown = 0;
         Contact[][] contacts = new Contact[3][];
+        
+        // init music player if enabled
         if (DebugMenu.isDebugEnabled & DebugMenu.music) {
+            Main.log("Starting sound");
             Sound sound = new Sound();
             sound.startBgMusic();
         }
         
+        // continue updating loading screen until worldgen is loaded
+        Main.log("thread:waiting for wg");
         while(!worldgen.isReady()) {
+            repaint();
             try {
                 Thread.sleep(20);
             } catch (InterruptedException ex) {
@@ -117,9 +151,11 @@ public class GameplayCanvas extends Canvas implements Runnable {
             }
         }
         
+        Main.log("thread:starting game cycle");
         while (!stopped) {
             if (scW != getWidth()) {
                 showNotify();
+                w.refreshScreenParameters();
             }
             if (!paused && worldgen.isReady()) {
                 isDrawingNow = true;
@@ -127,13 +163,13 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 contacts[0] = w.getContactsForBody(w.leftwheel);
                 contacts[1] = w.getContactsForBody(w.rightwheel);
                 contacts[2] = w.getContactsForBody(w.carbody);
-                ang = 360 - FXUtil.angleInDegrees2FX(w.carbody.rotation2FX());
+                carAngle = 360 - FXUtil.angleInDegrees2FX(w.carbody.rotation2FX());
                 leftContacts = contacts[0][0] != null;
                 rightContacts = contacts[1][0] != null;
                 if ((!leftContacts & !rightContacts)) {
-                    flying += 1;
+                    timeFlying += 1;
                 } else {
-                    flying = 0;
+                    timeFlying = 0;
                 }
                 
                 FXVector velFX = w.carbody.velocityFX();
@@ -150,13 +186,13 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 }
                 
                 if (uninterestingDebug) {
-                    flying = 0;
+                    timeFlying = 0;
                     speedMultipiler = 30;
                 }
 
                 if (accel) {
-                    motorTdOff = 0;
-                    if (flying > 2) {
+                    timeMotorTurnedOff = 0;
+                    if (timeFlying > 2) {
                         if (w.carbody.rotationVelocity2FX() > 50000000) {
                             w.carbody.applyTorque(FXUtil.toFX(-w.carbody.rotationVelocity2FX()/16000));
                         } else {
@@ -166,8 +202,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
                         int FXSinAngM = 0;
                         int FXCosAngM = 0;
 
-                        FXSinAngM = FXUtil.divideFX(FXUtil.toFX(Mathh.sin(ang - 15) * speedMultipiler), tenFX * 5);
-                        FXCosAngM = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(ang - 15) * speedMultipiler), tenFX * 5);
+                        FXSinAngM = FXUtil.divideFX(FXUtil.toFX(Mathh.sin(carAngle - 15) * speedMultipiler), TEN_FX * 5);
+                        FXCosAngM = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(carAngle - 15) * speedMultipiler), TEN_FX * 5);
                         w.carbody.applyMomentum(new FXVector(FXCosAngM, -FXSinAngM));
 
 
@@ -176,15 +212,15 @@ public class GameplayCanvas extends Canvas implements Runnable {
                         }
                     }
                 } else {
-                    if (motorTdOff < 40 & !uninterestingDebug) {
+                    if (timeMotorTurnedOff < 40 & !uninterestingDebug) {
                         try {
                             if (w.carbody.angularVelocity2FX() > 0) {
                                 w.carbody.applyTorque(FXUtil.toFX(w.carbody.angularVelocity2FX() / 4000));
                             }
-                            if (flying < 2) {
+                            if (timeFlying < 2) {
                                 w.carbody.applyMomentum(new FXVector(-w.carbody.velocityFX().xFX/5, -w.carbody.velocityFX().yFX/5));
                             }
-                            motorTdOff++;
+                            timeMotorTurnedOff++;
                         } catch (NullPointerException ex) {
                             ex.printStackTrace();
                         }
@@ -220,7 +256,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
                             waitingTime.removeElementAt(i);
                         }
                     }
-                    if (GraphicsWorld.carY > 2000 + worldgen.getLowestY() | (ang > 140 & ang < 220 & w.carbody.getContacts()[0] != null)) {
+                    if (GraphicsWorld.carY > 2000 + worldgen.getLowestY() | (carAngle > 140 & carAngle < 220 & w.carbody.getContacts()[0] != null)) {
                         if (gameoverCountdown < 8) {
                             gameoverCountdown++;
                         } else {
@@ -269,17 +305,24 @@ public class GameplayCanvas extends Canvas implements Runnable {
     }
 
     protected void paint(Graphics g) {
-        w.draw(g);
+        g.setColor(0, 0, 0);
+        g.fillRect(0, 0, maxScSide, maxScSide);
+        if (isWorldLoaded) {
+            w.draw(g);
+        }
         drawGUI(g);
     }
     
     private void drawGUI(Graphics g) {
-        if (firstStart & hintCountdown > 0) {
+        if (isFirstStart & hintCountdown > 0) {
             int color = 255 * hintCountdown / 120;
-            g.setColor(color/2, color, color/2);
+            g.setColor(color/4, color/2, color/4);
+            if (Main.isScreenLogEnabled) {
+                //g.setColor(color/2, color/2, color/2);
+            }
             g.fillRect(0, 0, scW/3, scH/6);
             g.fillRect(scW*2/3, 0, scW/3, scH/6);
-            g.setColor(0, 0, color);
+            g.setColor(color/4, color/4, color);
             g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL));
             for (int i = 0; i < menuhint.length; i++) {
                 g.drawString(menuhint[i], scW/6, i * sFontH + scH / 12 - sFontH*menuhint.length/2, Graphics.HCENTER | Graphics.TOP);
@@ -287,7 +330,9 @@ public class GameplayCanvas extends Canvas implements Runnable {
             for (int i = 0; i < pausehint.length; i++) {
                 g.drawString(pausehint[i], scW*5/6, i * sFontH + scH / 12 - sFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
             }
-            hintCountdown--;
+            if (isWorldLoaded) {
+                hintCountdown--;
+            }
         }
         
         if (DebugMenu.isDebugEnabled) {               // draw some debug info if debug is enabled
@@ -316,7 +361,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 debugTextOffset += currentFont.getHeight();
             }
             if (DebugMenu.showAngle) {
-                if (flying > 0) {
+                if (timeFlying > 0) {
                     g.setColor(0, 0, 255);
                 } else {
                     g.setColor(255, 255, 255);
@@ -336,6 +381,23 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 g.fillRect(0, 0, scW, scH*i/7/2 + 1);
                 g.fillRect(0, scH - scH*i/7/2, scW, scH - 1);
             }
+        }
+        if (Main.isScreenLogEnabled) {
+            g.setColor(150, 255, 150);
+            Font font = Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL);
+            g.setFont(font);
+            for (int i = 0; i < Main.onScreenLog.length; i++) {
+                try {
+                    g.drawString(Main.onScreenLog[i], 0, font.getHeight() * i, Graphics.TOP | Graphics.LEFT);
+                } catch (NullPointerException ex) {
+                    
+                } catch (IllegalArgumentException ex) {
+                    
+                }
+            }
+        }
+        if (!isWorldLoaded) {
+            return;
         }
         if (MenuCanvas.isWorldgenEnabled) { // points
             g.setColor(flipIndicator, flipIndicator, 255);
@@ -375,15 +437,14 @@ public class GameplayCanvas extends Canvas implements Runnable {
     protected void keyReleased(int keyCode) {
         int gameAction = getGameAction(keyCode);
         accel = false;
-        if (flying > 0) {
-            flying = Math.max(5, flying);
+        if (timeFlying > 0) {
+            timeFlying = Math.max(5, timeFlying);
         }
     }
 
     protected void keyPressed(int keyCode) {
         int gameAction = getGameAction(keyCode);
-        //text = "Last key: " + gameAction + " " + keyCode;
-        if (keyCode == KEY_ACTION_RIGHT) {
+        if (keyCode == KEY_ACTION_RIGHT/* | keyCode == GenericMenu.SIEMENS_KEYCODE_RIGHT_SOFT*/) {
             if (!paused) {
                 hideNotify();
                 repaint();
@@ -396,19 +457,26 @@ public class GameplayCanvas extends Canvas implements Runnable {
             openMenu();
         } else 
         if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
-            if (DebugMenu.isDebugEnabled & DebugMenu.cheat) {
+            if (!paused) {
+                hideNotify();
+                repaint();
+            } else {
+                paused = false;
+                showNotify();
+            }
+            /*if (DebugMenu.isDebugEnabled & DebugMenu.cheat) {
                 FXVector pos = w.carbody.positionFX();
                 int carX = pos.xAsInt();
                 int carY = pos.yAsInt();
                 worldgen.line(carX - 200, carY + 200, carX + 2000, carY + 0);
-            }
+            }*/
         } else {
             accel = true;
         }
     }
 
     public void openMenu() {
-        firstStart = false;
+        isFirstStart = false;
         MenuCanvas.isWorldgenEnabled = false;
         uninterestingDebug = false;
         stopped = true;
@@ -459,10 +527,13 @@ public class GameplayCanvas extends Canvas implements Runnable {
     }
 
     public void restart() {
+        Main.log("restart");
         gameoverCountdown = 0;
         worldgen = new WorldGen(w);
+        Main.log("wg inited, starting");
         if (MenuCanvas.isWorldgenEnabled) {
             worldgen.start();
+            Main.log("wg started");
         } else {
             w.addCar();
         }

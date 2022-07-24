@@ -72,9 +72,14 @@ public class AboutScreen extends GameCanvas implements Runnable {
         }
         
         try {
-            qr = scale(Image.createImage("/qr.png"), qrSide, qrSide);
+            qr = scale(Image.createImage("qr.png"), qrSide, qrSide);
         } catch (IOException ex) {
             ex.printStackTrace();
+            try {
+                qr = scale(Image.createImage("/qr.png"), qrSide, qrSide);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         
         g.setColor(0, 0, 0);
@@ -186,7 +191,7 @@ public class AboutScreen extends GameCanvas implements Runnable {
         }
     }
     void openLink() {
-        Main.print(url);
+        Main.log(url);
         try {
             if (Main.thiss.platformRequest(url)) {
                 Main.exit();

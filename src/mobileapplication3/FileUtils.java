@@ -54,7 +54,7 @@ public class FileUtils {
     boolean readFilesInFolder(String path, String folderName) {
         if (path != null) {
             path += folderName + sep;
-            Main.print(path);
+            Main.log(path);
             try {
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 if (fc.exists() & fc.isDirectory()) {

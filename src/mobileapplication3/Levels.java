@@ -62,9 +62,9 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
         stopped = false;
         v = new Vector();
 
-        drives = getRoots();
-        v.addElement("---levels---");
         try {
+            drives = getRoots();
+            v.addElement("---levels---");
             getLevels();
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -181,6 +181,8 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
             } catch (IllegalArgumentException ex) {
                 //Main.showAlert(ex);
                 //ex.printStackTrace();
+            } catch (SecurityException ex) {
+                
             }
         }
         return false;
@@ -271,6 +273,8 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
                 startLevel((String) v.elementAt(selected));
             } catch (NullPointerException ex) {
                 Main.showAlert(ex.toString());
+            } catch (SecurityException ex) {
+                
             }
         }
     }

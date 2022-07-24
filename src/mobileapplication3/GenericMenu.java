@@ -27,6 +27,14 @@ public class GenericMenu {
     public static final int OPTIONTYPE_NORMAL = 0;
     public static final int OPTIONTYPE_REACHABLE_ENABLED = 1;
     
+    public static final int SIEMENS_KEYCODE_FIRE = -28;
+    public static final int SIEMENS_KEYCODE_UP = -59;
+    public static final int SIEMENS_KEYCODE_DOWN = -60;
+    public static final int SIEMENS_KEYCODE_LEFT = -61;
+    public static final int SIEMENS_KEYCODE_RIGHT = -62;
+    public static final int SIEMENS_KEYCODE_LEFT_SOFT = -1;
+    public static final int SIEMENS_KEYCODE_RIGHT_SOFT = -4;
+    
     public void paint(Graphics g) {
         
         for (int i = 0; i < options.length; i++) {
@@ -63,6 +71,20 @@ public class GenericMenu {
             
             if (DebugMenu.isDebugEnabled & DebugMenu.fontSize) {
                 g.drawString(String.valueOf(font.getSize()), x0, y0, 0); // display text size (for debug)
+            }
+            if (Main.isScreenLogEnabled) {
+                g.setColor(150, 255, 150);
+                Font font = Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL);
+                g.setFont(font);
+                for (int j = 0; j < Main.onScreenLog.length; j++) {
+                    try {
+                        g.drawString(Main.onScreenLog[j], 0, font.getHeight() * j, Graphics.TOP | Graphics.LEFT);
+                    } catch (NullPointerException ex) {
+
+                    } catch (IllegalArgumentException ex) {
+
+                    }
+                }
             }
         }
     }
@@ -122,6 +144,9 @@ public class GenericMenu {
     
     boolean inited = false;
     public boolean handleKeyStates(int keyStates) {
+        if (keyStates != 0) {
+            //Main.log("states", keyStates);
+        }
         isSelectAlreadyPressed = isSelectPressed;
         if (delayAfterShowing > 0) {
             delayAfterShowing--;
@@ -170,7 +195,7 @@ public class GenericMenu {
     }
     
     public boolean handleKeyPressed(int keyCode) {
-        Main.print(keyCode);
+        Main.log("pressed", keyCode);
         boolean pressed = false;
         int selected = -1;
         switch (keyCode) {
@@ -215,9 +240,17 @@ public class GenericMenu {
                 pressed = true;
                 break;
             case GameCanvas.KEY_POUND:
-                selected = 10;
-                pressed = true;
+                return true;
+            case SIEMENS_KEYCODE_UP:
+                handleKeyStates(GameCanvas.UP_PRESSED);
                 break;
+            case SIEMENS_KEYCODE_DOWN:
+                handleKeyStates(GameCanvas.DOWN_PRESSED);
+                break;
+            case SIEMENS_KEYCODE_RIGHT:
+                return true;
+            case SIEMENS_KEYCODE_FIRE:
+                return true;
             case -6: // left soft button
                 return true;
             default:
@@ -297,7 +330,7 @@ public class GenericMenu {
         if (fontSize == -1) {
             findOptimalFont();
         } else {
-            Main.print(fontSize);
+            Main.log(fontSize);
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
             fontH = font.getHeight();
             fontFound = true;
@@ -314,12 +347,12 @@ public class GenericMenu {
             if (stateMap.length == options.length) {
                 this.stateMap = stateMap;
                 isStatemapEnabled = true;
-                Main.print("stateMap loaded");
+                Main.log("stateMap loaded");
             } else {
-                Main.print("GenericMenu.loadParams: optionTypeMap.length must be == options.length", Main.printCategory_err);
+                Main.log("GenericMenu.loadParams: optionTypeMap.length must be == options.length", Main.printCategory_err);
             }
         } else {
-            Main.print("null stateMap", Main.printCategory_err);
+            Main.log("null stateMap", Main.printCategory_err);
         }
     }
     public void setDefaultColor(int color_hex) {

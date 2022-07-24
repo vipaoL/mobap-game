@@ -7,6 +7,7 @@ package mobileapplication3;
 
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.PhysicsFileReader;
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
 
@@ -29,7 +30,7 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     public static boolean areExtStructsLoaded = false;
     
     Graphics g;
-    private GenericMenu menu = new GenericMenu(); // some generic code for drawing menus
+    private GenericMenu menu; // some generic code for drawing menus
     MgStruct mgStruct; // for loading external structures
 
     private static final int millis = 50; // time for one frame. 1000ms / 50ms = 20(FPS)
@@ -39,10 +40,24 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     public MenuCanvas() {
         super(false);
         setFullScreenMode(true);
+        scW = getWidth();
+        scH = getHeight();
+        if (Main.isScreenLogEnabled) {
+            if (!Main.isScreenLogInited) {
+                Main.onScreenLog = new String[scH/Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL).getHeight()];
+                Main.isScreenLogInited = true;
+            }
+        } else if (Main.isScreenLogInited) {
+            Main.onScreenLog = new String[1];
+            Main.isScreenLogInited = false;
+        }
+        Main.log("menu constructor");
+        menu = new GenericMenu();
         (new Thread(this, "menu canvas")).start();
     }
     
     protected void showNotify() { // init and refreshing screen parameters
+        Main.log("menu showNotify");
         // screen initialization
         scW = getWidth();
         scH = getHeight();
@@ -65,6 +80,7 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     }
 
     protected void hideNotify() {
+        Main.log("menu hideNotify");
         isPaused = true;
     }
 
@@ -77,7 +93,7 @@ public class MenuCanvas extends GameCanvas implements Runnable {
         long sleep = 0; // for FPS/TPS control
         long start = 0; //
         
-        showNotify(); // init
+        //showNotify(); // init
 
         while (!isStopped) { // *** main cycle of menu drawing ***
             start = System.currentTimeMillis();
@@ -111,16 +127,18 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     }
 
     public void startGame() {
-        Main.print("menu:startLevel()");
+        Main.log("menu:startGame()");
         try {
             isStopped = true;
-            PhysicsFileReader reader = new PhysicsFileReader("/void.phy");
+            PhysicsFileReader reader = new PhysicsFileReader("void.phy");
+            Main.log("World read successfully");
             GameplayCanvas gameCanvas = new GameplayCanvas();
+            Main.set(gameCanvas);
             gameCanvas.setWorld(new GraphicsWorld(World.loadWorld(reader)));
             reader.close();
-            Main.set(gameCanvas);
+            repaint();
         } catch (NullPointerException ex) {
-            Main.showAlert(ex.toString());
+            ex.printStackTrace();
         }
     }
     
@@ -155,8 +173,9 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     void selectPressed() { // Do something when pressed any option in menu
         selected = menu.selected;
         if (selected == 1) { // Play
-            Main.print("menu:selected == 1 -> gen = true");
+            Main.log("menu:selected == 1 -> gen = true");
             isWorldgenEnabled = true;
+            repaint();
             startGame();
         }
         if (selected == 2) { // Ext Structs / Reload

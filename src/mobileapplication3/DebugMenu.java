@@ -6,6 +6,7 @@
 
 package mobileapplication3;
 
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.lcdui.Graphics;
 
@@ -21,14 +22,13 @@ public class DebugMenu extends GameCanvas implements Runnable {
         "Enable debug options",
         "-----",
         "closer worldgen trigger",
-        "show X-coordinate",
+        "show coordinates",
         "show speedometer",
-        "cheat(*)",
+        "show log",
         "music",
         "show font size",
         ".mgstruct only",
         "show points of lines",
-        "show car rotation",
         "back"};
     private final int[] statemap = new int[menuOpts.length];
     boolean stopped = false;
@@ -108,7 +108,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             speedo = !speedo;
         }
         if (selected == 5) {
-            cheat = !cheat;
+            Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
         }
         if (selected == 6) {
             music = !music;
@@ -130,9 +130,6 @@ public class DebugMenu extends GameCanvas implements Runnable {
         if (selected == 9) {
             showLinePoints = !showLinePoints;
         }
-        if (selected == 10) {
-            showAngle = !showAngle;
-        }
         if (selected == menuOpts.length - 1) {
             stopped = true;
             Main.set(new MenuCanvas());
@@ -146,13 +143,12 @@ public class DebugMenu extends GameCanvas implements Runnable {
             menu.setEnabledFor(closerWorldgen, 2);
             menu.setEnabledFor(xCoord, 3);
             menu.setEnabledFor(speedo, 4);
-            menu.setEnabledFor(cheat, 5);
+            menu.setEnabledFor(Main.isScreenLogEnabled, 5);
             menu.setEnabledFor(music, 6);
             menu.setEnabledFor(fontSize, 7);
             //menu.setEnabledFor(mgstructOnly, 8);
             menu.setStateFor(-1, 8); // set ".mgstruct only" as inactive button. it's buggy
             menu.setEnabledFor(showLinePoints, 9);
-            menu.setEnabledFor(showAngle, 10);
         } else {
             for (int i = 2; i < menuOpts.length - 1; i++) {
                 menu.setStateFor(-1, i);

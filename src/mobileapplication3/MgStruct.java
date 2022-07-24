@@ -36,18 +36,22 @@ public class MgStruct {
     String sep = "/";
     
     public MgStruct() {
+        Main.log("MGStruct constructor");
         if (!isInited) {
+            Main.log("mgs init");
             for (int i = 1; readRes("/" + i + ".mgstruct"); i++) {
-                Main.print(i);
+                Main.log(i + ".mgstruct");
             }
 
-            Main.print("MGStruct:read completed. loaded " + loadedStructsNumber);
+            Main.log("MGStruct:read completed. loaded " + loadedStructsNumber);
             loadedStructsFromResNumber = loadedStructsNumber;
         }
+        Main.log("inited");
         isInited = true;
     }
     
     boolean load() {
+        Main.log("mgs load()");
         //structBuffer = new short[structArrayBufferSize][][];
         loadedStructsNumber = loadedStructsFromResNumber;
         try {
@@ -80,7 +84,7 @@ public class MgStruct {
     boolean readFilesInFolder(String path) {
         if (path != null) {
             path += "MGStructs" + sep;
-            Main.print(path);
+            Main.log(path);
             try {
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 if (fc.exists() & fc.isDirectory()) {
@@ -88,7 +92,7 @@ public class MgStruct {
                     while (list.hasMoreElements()) {
                         String name = list.nextElement().toString();
                         if (!name.startsWith("-")) readFile(path + name);
-                        else Main.print("struct file \"" + name + "\" is disabled by name prefix \"-\"");
+                        else Main.log("struct file \"" + name + "\" is disabled by name prefix \"-\"");
                     }
                     return true;
                 }
@@ -104,7 +108,7 @@ public class MgStruct {
     }
     
     public void readFile(String path) {
-        Main.print(path);
+        Main.log(path);
         try {
             FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
             DataInputStream dis = fc.openDataInputStream();
@@ -138,7 +142,7 @@ public class MgStruct {
                 if (fVervion != 0) {
                     length = dis.readShort();
                 }
-                Main.print("read: ver=" + fVervion + " length=" + length);
+                Main.log("read: ver=" + fVervion + " length=" + length);
                 short[][] buffer = new short[length][];
                 //structSizes = new int[length];
                 bufSizeInCells = 0;
@@ -162,7 +166,7 @@ public class MgStruct {
                 dis.close();
                 return true;
             } else {
-                Main.print("Unsupported version number: " + fVervion);
+                Main.log("Unsupported version number: " + fVervion);
                 dis.close();
                 return false;
             }
@@ -179,7 +183,7 @@ public class MgStruct {
         changed = true;
     }*/
     void saveStructToBuffer(short[][] data) {
-        Main.print("savivg new structure with id=" + loadedStructsNumber);
+        Main.log("savivg new structure with id=" + loadedStructsNumber);
         structBuffer[loadedStructsNumber] = data;
         structSizes[loadedStructsNumber] = bufSizeInCells;
         loadedStructsNumber++;
