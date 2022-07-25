@@ -15,9 +15,6 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
 
@@ -29,7 +26,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
 
     Enumeration drives;
     String prefix = "file:///";
-    String root = "C:/";
     String sep = "/";
 
     private Command select, back;
@@ -45,7 +41,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     int selected = 1;
     int delay = 10;
     private static int fontSizeCache = -1;
-    Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     boolean paused = false;
     private GenericMenu menu = new GenericMenu();
 
@@ -88,23 +83,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     protected void showNotify() {
         scW = this.getWidth();
         scH = this.getHeight();
-        if (font.getHeight() * v.size() >= scH) {
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-            if (font.getHeight() * v.size() >= scH) {
-                font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-            }
-        }
-        if (font.getSize() != Font.SIZE_SMALL) {
-            for (int i = 1; i < v.size() - 1; i++) {
-                if (font.stringWidth((String) v.elementAt(i)) >= scW) {
-                    font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-                    if (font.stringWidth((String) v.elementAt(i)) >= scW) {
-                        font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-                        break;
-                    }
-                }
-            }
-        }
         menu.loadParams(scW, scH, v, 1, v.size() - 1, selected, fontSizeCache);
         fontSizeCache = menu.getFontSize();
         paused = false;
@@ -192,7 +170,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
         start();
         long sleep = 0;
         long start = 0;
-        long millis = 50;
 
         while (!stopped) {
             if (scW != getWidth()) {
@@ -203,7 +180,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
                 input();
                 repaint();
 
-                sleep = millis - (System.currentTimeMillis() - start);
+                sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
 
                 try {

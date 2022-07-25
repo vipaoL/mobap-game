@@ -8,10 +8,6 @@ package mobileapplication3;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
-import javax.microedition.io.file.FileSystemRegistry;
 
 /**
  *
@@ -26,10 +22,11 @@ public class MgStruct {
 
     static short[][][] structBuffer = new short[structArrayBufferSize][][];
     static int[] structSizes = new int[structArrayBufferSize];
-    static int loadedStructsNumber = 0;
+    static int structsInBufferNumber = 0;
     private int bufSizeInCells = 0;
     static boolean isInited = false;
     static int loadedStructsFromResNumber = 0;
+    boolean loadCancelled = false;
     
     String prefix = "file:///";
     String root = "C:/";
@@ -43,81 +40,11 @@ public class MgStruct {
                 Main.log(i + ".mgstruct");
             }
 
-            Main.log("MGStruct:read completed. loaded " + loadedStructsNumber);
-            loadedStructsFromResNumber = loadedStructsNumber;
+            Main.log("MGStruct:read completed. loaded " + structsInBufferNumber);
+            loadedStructsFromResNumber = structsInBufferNumber;
         }
         Main.log("inited");
         isInited = true;
-    }
-    
-    boolean load() {
-        Main.log("mgs load()");
-        //structBuffer = new short[structArrayBufferSize][][];
-        loadedStructsNumber = loadedStructsFromResNumber;
-        try {
-            String path = System.getProperty("fileconn.dir.photos");
-            readFilesInFolder(path);
-            path = System.getProperty("fileconn.dir.graphics");
-            readFilesInFolder(path);
-        } catch (SecurityException ex) {
-            ex.printStackTrace();
-        } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
-        }
-        Enumeration roots = FileSystemRegistry.listRoots();
-        while (roots.hasMoreElements()) {
-            root = (String) roots.nextElement();
-            String path = prefix + root;
-            try {
-                readFilesInFolder(path);
-                path = prefix + root + "other" + sep;
-                readFilesInFolder(path);
-            } catch (SecurityException ex) {
-            } catch (IllegalArgumentException ex) {
-            }
-        }
-        return loadedStructsNumber > 0;
-    }
-    
-    boolean readFilesInFolder(String path) {
-        if (path != null) {
-            path += "MGStructs" + sep;
-            Main.log(path);
-            try {
-                FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-                if (fc.exists() & fc.isDirectory()) {
-                    Enumeration list =  fc.list();
-                    while (list.hasMoreElements()) {
-                        String name = list.nextElement().toString();
-                        if (!name.startsWith("-")) readFile(path + name);
-                        else Main.log("struct file \"" + name + "\" is disabled by name prefix \"-\"");
-                    }
-                    return true;
-                }
-            } catch (IOException ex) {
-                //Main.showAlert(ex);
-                //ex.printStackTrace();
-            } catch (IllegalArgumentException ex) {
-                //Main.showAlert(ex);
-                //ex.printStackTrace();
-            }
-        }
-        return false;
-    }
-    
-    public void readFile(String path) {
-        Main.log(path);
-        try {
-            FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-            DataInputStream dis = fc.openDataInputStream();
-            if (!readFromDataInputStream(dis)) {
-                Main.showAlert("Failed to load file: " + fc.getName());
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
     }
     
     public boolean readRes(String path) {
@@ -132,6 +59,37 @@ public class MgStruct {
         } catch (NullPointerException ex) {
             return false;
         }
+    }
+    
+    public boolean loadFromFiles() {
+        Main.log("mgs load()");
+        loadCancelled = false;
+        FileUtils files = new FileUtils();
+        int loaded = 0;
+        structsInBufferNumber = loadedStructsFromResNumber;
+        while (true) {
+            DataInputStream dis = null;
+            try {
+                dis = files.loadNextMGStuct();
+            } catch (SecurityException sex) {
+                Main.log("mgs:load cancelled");
+                loadCancelled = true;
+                structsInBufferNumber = loadedStructsFromResNumber;
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+            }
+            if (dis != null) {
+                try {
+                    readFromDataInputStream(dis);
+                    loaded += 1;
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                break;
+            }
+        }
+        return loaded > 0;
     }
 
     public boolean readFromDataInputStream(DataInputStream dis) throws IOException {
@@ -183,10 +141,10 @@ public class MgStruct {
         changed = true;
     }*/
     void saveStructToBuffer(short[][] data) {
-        Main.log("savivg new structure with id=" + loadedStructsNumber);
-        structBuffer[loadedStructsNumber] = data;
-        structSizes[loadedStructsNumber] = bufSizeInCells;
-        loadedStructsNumber++;
+        Main.log("savivg new structure with id=" + structsInBufferNumber);
+        structBuffer[structsInBufferNumber] = data;
+        structSizes[structsInBufferNumber] = bufSizeInCells;
+        structsInBufferNumber++;
         bufSizeInCells = 0;
     }
 }

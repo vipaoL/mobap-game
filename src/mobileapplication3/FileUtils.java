@@ -5,6 +5,7 @@
  */
 package mobileapplication3;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import javax.microedition.io.Connector;
@@ -17,61 +18,88 @@ import javax.microedition.io.file.FileSystemRegistry;
  */
 public class FileUtils {
     String prefix = "file:///";
-    String root = "C:/";
     String sep = "/";
+    String path;
+    String root;
+    String[] folders = {"", "other" + sep};
+    int counter = folders.length;
     
-    public Enumeration getRoots() {
-        return FileSystemRegistry.listRoots();
-    }
-    void load(String folderName) {
-        //structBuffer = new short[32][][];
+    Enumeration list;
+    Enumeration roots;
+    
+    boolean photosChecked = false;
+    boolean graphicsChecked = false;
+    
+    public DataInputStream fileToDataInputStream(String path) {
+        Main.log(path);
         try {
-                String path = System.getProperty("fileconn.dir.photos");
-                readFilesInFolder(path, folderName);
-                path = System.getProperty("fileconn.dir.graphics");
-                readFilesInFolder(path, folderName);
-            } catch (SecurityException ex) {
-                ex.printStackTrace();
-            } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
-            } catch (NullPointerException ex) {
-                ex.printStackTrace();
-            }
-            Enumeration roots = FileSystemRegistry.listRoots();
-            while (roots.hasMoreElements()) {
-                root = (String) roots.nextElement();
-                String path = prefix + root;
-                try {
-                    readFilesInFolder(path, folderName);
-                    path = prefix + root + "other" + sep;
-                    readFilesInFolder(path, folderName);
-                } catch (SecurityException ex) {
-                } catch (IllegalArgumentException ex) {
-                }
-            }
+            FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
+            return fc.openDataInputStream();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
     
-    boolean readFilesInFolder(String path, String folderName) {
-        if (path != null) {
-            path += folderName + sep;
-            Main.log(path);
+    public DataInputStream loadNextMGStuct() throws SecurityException {
+        if (roots == null) {
+            roots = FileSystemRegistry.listRoots();
+        }
+        if (list == null) {
+            list = getNextList();
+        }
+        while (list != null) {
+            if (!list.hasMoreElements()) {
+                list = getNextList();
+            }
+            if (list == null) {
+                return null;
+            }
+            String name = list.nextElement().toString();
+            if (!name.startsWith("-")) {
+                return fileToDataInputStream(path + name);
+            } else {
+                Main.log("struct file \"" + name + "\" is disabled by name prefix \"-\"");
+            }
+        }
+        return null;
+    }
+    
+    private Enumeration getNextList() throws SecurityException {
+        while (roots.hasMoreElements() | !photosChecked | !graphicsChecked) {
+            if (roots.hasMoreElements()) {
+                if (counter >= folders.length) {
+                    root = (String) roots.nextElement();
+                    counter = 1;
+                } else {
+                    counter++;
+                }
+                path = prefix + root + folders[counter - 1];
+            } else if (!photosChecked) {
+                path = System.getProperty("fileconn.dir.photos");
+                photosChecked = true;
+            } else if (!graphicsChecked) {
+                path = System.getProperty("fileconn.dir.graphics");
+                graphicsChecked = true;
+            }
+            if (path == null) {
+                continue;
+            }
+            path += "MGStructs" + sep;
             try {
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 if (fc.exists() & fc.isDirectory()) {
-                    Enumeration list =  fc.list();
-                    while (list.hasMoreElements()) {
-                        //readFile(path + list.nextElement());
+                    Enumeration list = fc.list();
+                    if (list.hasMoreElements()) {
+                        return list;
                     }
-                    return true;
                 }
-            } catch (IOException ex) {
-                //Main.showAlert(ex);
-                //ex.printStackTrace();
-            } catch (IllegalArgumentException ex) {
-                //Main.showAlert(ex);
-                //ex.printStackTrace();
+            } catch (IllegalArgumentException iaex) {
+                iaex.printStackTrace();
+            } catch (IOException ioex) {
+                ioex.printStackTrace();
             }
         }
-        return false;
+        return null;
     }
 }

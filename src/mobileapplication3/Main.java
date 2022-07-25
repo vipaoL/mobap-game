@@ -17,14 +17,11 @@ import javax.microedition.midlet.*;
  */
 public class Main extends MIDlet {
     
+    // enable or disable on-screen log
     public static boolean isScreenLogEnabled = false;
-
-    //public static GraphicsWorld gameWorld;
-    //public static mCanvas gameCanvas;
-    MenuCanvas menuCanvas;
-    //static Levels levelPicker;
-    static int sWidth = 240;
-    static int sHeight = 320;
+    // time for one frame. 1000ms / 50ms = 20fps
+    public static final int TICK_DURATION = 50;
+    static int sWidth, sHeight;
     Display display = Display.getDisplay(this);
     public static Main thiss;
     public static Displayable current;
@@ -33,10 +30,9 @@ public class Main extends MIDlet {
     public static String[] onScreenLog = new String[1];
     public static int onScreenLogOffset = 0;
     public static boolean isScreenLogInited = false;
-    
 
     public Main() {
-        menuCanvas = new MenuCanvas();
+        MenuCanvas menuCanvas = new MenuCanvas();
         sWidth = menuCanvas.getWidth();
         sHeight = menuCanvas.getHeight();
         thiss = this;
@@ -44,7 +40,6 @@ public class Main extends MIDlet {
     }
 
     public void startApp() {
-        //throw new NullPointerException();
     }
 
     public void pauseApp() {
@@ -62,10 +57,6 @@ public class Main extends MIDlet {
         Display.getDisplay(thiss).setCurrent(d);
         current = d;
         clear();
-    }
-    
-    public static void main(String[] args) {
-        
     }
     
     public static void showAlert(Throwable ex) {
@@ -109,11 +100,13 @@ public class Main extends MIDlet {
         }
     }
     public static void log(int i) {
-        log(String.valueOf(i));
+        if (isScreenLogEnabled | DebugMenu.isDebugEnabled) {
+            log(String.valueOf(i));
+        }
     }
     public static void log(String text) {
         if (DebugMenu.isDebugEnabled) {
-            System.out.println("info:" + text);
+            System.out.println(text);
         }
         if (isScreenLogEnabled) {
             if (onScreenLogOffset < onScreenLog.length - 1) {
@@ -124,7 +117,7 @@ public class Main extends MIDlet {
                 }
             }
             onScreenLog[onScreenLogOffset] = text;
-            try {
+            try { // slowing for log readability
                 Thread.sleep(50);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();

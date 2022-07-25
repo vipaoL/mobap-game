@@ -22,7 +22,7 @@ public class WorldGen implements Runnable {
     
     int stdStructsNumber = 6;
     int structLogSize = 7;
-    int floorStatWheightInRandom = 4;
+    int floorWeightInRandom = 4;
     
     private int prevStructRandomId;
     private int nextStructRandomId;
@@ -100,22 +100,28 @@ public class WorldGen implements Runnable {
     private void placeNext() {
         int idsCount;
         if (DebugMenu.mgstructOnly) {
-            idsCount = mgStruct.loadedStructsNumber;
+            idsCount = mgStruct.structsInBufferNumber;
         } else {
-            idsCount = stdStructsNumber + floorStatWheightInRandom + mgStruct.loadedStructsNumber;;
+            idsCount = stdStructsNumber + floorWeightInRandom + mgStruct.structsInBufferNumber;;
         }
         while (nextStructRandomId == prevStructRandomId) {
             nextStructRandomId = rand.nextInt(idsCount); // 10: 0-9
         }
         prevStructRandomId = nextStructRandomId;
         if (DebugMenu.mgstructOnly) {
-            nextStructRandomId+=stdStructsNumber + floorStatWheightInRandom;
+            nextStructRandomId+=stdStructsNumber + floorWeightInRandom;
         }
         
         Main.log("placing: id=", nextStructRandomId);
-        if (lastY > 5000 | lastY < -5000) { // will correct height if it is too high or too low
+        if (lastY > 1000 | lastY < -1000) { // will correct height if it is too high or too low
+            Main.log("correcting height because lastY=", lastY);
             floor(lastX, lastY, 1000 + rand.nextInt(4) * 100, (rand.nextInt(7) - 3) * 100);
         } else {
+            /*
+            * 0 - circ1, 1 - sin, 2 - floorStat, 3 - circ2, 4 - abyss,
+            * 5 - dotline, 6..9 - floor, 10 - mgstruct0, 11 - mgstruct1,
+            * ...
+            */
             switch(nextStructRandomId) {
                 case 0:
                     circ1(lastX, lastY, 400, 15, 120);
@@ -126,7 +132,7 @@ public class WorldGen implements Runnable {
                     sin(lastX, lastY, l, l / 180, 0, amp);
                     break;
                 case 2:
-                    floor(lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(7) - 3) * 100);
+                    floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
                     break;
                 case 3:
                     circ2(lastX, lastY, 1000, 20);
@@ -139,8 +145,8 @@ public class WorldGen implements Runnable {
                     dotline(lastX, lastY, n);
                     break;
                 default:
-                    if (Mathh.strictIneq(stdStructsNumber - 1,/*<*/ nextStructRandomId,/*<*/ stdStructsNumber + floorStatWheightInRandom)) {
-                        floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
+                    if (Mathh.strictIneq(stdStructsNumber - 1,/*<*/ nextStructRandomId,/*<*/ stdStructsNumber + floorWeightInRandom)) {
+                        floor(lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(7) - 3) * 100);
                     } else {
                         placeMGStructByRelativeID(nextStructRandomId);
                     }
@@ -320,7 +326,7 @@ public class WorldGen implements Runnable {
                 dotline(lastX, y, n);
                 Main.log("placing dotline");
             }
-            if (structID >= stdStructsNumber + floorStatWheightInRandom) {
+            if (structID >= stdStructsNumber + floorWeightInRandom) {
                 placeMGStructByRelativeID(structID);
             }
         }
@@ -338,7 +344,7 @@ public class WorldGen implements Runnable {
     
     
     void placeMGStructByRelativeID(int relID) {
-        int id = relID - floorStatWheightInRandom - stdStructsNumber;
+        int id = relID - floorWeightInRandom - stdStructsNumber;
         if (!isResettingPosition) {
             int[] log = {relID, lastX, lastY};
             structlogger(log);

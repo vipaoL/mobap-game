@@ -6,7 +6,6 @@
 
 package mobileapplication3;
 
-import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.lcdui.Graphics;
 
@@ -16,7 +15,7 @@ import javax.microedition.lcdui.Graphics;
  */
 public class DebugMenu extends GameCanvas implements Runnable {
     
-    private static final int millis = 50;
+    
     private GenericMenu menu = new GenericMenu();
     private String[] menuOpts = {
         "Enable debug options",
@@ -30,13 +29,15 @@ public class DebugMenu extends GameCanvas implements Runnable {
         ".mgstruct only",
         "show points of lines",
         "back"};
-    private final int[] statemap = new int[menuOpts.length];
+    
+    // array with states of all buttons (active/inactive/enabled)
+    private final int[] statemap = new int[menuOpts.length]; 
     boolean stopped = false;
     private int scW = 0, scH;
     private static int fontSizeCache = -1;
     public static boolean isDebugEnabled = false;
     public static boolean closerWorldgen = false;
-    public static boolean xCoord = false;
+    public static boolean coordinates = false;
     public static boolean speedo = false;
     public static boolean cheat = false;
     public static boolean music = false;
@@ -71,7 +72,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             }
             repaint();
 
-            sleep = millis - (System.currentTimeMillis() - start);
+            sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
             sleep = Math.max(sleep, 0);
 
             try {
@@ -102,7 +103,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             closerWorldgen = !closerWorldgen;
         }
         if (selected == 3) {
-            xCoord = !xCoord;
+            coordinates = !coordinates;
         }
         if (selected == 4) {
             speedo = !speedo;
@@ -121,7 +122,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
             fontSize = !fontSize;
         }
         if (selected == 8) {
-            if (MgStruct.loadedStructsNumber > 0) {
+            if (MgStruct.structsInBufferNumber > 0) {
                 mgstructOnly = !mgstructOnly;
             } else {
                 mgstructOnly = false;
@@ -141,7 +142,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
         menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         if (DebugMenu.isDebugEnabled) {
             menu.setEnabledFor(closerWorldgen, 2);
-            menu.setEnabledFor(xCoord, 3);
+            menu.setEnabledFor(coordinates, 3);
             menu.setEnabledFor(speedo, 4);
             menu.setEnabledFor(Main.isScreenLogEnabled, 5);
             menu.setEnabledFor(music, 6);

@@ -44,21 +44,18 @@ public class AboutScreen extends GameCanvas implements Runnable {
     Graphics g;
     Image qr;
     
-
-    private static final int millis = 50;
-    
     private GenericMenu menu = new GenericMenu();
 
     public AboutScreen() {
         super(true);
         setFullScreenMode(true);
-        (new Thread(this, "about canvas")).start();
     }
 
     public void start() {
         g = getGraphics();
         showNotify();
         stopped = false;
+        (new Thread(this, "about canvas")).start();
     }
 
     protected void showNotify() {
@@ -72,11 +69,11 @@ public class AboutScreen extends GameCanvas implements Runnable {
         }
         
         try {
-            qr = scale(Image.createImage("qr.png"), qrSide, qrSide);
+            qr = scale(Image.createImage("/qr.png"), qrSide, qrSide);
         } catch (IOException ex) {
             ex.printStackTrace();
             try {
-                qr = scale(Image.createImage("/qr.png"), qrSide, qrSide);
+                qr = scale(Image.createImage("resource://qr.png"), qrSide, qrSide);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -122,7 +119,7 @@ public class AboutScreen extends GameCanvas implements Runnable {
             }
             repaint();
 
-            sleep = millis - (System.currentTimeMillis() - start);
+            sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
             sleep = Math.max(sleep, 0);
 
             try {

@@ -5,8 +5,6 @@
  */
 package mobileapplication3;
 
-import at.emini.physics2D.World;
-import at.emini.physics2D.util.PhysicsFileReader;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
@@ -25,15 +23,15 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     int scW, scH; // screeen width and height
     private static int fontSizeCache = -1; // reduce some operations on next menu showing
     
+    // states
     boolean isPaused = false;
     boolean isStopped = false;
     public static boolean areExtStructsLoaded = false;
+    boolean isInited = false;
     
     Graphics g;
     private GenericMenu menu; // some generic code for drawing menus
     MgStruct mgStruct; // for loading external structures
-
-    private static final int millis = 50; // time for one frame. 1000ms / 50ms = 20(FPS)
     
     public static boolean isWorldgenEnabled = false;
 
@@ -51,13 +49,14 @@ public class MenuCanvas extends GameCanvas implements Runnable {
             Main.onScreenLog = new String[1];
             Main.isScreenLogInited = false;
         }
-        Main.log("menu constructor");
+        Main.log("menu:constructor");
         menu = new GenericMenu();
         (new Thread(this, "menu canvas")).start();
     }
     
-    protected void showNotify() { // init and refreshing screen parameters
-        Main.log("menu showNotify");
+    // init and refreshing screen parameters
+    protected void showNotify() {
+        Main.log("menu:showNotify");
         // screen initialization
         scW = getWidth();
         scH = getHeight();
@@ -65,22 +64,25 @@ public class MenuCanvas extends GameCanvas implements Runnable {
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));
         
-        // menu initialization
-        menu.loadParams(scW, scH, menuOptions, 1, menuOptions.length - 2, selected, fontSizeCache);
-        fontSizeCache = menu.getFontSize();
-        menu.loadStatemap(statemap);
-        if (areExtStructsLoaded) { // highlight and change label of "Ext Structs" btn if it already loaded
-            menu.setStateFor(1, 2);
-            menuOptions[2] = "Reload";
+        if (!isInited) {
+            // menu initialization
+            menu.loadParams(scW, scH, menuOptions, 1, menuOptions.length - 2, selected, fontSizeCache);
+            fontSizeCache = menu.getFontSize();
+            menu.loadStatemap(statemap);
+            if (areExtStructsLoaded) { // highlight and change label of "Ext Structs" btn if it already loaded
+                menu.setStateFor(1, 2);
+                menuOptions[2] = "Reload";
+            }
+            menu.setSpecialOption(menuOptions.length - 3); // to be able to highlight "Debug" option
+            isInited = true;
         }
-        menu.setSpecialOption(menuOptions.length - 3); // to be able to highlight "Debug" option
         
         // enable screen refreshing
         isPaused = false;
     }
 
     protected void hideNotify() {
-        Main.log("menu hideNotify");
+        Main.log("menu:hideNotify");
         isPaused = true;
     }
 
@@ -107,7 +109,7 @@ public class MenuCanvas extends GameCanvas implements Runnable {
                 repaint(); // refresh picture on screen
             }
 
-            sleep = millis - (System.currentTimeMillis() - start);
+            sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
             sleep = Math.max(sleep, 0);
 
             try {
@@ -128,17 +130,20 @@ public class MenuCanvas extends GameCanvas implements Runnable {
 
     public void startGame() {
         Main.log("menu:startGame()");
+        repaint();
         try {
             isStopped = true;
-            PhysicsFileReader reader = new PhysicsFileReader("void.phy");
-            Main.log("World read successfully");
+            Main.log("menu:new CGanvas");
             GameplayCanvas gameCanvas = new GameplayCanvas();
-            Main.set(gameCanvas);
-            gameCanvas.setWorld(new GraphicsWorld(World.loadWorld(reader)));
-            reader.close();
             repaint();
-        } catch (NullPointerException ex) {
+            Main.log("menu:setting gcanvas displayable");
+            repaint();
+            Main.set(gameCanvas);
+            gameCanvas.setLoadingProgress(5);
+            gameCanvas.setDefaultWorld();
+        } catch (Exception ex) {
             ex.printStackTrace();
+            Main.log(ex.toString());
         }
     }
     
@@ -181,13 +186,17 @@ public class MenuCanvas extends GameCanvas implements Runnable {
         if (selected == 2) { // Ext Structs / Reload
             menu.setStateFor(1, 2);
             mgStruct = new MgStruct();
-            if (mgStruct.load()) {
+            if (mgStruct.loadFromFiles()) {
                 areExtStructsLoaded = true;
-                menuOptions[2] = "Reload";
+                menuOptions[2] = (MgStruct.structsInBufferNumber - MgStruct.loadedStructsFromResNumber) + " loaded";
                 menu.setColorEnabledOption(0x0099ff00);
             } else {
                 areExtStructsLoaded = false;
-                menuOptions[2] = "Error, 0 loaded";
+                if (!mgStruct.loadCancelled) {
+                    menuOptions[2] = "Error, 0 loaded";
+                } else {
+                    menuOptions[2] = "Cancelled";
+                }
                 menu.setColorEnabledOption(0x00880000);
             }
         }

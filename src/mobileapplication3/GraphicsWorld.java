@@ -7,7 +7,6 @@ package mobileapplication3;
 import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.FXUtil;
-import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
 /**
@@ -32,7 +31,6 @@ public class GraphicsWorld extends World {
     public static int carY = 0;
     public static int viewField = 10;
     public static int points = 0;
-    int fontH = 50;
     int prevAng = 0;
     int ang = 0;
     int currColBg = colBg;
@@ -41,8 +39,6 @@ public class GraphicsWorld extends World {
 
     public GraphicsWorld(World w) {
         super(w);
-        Main.log("world:constructor");
-        refreshScreenParameters();
     }
 
     public void addCar() {
@@ -80,9 +76,9 @@ public class GraphicsWorld extends World {
         wheelShape.setFriction(0);
         wheelShape.setMass(2);
         wheelShape.correctCentroid();
-        int lwX = spawnX - (carbodyLength / 2 - wheelRadius) * Mathh.cos(ang) / 1000;
+        int lwX = spawnX - (carbodyLength / 2 - wheelRadius - 2) * Mathh.cos(ang) / 1000;
         int lwY = spawnY + wheelRadius / 2 - (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
-        int rwX = spawnX + (carbodyLength / 2 - wheelRadius) * Mathh.cos(ang) / 1000;
+        int rwX = spawnX + (carbodyLength / 2 - wheelRadius + 2) * Mathh.cos(ang) / 1000;
         int rwY = spawnY + wheelRadius / 2 + (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
         leftwheel = new Body(lwX, lwY, wheelShape, true);
         rightwheel = new Body(rwX, rwY, wheelShape, true);
@@ -99,8 +95,8 @@ public class GraphicsWorld extends World {
         leftwheel.addCollisionLayer(1);
         rightwheel.addCollisionLayer(1);
 
-        Joint leftjoint = new Joint(carbody, leftwheel, FXVector.newVector(-carbodyLength / 2 + wheelRadius, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
-        Joint rightjoint = new Joint(carbody, rightwheel, FXVector.newVector(carbodyLength / 2 - wheelRadius, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
+        Joint leftjoint = new Joint(carbody, leftwheel, FXVector.newVector(-carbodyLength / 2 + wheelRadius - 2, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
+        Joint rightjoint = new Joint(carbody, rightwheel, FXVector.newVector(carbodyLength / 2 - wheelRadius + 2, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
         addConstraint(leftjoint);
         addConstraint(rightjoint);
 
@@ -113,7 +109,7 @@ public class GraphicsWorld extends World {
     }
 
     static boolean bg = false;
-    public void draw(Graphics g) {
+    public void drawWorld(Graphics g) {
         // fill background
         g.setColor(currColBg);
         g.fillRect(0, 0, scWidth, scHeight);
@@ -151,8 +147,11 @@ public class GraphicsWorld extends World {
                 */
                 //g.setColor(0, 63, 0);
                 g.setColor(63, 0, 31);
-                for (int i = 0; i < scWidth / 4; i++) {
-                    int x2 = -((i * 64 + (carX - WorldGen.zeroPoint) / 16) % (scWidth * 16) - scWidth * 8)/*  *64/8  */;
+                int offset = (carX - WorldGen.zeroPoint) / 16;
+                int width = (scWidth * 16);
+                int step = 64;
+                for (int i = 0; i < width; i+=step) {
+                    int x2 = -((i + offset) % width - width / 2)/*  *64/8  */;
                     int x1 = x2 / 32;
                     g.drawLine(x1 + scWidth / 2, scHeight * 2 / 3, x2 + scWidth / 2, scHeight);
                 }
@@ -164,7 +163,7 @@ public class GraphicsWorld extends World {
                 g.setColor(0, 0, 0);
                 //g.setColor(63, 0, 31);
                 for (int i = 0; i < lines; i++) {
-                    int y = + i * r / lines + scHeight * 2 / 5 - r / 12;
+                    int y = i * r / lines + scHeight * 2 / 5 - r / 12;
                     g.drawLine(0, y-1, scWidth, y-1);
                     g.drawLine(0, y, scWidth, y);
                     g.drawLine(0, y+1, scWidth, y+1);
@@ -290,7 +289,6 @@ public class GraphicsWorld extends World {
 
     void refreshScreenParameters() {
         Main.log("world:refreshing screen params");
-        fontH = Font.getDefaultFont().getHeight();
         scWidth = Main.sWidth;
         halfScWidth = scWidth / 2;
         scHeight = Main.sHeight;
