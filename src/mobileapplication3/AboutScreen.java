@@ -18,14 +18,15 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class AboutScreen extends GameCanvas implements Runnable {
+public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Feedback {
     String url = "https://github.com/vipaoL/mobap-game";
     String urlPrew = "github: vipaoL/mobap-game";
     String[] strings = {"J2ME game on emini", "physics engine"};
-    String[] menuOpts = {urlPrew, "Version: " + Main.thiss.getAppProperty("MIDlet-Version"), "Back"};
+    String[] menuOpts = {"", urlPrew, "Version: " + Main.thiss.getAppProperty("MIDlet-Version"), "Back"};
     int counter = 17;
     int scW = getWidth();
     int scH = getHeight();
+    int offset = 0;
     int qrOffsetH = 0;
     int menuBtnsOffsetH = 0;
     int qrSide = 0;
@@ -40,21 +41,16 @@ public class AboutScreen extends GameCanvas implements Runnable {
 
     boolean paused = false;
     boolean stopped = false;
+    boolean bigQRIsPainted = false;
     
-    Graphics g;
-    Image qr;
+    Graphics g = getGraphics();
+    Image qr, qrBig;
     
-    private GenericMenu menu = new GenericMenu();
+    private GenericMenu menu = new GenericMenu(this);
 
     public AboutScreen() {
         super(true);
         setFullScreenMode(true);
-    }
-
-    public void start() {
-        g = getGraphics();
-        showNotify();
-        stopped = false;
         (new Thread(this, "about canvas")).start();
     }
 
@@ -71,7 +67,6 @@ public class AboutScreen extends GameCanvas implements Runnable {
         try {
             qr = scale(Image.createImage("/qr.png"), qrSide, qrSide);
         } catch (IOException ex) {
-            ex.printStackTrace();
             try {
                 qr = scale(Image.createImage("resource://qr.png"), qrSide, qrSide);
             } catch (IOException e) {
@@ -79,20 +74,23 @@ public class AboutScreen extends GameCanvas implements Runnable {
             }
         }
         
+        try {
+            qrBig = scale(Image.createImage("/qr.png"), Math.min(scW, scH), Math.min(scW, scH));
+        } catch (IOException ex) {
+            try {
+                qrBig = scale(Image.createImage("resource://qr.png"), Math.min(scW, scH), Math.min(scW, scH));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
         g.setColor(0, 0, 0);
-        g.fillRect(0, 0, getWidth(), getHeight());
-
-        if (font.getHeight() * (strings.length + menuOpts.length) + qrSide > scH) {
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-        }
-        if (font.getHeight() * (strings.length + menuOpts.length) > scH) {
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-        }
-        fontH = font.getHeight();
-        qrOffsetH = font2H + fontH * strings.length + qrMargin;
-        menuBtnsOffsetH = qrOffsetH + qrSide + qrMargin;
-        menu.loadParams(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH, menuOpts, 0, 2, 2, fontSizeCache);
+        g.fillRect(0, 0, Math.max(getWidth(), getHeight()), Math.max(getWidth(), getHeight()));
+        drawHeaderAndQR(g);
+        menuBtnsOffsetH = offset;
+        menu.loadParams(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH, menuOpts, 0, menuOpts.length - 1, menuOpts.length - 1, fontSizeCache);
         fontSizeCache = menu.getFontSize();
+        menu.setFirstDrawable(1);
         paused = false;
     }
 
@@ -104,10 +102,12 @@ public class AboutScreen extends GameCanvas implements Runnable {
         stopped = true;
         Main.exit();
     }
+    
+    public void setIsPaused(boolean isPaused) {
+        this.paused = isPaused;
+    }
 
     public void run() {
-        start();
-
         long sleep = 0;
         long start = 0;
 
@@ -117,7 +117,9 @@ public class AboutScreen extends GameCanvas implements Runnable {
             if (scW != getWidth()) {
                 showNotify();
             }
-            repaint();
+            if (menu.selected != 0 | !bigQRIsPainted) {
+                repaint();
+            }
 
             sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
             sleep = Math.max(sleep, 0);
@@ -131,30 +133,63 @@ public class AboutScreen extends GameCanvas implements Runnable {
     }
     
     public void paint(Graphics g) {
-        g.setColor(0, 0, 0);
-        g.fillRect(0, 0, scW, scH);
+        if (menu.selected != 0) {
+            g.setColor(0, 0, 0);
+            g.fillRect(0, 0, scW, scH);
+            drawHeaderAndQR(g);
+            menu.paint(g);
+            menu.tick();
+            bigQRIsPainted = false;
+        } else {
+            drawBigQR(g);
+        }
+    }
+    
+    void drawHeaderAndQR(Graphics g) {
         g.setColor(255, 255, 255);
-        g.setFont(font2);
-        g.drawString("About:", scW/2, 0, Graphics.HCENTER | Graphics.TOP);
-        int offset = font2H;
+        
+        offset = qrMargin;
+        //g.setFont(font2);
+        //g.drawString("About:", scW/2, 0, Graphics.HCENTER | Graphics.TOP);
+        //offset += font2H;
         for (int i = 0; i < strings.length; i++) {
             g.setFont(font);
             g.drawString(strings[i], scW/2, offset, Graphics.HCENTER | Graphics.TOP);
-            offset+=fontH;
+            offset += fontH;
         }
-        
+        offset += qrMargin;
         try {
-            g.drawImage(qr, scW / 2, qrOffsetH, Graphics.HCENTER | Graphics.TOP);
+            g.drawImage(qr, scW / 2, offset, Graphics.HCENTER | Graphics.TOP);
         } catch (NullPointerException ex) {
-            g.drawLine(qrMargin, qrOffsetH, scW - qrMargin, qrOffsetH);
-            g.drawLine(qrMargin, qrOffsetH + qrSide, scW - qrMargin, qrOffsetH + qrSide);
-            g.drawLine(qrMargin, qrOffsetH, qrMargin, qrOffsetH + qrSide);
-            g.drawLine(scW - qrMargin, qrOffsetH, scW - qrMargin, qrOffsetH + qrSide);
+            g.drawLine(qrMargin, offset, scW - qrMargin, offset);
+            g.drawLine(qrMargin, offset + qrSide, scW - qrMargin, offset + qrSide);
+            g.drawLine(qrMargin, offset, qrMargin, offset + qrSide);
+            g.drawLine(scW - qrMargin, offset, scW - qrMargin, offset + qrSide);
             g.setFont(font3);
-            g.drawString("Your ad could be here.", scW / 2, qrOffsetH + (qrSide - font3H) / 2, Graphics.HCENTER|Graphics.TOP);
+            int x = scW / 2;
+            int y = offset + qrSide / 2;
+            g.drawString("Your ad", x, y, Graphics.HCENTER|Graphics.BOTTOM);
+            g.drawString("could be here.", x, y, Graphics.HCENTER|Graphics.TOP);
         }
-        menu.paint(g);
-        menu.tick();
+        offset += qrSide;
+        offset += qrMargin;
+    }
+    
+    void drawBigQR(Graphics g) {
+        try {
+            g.drawImage(qrBig, scW / 2, scH / 2, Graphics.HCENTER | Graphics.VCENTER);
+        } catch (NullPointerException ex) {
+            g.drawLine(qrMargin, offset, scW - qrMargin, offset);
+            g.drawLine(qrMargin, offset + qrSide, scW - qrMargin, offset + qrSide);
+            g.drawLine(qrMargin, offset, qrMargin, offset + qrSide);
+            g.drawLine(scW - qrMargin, offset, scW - qrMargin, offset + qrSide);
+            g.setFont(font3);
+            int x = scW / 2;
+            int y = scH / 2;
+            g.drawString("Your ad", x, y, Graphics.HCENTER|Graphics.BOTTOM);
+            g.drawString("could be here.", x, y, Graphics.HCENTER|Graphics.TOP);
+        }
+        bigQRIsPainted = true;
     }
 
     private void input() {
@@ -200,10 +235,10 @@ public class AboutScreen extends GameCanvas implements Runnable {
 
     void selectPressed() {
         int selected = menu.selected;
-        if (selected == 0) {
+        if (selected == menuOpts.length - 3) {
             openLink();
         }
-        if (selected == 1) {
+        if (selected == menuOpts.length - 2) {
             counter+=1;
             if (counter == 20) {
                 MenuCanvas.isWorldgenEnabled = true;
@@ -217,7 +252,7 @@ public class AboutScreen extends GameCanvas implements Runnable {
                 Main.set(test);
             }
         }
-        if (selected == 2) {
+        if (selected == menuOpts.length - 1) {
             stopped = true;
             Main.set(new MenuCanvas());
         }

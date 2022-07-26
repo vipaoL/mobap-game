@@ -22,7 +22,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ {
+public class Levels extends GameCanvas implements Runnable/*, CommandListener*/, GenericMenu.Feedback {
 
     Enumeration drives;
     String prefix = "file:///";
@@ -42,7 +42,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
     int delay = 10;
     private static int fontSizeCache = -1;
     boolean paused = false;
-    private GenericMenu menu = new GenericMenu();
+    private GenericMenu menu = new GenericMenu(this);
 
     Levels() {
         super(true);
@@ -164,6 +164,10 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/ 
             }
         }
         return false;
+    }
+    
+    public void setIsPaused(boolean isPaused) {
+        this.paused = isPaused;
     }
 
     public void run() {

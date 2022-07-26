@@ -16,17 +16,29 @@ import javax.microedition.lcdui.game.GameCanvas;
  */
 public class GenericMenu {
     
-    private int x0, y0, w, h, fontH, tick = 0, k, delay = 5, delayAfterShowing = 5, firstReachable, lastReachable, specialOption = -1;
+    private int x0, y0, w, h, fontH, tick = 0, k, delay = 5,
+            delayAfterShowing = 5, firstReachable, lastReachable,
+            firstDrawable = 0, specialOption = -1;
+    
     int selected;
-    private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040, pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00, colUnreachable = 0x00888888, colReachableEnabled = 0x00ccff00;
+    
+    private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040,
+            pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00,
+            colUnreachable = 0x00888888, colReachableEnabled = 0x00ccff00;
     String[] options;
-    private boolean pressed, firstload = true, isSpecialOptionActivated = false, isSelectPressed = false, isSelectAlreadyPressed = false, isStatemapEnabled = false, dontLoadStateMap = false, fontFound = false;
+    
+    private boolean pressed, firstload = true,
+            isSpecialOptionActivated = false, isSelectPressed = false,
+            isSelectAlreadyPressed = false, isStatemapEnabled = false,
+            dontLoadStateMap = false, fontFound = false;
     private Font font;
     private int[] stateMap = null;
     public static final int OPTIONTYPE_UNREACHABLE = -1;
     public static final int OPTIONTYPE_NORMAL = 0;
     public static final int OPTIONTYPE_REACHABLE_ENABLED = 1;
     
+    
+    // key codes
     public static final int SIEMENS_KEYCODE_FIRE = -28;
     public static final int SIEMENS_KEYCODE_UP = -59;
     public static final int SIEMENS_KEYCODE_DOWN = -60;
@@ -35,9 +47,15 @@ public class GenericMenu {
     public static final int SIEMENS_KEYCODE_LEFT_SOFT = -1;
     public static final int SIEMENS_KEYCODE_RIGHT_SOFT = -4;
     
+    Feedback feedback;
+    
+    public GenericMenu(Feedback feedback) {
+        this.feedback = feedback;
+    }
+    
     public void paint(Graphics g) {
         
-        for (int i = 0; i < options.length; i++) {
+        for (int i = firstDrawable; i < options.length; i++) {
             g.setFont(font);
             g.setColor(normalColor);
             int offset = 0;
@@ -66,7 +84,7 @@ public class GenericMenu {
             }
             
             int x = x0 + w / 2;
-            int y = y0 + k * (i + 1) - fontH / 2 - h / (options.length + 1) / 2 + offset*Font.getDefaultFont().getHeight() / 8000;
+            int y = y0 + k * (i + 1 - firstDrawable) - fontH / 2 - h / (options.length + 1 - firstDrawable) / 2 + offset*Font.getDefaultFont().getHeight() / 8000;
             g.drawString(options[i], x, y, Graphics.HCENTER | Graphics.TOP); // draw option on (x, y) //
             
             if (DebugMenu.isDebugEnabled & DebugMenu.fontSize) {
@@ -93,16 +111,16 @@ public class GenericMenu {
         font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
         
         // height
-        if (font.getHeight() * options.length >= h - h/16) {
+        if (font.getHeight() * options.length - firstDrawable >= h - h/16) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
         }
-        if (font.getHeight() * options.length >= h - h/16) {
+        if (font.getHeight() * options.length - firstDrawable >= h - h/16) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         
         // width
         if (font.getSize() != Font.SIZE_SMALL) {
-            for (int i = 0; i < options.length - 1; i++) {
+            for (int i = firstDrawable; i < options.length - 1; i++) {
                 if (font.stringWidth((String) options[i]) >= w - w/16) {
                     font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
                     if (font.stringWidth((String) options[i]) >= w - w/16) {
@@ -132,7 +150,8 @@ public class GenericMenu {
     }
     
     public boolean handlePointer(int x, int y) {
-        int selected = y / k;
+        feedback.setIsPaused(false);
+        int selected = firstDrawable + y / k;
         if (!isOptionAvailable(selected)) {
             pressed = false;
             return false;
@@ -166,12 +185,14 @@ public class GenericMenu {
             while (needRepeat) {
                 needRepeat = false;
                 if ((keyStates & GameCanvas.UP_PRESSED) != 0) {
+                    feedback.setIsPaused(false);
                     if (selected > firstReachable) {
                         selected--;
                     } else {
                         selected = lastReachable;
                     }
                 } else if ((keyStates & GameCanvas.DOWN_PRESSED) != 0) {
+                    feedback.setIsPaused(false);
                     if (selected < lastReachable) {
                         selected++;
                     } else {
@@ -195,6 +216,7 @@ public class GenericMenu {
     }
     
     public boolean handleKeyPressed(int keyCode) {
+        feedback.setIsPaused(false);
         Main.log("pressed", keyCode);
         boolean pressed = false;
         int selected = -1;
@@ -324,7 +346,7 @@ public class GenericMenu {
         if (!dontLoadStateMap & optionStateMap != null) {
             loadStatemap(optionStateMap);
         }
-        k = (h + h / (options.length + 1)) / (options.length + 1);
+        k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
         this.firstReachable = firstReachable;
         this.lastReachable = lastReachable;
         if (fontSize == -1) {
@@ -376,6 +398,10 @@ public class GenericMenu {
     public void setIsSpecialOptnActivated (boolean isActivated) {
         isSpecialOptionActivated = isActivated;
     }
+    public void setFirstDrawable(int n) {
+        firstDrawable = n;
+        k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
+    }
     public void setEnabledFor(boolean enabled, int i) {
         if (enabled) {
             setStateFor(1, i);
@@ -402,5 +428,9 @@ public class GenericMenu {
         } else {
             tick++;
         }
+    }
+    
+    interface Feedback {
+        void setIsPaused(boolean isPaused);
     }
 }

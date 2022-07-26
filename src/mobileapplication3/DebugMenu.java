@@ -13,10 +13,8 @@ import javax.microedition.lcdui.Graphics;
  *
  * @author vipaol
  */
-public class DebugMenu extends GameCanvas implements Runnable {
-    
-    
-    private GenericMenu menu = new GenericMenu();
+public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedback {
+    private GenericMenu menu = new GenericMenu(this);
     private String[] menuOpts = {
         "Enable debug options",
         "-----",
@@ -33,6 +31,7 @@ public class DebugMenu extends GameCanvas implements Runnable {
     // array with states of all buttons (active/inactive/enabled)
     private final int[] statemap = new int[menuOpts.length]; 
     boolean stopped = false;
+    boolean isPaused = false;
     private int scW = 0, scH;
     private static int fontSizeCache = -1;
     public static boolean isDebugEnabled = false;
@@ -52,6 +51,10 @@ public class DebugMenu extends GameCanvas implements Runnable {
         statemap[1] = -1; // set "-----" separator as inactive button
         setFullScreenMode(true);
         (new Thread(this, "about canvas")).start();
+    }
+    
+    public void setIsPaused(boolean isPaused) {
+        this.isPaused = isPaused;
     }
 
     public void run() {

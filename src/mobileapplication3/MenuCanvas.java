@@ -13,7 +13,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class MenuCanvas extends GameCanvas implements Runnable {
+public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feedback{
     
     String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Debug", "Exit", "-"};
     
@@ -50,7 +50,7 @@ public class MenuCanvas extends GameCanvas implements Runnable {
             Main.isScreenLogInited = false;
         }
         Main.log("menu:constructor");
-        menu = new GenericMenu();
+        menu = new GenericMenu(this);
         (new Thread(this, "menu canvas")).start();
     }
     
@@ -89,6 +89,10 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     public void destroyApp(boolean unconditional) {
         isStopped = true;
         Main.exit();
+    }
+    
+    public void setIsPaused(boolean isPaused) {
+        this.isPaused = isPaused;
     }
 
     public void run() {
