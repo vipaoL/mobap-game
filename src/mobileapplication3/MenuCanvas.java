@@ -26,12 +26,12 @@ public class MenuCanvas extends GameCanvas implements Runnable {
     // states
     boolean isPaused = false;
     boolean isStopped = false;
-    public static boolean areExtStructsLoaded = false;
+    boolean areExtStructsLoaded = false;
     boolean isInited = false;
     
-    Graphics g;
+    private Graphics g;
     private GenericMenu menu; // some generic code for drawing menus
-    MgStruct mgStruct; // for loading external structures
+    private MgStruct mgStruct; // for loading external structures
     
     public static boolean isWorldgenEnabled = false;
 

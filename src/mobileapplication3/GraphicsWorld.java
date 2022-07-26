@@ -148,10 +148,11 @@ public class GraphicsWorld extends World {
                 //g.setColor(0, 63, 0);
                 g.setColor(63, 0, 31);
                 int offset = (carX - WorldGen.zeroPoint) / 16;
-                int width = (scWidth * 16);
+                int l = (scWidth * 16);
                 int step = 64;
-                for (int i = 0; i < width; i+=step) {
-                    int x2 = -((i + offset) % width - width / 2)/*  *64/8  */;
+                int end = scWidth * 16;
+                for (int i = 0; i < end; i+=step) {
+                    int x2 = -((i * 64 + offset) % l - l / 2)/*  *64/8  */;
                     int x1 = x2 / 32;
                     g.drawLine(x1 + scWidth / 2, scHeight * 2 / 3, x2 + scWidth / 2, scHeight);
                 }
