@@ -18,24 +18,32 @@ public class GraphicsWorld extends World {
     int colBg = 0x000000;
     int colLandscape = 0x4444ff;
     int colBodies = 0xffffff;
+    
     int scWidth = 64;
     int halfScWidth = 32;
-    int scHeight = 320;
+    int scHeight = 320; // test values, will be replaced
     int halfScHeight = 160;
     int scMinSide = 64;
+    
     int zoomBase = 0;
     int zoomOut = 100;
     int offsetX = 0;
     int offsetY = 0;
-    public static int carX = 0;
-    public static int carY = 0;
     public static int viewField = 10;
     public static int points = 0;
-    int prevAng = 0;
-    int ang = 0;
     int currColBg = colBg;
     int currColLandscape = colLandscape;
     int currColBodies = colBodies;
+    
+    static boolean bg = false;
+    
+    public static int carX = 0;
+    public static int carY = 0;
+    int prevAng = 0;
+    int ang = 0;
+    public Body carbody;
+    public Body leftwheel;
+    public Body rightwheel;
 
     public GraphicsWorld(World w) {
         super(w);
@@ -48,10 +56,6 @@ public class GraphicsWorld extends World {
         }
         addCar(x, -400, FXUtil.TWO_PI_2FX / 360 * 30, null);
     }
-
-    public Body carbody;
-    public Body leftwheel;
-    public Body rightwheel;
 
     public void addCar(int spawnX, int spawnY, int ang2FX, Object[] vel) {
         int carbodyLength = 240;
@@ -107,8 +111,7 @@ public class GraphicsWorld extends World {
         }
         WorldGen.zeroPoint = spawnX;
     }
-
-    static boolean bg = false;
+    
     public void drawWorld(Graphics g) {
         // fill background
         g.setColor(currColBg);

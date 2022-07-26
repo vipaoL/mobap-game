@@ -109,7 +109,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         setLoadingProgress(30);
 
         Main.log("gCanv:new grWorld");
-        //
+        // there's siemens c65 stucks if obfucsation is enabled
         GraphicsWorld grWorld = new GraphicsWorld(w);
         setLoadingProgress(50);
 
