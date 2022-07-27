@@ -15,13 +15,17 @@ import javax.microedition.lcdui.game.GameCanvas;
  * @author vipaol
  */
 public class GenericMenu {
+    private static final int PAUSE_DELAY = 5;
+    private static final int KEY_PRESS_DELAY = 5;
     
-    private int x0, y0, w, h, fontH, tick = 0, k, delay = 5,
+    private int x0, y0, w, h, fontH, tick = 0, k, keyPressDelay = KEY_PRESS_DELAY,
             delayAfterShowing = 5, firstReachable, lastReachable,
-            firstDrawable = 0, specialOption = -1;
+            firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY,
+            currKeyStates = 0, currKeyCode = 0;
     
     int selected;
     
+    // colors
     private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040,
             pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00,
             colUnreachable = 0x00888888, colReachableEnabled = 0x00ccff00;
@@ -30,7 +34,7 @@ public class GenericMenu {
     private boolean pressed, firstload = true,
             isSpecialOptionActivated = false, isSelectPressed = false,
             isSelectAlreadyPressed = false, isStatemapEnabled = false,
-            dontLoadStateMap = false, fontFound = false;
+            dontLoadStateMap = false, fontFound = false, isKnownButton = true;
     private Font font;
     private int[] stateMap = null;
     public static final int OPTIONTYPE_UNREACHABLE = -1;
@@ -39,13 +43,13 @@ public class GenericMenu {
     
     
     // key codes
-    public static final int SIEMENS_KEYCODE_FIRE = -28;
-    public static final int SIEMENS_KEYCODE_UP = -59;
-    public static final int SIEMENS_KEYCODE_DOWN = -60;
-    public static final int SIEMENS_KEYCODE_LEFT = -61;
-    public static final int SIEMENS_KEYCODE_RIGHT = -62;
-    public static final int SIEMENS_KEYCODE_LEFT_SOFT = -1;
-    public static final int SIEMENS_KEYCODE_RIGHT_SOFT = -4;
+    public static final int SIEMENS_KEY_FIRE = -26;
+    public static final int SIEMENS_KEY_UP = -59;
+    public static final int SIEMENS_KEY_DOWN = -60;
+    public static final int SIEMENS_KEY_LEFT = -61;
+    public static final int SIEMENS_KEY_RIGHT = -62;
+    public static final int SIEMENS_KEY_LEFT_SOFT = -1;
+    public static final int SIEMENS_KEY_RIGHT_SOFT = -4;
     
     Feedback feedback;
     
@@ -54,7 +58,6 @@ public class GenericMenu {
     }
     
     public void paint(Graphics g) {
-        
         for (int i = firstDrawable; i < options.length; i++) {
             g.setFont(font);
             g.setColor(normalColor);
@@ -104,6 +107,10 @@ public class GenericMenu {
                     }
                 }
             }
+        }
+        if (!isKnownButton) {
+            g.setColor(127, 127, 127);
+            g.drawString("Unknown btn:keyStates=" + currKeyStates + ", keyCode=" + currKeyCode, x0 + w, y0 + h, Graphics.BOTTOM | Graphics.RIGHT);
         }
     }
     
@@ -174,17 +181,19 @@ public class GenericMenu {
         } else {
             if (!inited) {
                 inited = true;
-                delay = 0;
+                keyPressDelay = 0;
                 isSelectAlreadyPressed = false;
             }
         }
-        if (delay < 1) {
+        
+        if (keyPressDelay < 1) {
             isSelectPressed = ((keyStates & (GameCanvas.RIGHT_PRESSED | GameCanvas.FIRE_PRESSED)) != 0);
-            delay = 5;
+            keyPressDelay = KEY_PRESS_DELAY;
             boolean needRepeat = true;
             while (needRepeat) {
                 needRepeat = false;
                 if ((keyStates & GameCanvas.UP_PRESSED) != 0) {
+                    isKnownButton = true;
                     feedback.setIsPaused(false);
                     if (selected > firstReachable) {
                         selected--;
@@ -192,6 +201,7 @@ public class GenericMenu {
                         selected = lastReachable;
                     }
                 } else if ((keyStates & GameCanvas.DOWN_PRESSED) != 0) {
+                    isKnownButton = true;
                     feedback.setIsPaused(false);
                     if (selected < lastReachable) {
                         selected++;
@@ -204,18 +214,22 @@ public class GenericMenu {
                 }
             }
         } else {
-            if (delay > 0)
-                delay--;
+            keyPressDelay--;
         }
         if (keyStates == 0) {
-            delay = 0;
+            keyPressDelay = 0;
             isSelectPressed = false;
             isSelectAlreadyPressed = false;
+        } else {
+            currKeyStates = keyStates;
         }
         return isSelectPressed & !isSelectAlreadyPressed;
     }
     
     public boolean handleKeyPressed(int keyCode) {
+        if (feedback.getIsPaused()) {
+            feedback.recheckInput();
+        }
         feedback.setIsPaused(false);
         Main.log("pressed", keyCode);
         boolean pressed = false;
@@ -262,35 +276,95 @@ public class GenericMenu {
                 pressed = true;
                 break;
             case GameCanvas.KEY_POUND:
-                return true;
-            case SIEMENS_KEYCODE_UP:
+                isKnownButton = true;
+                if (keyPressDelay < 1) {
+                    keyPressDelay = KEY_PRESS_DELAY;
+                    return true;
+                } else {
+                    return false;
+                }
+            case SIEMENS_KEY_UP:
+                isKnownButton = true;
                 handleKeyStates(GameCanvas.UP_PRESSED);
                 break;
-            case SIEMENS_KEYCODE_DOWN:
+            case SIEMENS_KEY_DOWN:
+                isKnownButton = true;
                 handleKeyStates(GameCanvas.DOWN_PRESSED);
                 break;
-            case SIEMENS_KEYCODE_RIGHT:
-                return true;
-            case SIEMENS_KEYCODE_FIRE:
-                return true;
+            case SIEMENS_KEY_RIGHT:
+                isKnownButton = true;
+                if (keyPressDelay < 1) {
+                    keyPressDelay = KEY_PRESS_DELAY;
+                    return true;
+                } else {
+                    return false;
+                }
+            case SIEMENS_KEY_FIRE:
+                isKnownButton = true;
+                if (keyPressDelay < 1) {
+                    keyPressDelay = KEY_PRESS_DELAY;
+                    return true;
+                } else {
+                    return false;
+                }
             case -6: // left soft button
-                return true;
+                isKnownButton = true;
+                if (keyPressDelay < 1) {
+                    keyPressDelay = KEY_PRESS_DELAY;
+                    return true;
+                } else {
+                    return false;
+                }
             default:
+                isKnownButton = false;
                 break;
         }
         selected += firstReachable;
-        if (keyCode == GameCanvas.KEY_NUM0 | keyCode == -7/*right soft button*/) {
+        if (keyCode == GameCanvas.KEY_NUM0 | keyCode == -7/*right soft button*/ | keyCode == SIEMENS_KEY_LEFT) {
+            isKnownButton = true;
             selected = lastReachable; // back
-            pressed = true;
+            if (keyPressDelay < 1) {
+                pressed = true;
+                keyPressDelay = KEY_PRESS_DELAY;
+            }
+        }
+        
+        if (!isKnownButton) {
+            currKeyCode = keyCode;
         }
         
         if (pressed) {
+            isKnownButton = true;
             if (isOptionAvailable(selected)) {
                 this.selected = selected;
                 return true;
             }
         }
         return false;
+    }
+    
+    /**
+     * Should be placed to showNotify.
+     * <p>handleHideNotify() in its right place is also needed.
+     * <p>
+     * It prevents siemens' bug that calls hideNotify right after
+     * calling showNotify.
+     */
+    public void handleShowNotify() {
+        pauseDelay = PAUSE_DELAY;
+    }
+    
+    /**
+     * Should be places in the END of hideNotify() (after "isPaused = true").
+     * <p>handleShowNotify() in its right place is also needed.
+     * <p>
+     * It prevents siemens' bug that calls hideNotify right after
+     * calling showNotify.
+     */
+    public void handleHideNotify() {
+        if (pauseDelay > 0) {
+            feedback.setIsPaused(false);
+        }
     }
     
     
@@ -428,9 +502,21 @@ public class GenericMenu {
         } else {
             tick++;
         }
+        if (pauseDelay > 0) {
+            pauseDelay--;
+        }
     }
     
     interface Feedback {
+        boolean getIsPaused();
         void setIsPaused(boolean isPaused);
+        /*
+        * if this method was called, then you need to re-check keyboard input
+        * <p> e.g.: <p>
+        * void recheckInput() { <p>
+        *   input(); <p>
+        * }
+        */
+        void recheckInput();
     }
 }

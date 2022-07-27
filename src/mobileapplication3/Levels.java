@@ -159,10 +159,12 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
         menu.loadParams(scW, scH, levelNames, 1, levelNames.size() - 1, selected, fontSizeCache);
         fontSizeCache = menu.getFontSize();
         paused = false;
+        menu.handleShowNotify();
     }
 
     protected void hideNotify() {
         paused = true;
+        menu.handleHideNotify();
     }
     
     public void setIsPaused(boolean isPaused) {
@@ -207,4 +209,12 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
             m.start();
         }
     }*/
+
+    public boolean getIsPaused() {
+        return paused;
+    }
+
+    public void recheckInput() {
+        input();
+    }
 }

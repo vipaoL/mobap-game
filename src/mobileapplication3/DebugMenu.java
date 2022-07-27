@@ -53,16 +53,22 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         (new Thread(this, "about canvas")).start();
     }
     
+    public boolean getIsPaused() {
+        return isPaused;
+    }
+    
     public void setIsPaused(boolean isPaused) {
         this.isPaused = isPaused;
     }
     
     protected void hideNotify(){
         isPaused = true;
+        menu.handleHideNotify();
     }
     
     protected void showNotify(){
         isPaused = false;
+        menu.handleShowNotify();
     }
 
     public void run() {
@@ -195,5 +201,9 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
         }
+    }
+
+    public void recheckInput() {
+        input();
     }
 }

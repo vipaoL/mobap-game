@@ -23,6 +23,11 @@ public class GameplayCanvas extends Canvas implements Runnable {
     String[] pausehint = {"PAUSE:", "here(touch), *,", "B, right soft"};
     int hintTime = 120; // in ticks
     
+    // to prevent siemens' bug that calls hideNotify right after showing canvas
+    private static final int PAUSE_DELAY = 5;
+    private int pauseDelay = PAUSE_DELAY;
+    private boolean previousPauseState = false;
+    
     // state and mode
     static boolean isFirstStart = true; // for displaying hints only on first start
     public static boolean isDrawingNow = true;
@@ -548,12 +553,21 @@ public class GameplayCanvas extends Canvas implements Runnable {
             worldgen.pause();
         }
         repaint();
+        // to prevent siemens' bug that calls hideNotify right after showing canvas
+        if (pauseDelay > 0) {
+            if (previousPauseState == false) {
+                resume();
+            }
+        }
     }
     
     protected void showNotify() {
         log("showNotify");
         refreshScreenParameters();
         repaint();
+        // to prevent siemens' bug that calls hideNotify right after showing canvas
+        pauseDelay = PAUSE_DELAY;
+        previousPauseState = paused;
     }
 
     // keyboard events

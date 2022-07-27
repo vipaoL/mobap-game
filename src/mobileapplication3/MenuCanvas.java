@@ -79,11 +79,13 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         
         // enable screen refreshing
         isPaused = false;
+        menu.handleShowNotify();
     }
 
     protected void hideNotify() {
         Main.log("menu:hideNotify");
         isPaused = true;
+        menu.handleHideNotify();
     }
 
     public void destroyApp(boolean unconditional) {
@@ -221,5 +223,13 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             isStopped = true;
             Main.exit();
         }
+    }
+
+    public boolean getIsPaused() {
+        return isPaused;
+    }
+
+    public void recheckInput() {
+        input();
     }
 }

@@ -93,10 +93,12 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         menu.setFirstDrawable(1);
         paused = false;
         repaint();
+        menu.handleShowNotify();
     }
 
     protected void hideNotify() {
         paused = true;
+        menu.handleHideNotify();
     }
 
     public void destroyApp(boolean unconditional) {
@@ -304,5 +306,12 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         rawInput = null;
         return Image.createRGBImage(rawOutput, newWidth, newHeight, true);
 
+    }
+    public boolean getIsPaused() {
+        return paused;
+    }
+
+    public void recheckInput() {
+        input();
     }
 }
