@@ -64,13 +64,14 @@ public class MgStruct {
     public boolean loadFromFiles() {
         Main.log("mgs load()");
         loadCancelled = false;
-        FileUtils files = new FileUtils();
+        FileUtils files = new FileUtils("MGStructs");
+        files.setPrefixToDisable("-");
         int loaded = 0;
         structsInBufferNumber = loadedStructsFromResNumber;
         while (true) {
             DataInputStream dis = null;
             try {
-                dis = files.loadNextMGStuct();
+                dis = files.loadNext();
             } catch (SecurityException sex) {
                 Main.log("mgs:load cancelled");
                 loadCancelled = true;

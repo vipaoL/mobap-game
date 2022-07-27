@@ -56,28 +56,41 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public void setIsPaused(boolean isPaused) {
         this.isPaused = isPaused;
     }
+    
+    protected void hideNotify(){
+        isPaused = true;
+    }
+    
+    protected void showNotify(){
+        isPaused = false;
+    }
 
     public void run() {
-        long sleep = 0;
-        long start = 0;
+        long sleep;
+        long start;
+        
+        repaint();
 
         while (!stopped) {
-            start = System.currentTimeMillis();
-            input();
-            if (scW != getWidth()) {
-                scW = getWidth();
-                scH = getHeight();
-                System.out.println(statemap != null);
-                menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
-                fontSizeCache = menu.getFontSize();
-                menu.setSpecialOption(0);
-                refreshStates();
+            if (!isPaused) {
+                start = System.currentTimeMillis();
+                input();
+                if (scW != getWidth()) {
+                    scW = getWidth();
+                    scH = getHeight();
+                    System.out.println(statemap != null);
+                    menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
+                    fontSizeCache = menu.getFontSize();
+                    menu.setSpecialOption(0);
+                    refreshStates();
+                }
+                repaint();
+
+                sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
+                sleep = Math.max(sleep, 0);
+            } else {
+                sleep = 200;
             }
-            repaint();
-
-            sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
-            sleep = Math.max(sleep, 0);
-
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {

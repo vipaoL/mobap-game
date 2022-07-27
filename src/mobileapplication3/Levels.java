@@ -11,10 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Vector;
-import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
-import javax.microedition.io.file.FileSystemRegistry;
-import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
 
@@ -24,16 +20,10 @@ import javax.microedition.lcdui.game.GameCanvas;
  */
 public class Levels extends GameCanvas implements Runnable/*, CommandListener*/, GenericMenu.Feedback {
 
-    Enumeration drives;
-    String prefix = "file:///";
-    String sep = "/";
-
-    private Command select, back;
-
-    Enumeration list;
+    //private Command select, back;
 
     boolean stopped = false;
-    Vector v;
+    Vector levelNames;
 
     int scW = this.getWidth();
     int scH = this.getHeight();
@@ -43,132 +33,91 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
     private static int fontSizeCache = -1;
     boolean paused = false;
     private GenericMenu menu = new GenericMenu(this);
+    FileUtils files = new FileUtils("Levels");
 
     Levels() {
         super(true);
         setFullScreenMode(true);
-        select = new Command("Select", Command.OK, 1);
-        back = new Command("Back", Command.BACK, 2);
+        //select = new Command("Select", Command.OK, 1);
+        //back = new Command("Back", Command.BACK, 2);
         (new Thread(this, "level picker")).start();
     }
 
     public void start() {
-        //drives = FileSystemRegistry.listRoots();
         stopped = false;
-        v = new Vector();
+        levelNames = new Vector();
 
         try {
-            drives = getRoots();
-            v.addElement("---levels---");
+            levelNames.addElement("---levels---");
             getLevels();
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SecurityException e) {
-            e.printStackTrace();
+            levelNames.setElementAt("no read permission", 0);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
-
-        v.addElement("--Back--");
+        // TODO: separate with pages -----------------------!
+        levelNames.addElement("--Back--");
         showNotify();
 
         //addCommand(select);
         //addCommand(back);
         //setCommandListener(this);
-
-        //runner = new Thread(this);
-        //runner.start();
     }
-
-    protected void showNotify() {
-        scW = this.getWidth();
-        scH = this.getHeight();
-        menu.loadParams(scW, scH, v, 1, v.size() - 1, selected, fontSizeCache);
-        fontSizeCache = menu.getFontSize();
-        paused = false;
-    }
-
-    protected void hideNotify() {
-        paused = true;
-    }
-
-    public void paint(Graphics g) {
-        g.setColor(0, 0, 0);
-        g.fillRect(0, 0, scW, scH);
-        menu.paint(g);
-        menu.tick();
-    }
-
+    
     public void getLevels() {
-        if (drives.hasMoreElements()) {
-            while (drives.hasMoreElements()) {
-                checkDrive((String) drives.nextElement());
-            }
-        } else {
+        Enumeration list;
+        while (true) {            
+            list =  files.getNextList();
             
-        }
-        try {
-            String path = System.getProperty("fileconn.dir.photos");
-            listFiles(path);
-            path = System.getProperty("fileconn.dir.graphics");
-            listFiles(path);
-        } catch (SecurityException ex) {
-            ex.printStackTrace();
-            //Main.showAlert(ex);
-        } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-            //Main.showAlert(ex);
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
-            //Main.showAlert(ex);
+            // if no more files
+            if (list == null) break;
+            
+            while (list.hasMoreElements()) {
+                levelNames.addElement(files.path + list.nextElement());
+            }
         }
     }
     
-    void checkDrive(String root) {
-        String path = prefix + root;
-        try {
-            listFiles(path);
-            path = prefix + root + "other" + sep;
-            listFiles(path);
-            //path = prefix + root + "predefgallery" + sep + "predefgraphics" + sep + "Levels/";
-            //listFiles(path);
-        } catch (SecurityException ex) {
-            //ex.printStackTrace();
-            //Main.showAlert(ex);
-        } catch (IllegalArgumentException ex) {
-            //ex.printStackTrace();
-            //Main.showAlert(ex);
-        }
+    public void startLevel(String path) {
+        GameplayCanvas gameCanvas = new GameplayCanvas();
+        gameCanvas.setWorld(readWorldFile(path));
+        Main.set(gameCanvas);
     }
-
-    boolean listFiles(String path) {
-        if (path != null) {
-            path += "Levels" + sep;
+    
+    public GraphicsWorld readWorldFile(String path) {
+        PhysicsFileReader reader;
+        try {
+            InputStream is;
+            is = files.fileToInputStream(path);
+            reader = new PhysicsFileReader(is);
+            GraphicsWorld w = new GraphicsWorld(World.loadWorld(reader));
+            reader.close();
+            is.close();
+            return w;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    
+    public void selectPressed() {
+        selected = menu.selected;
+        stopped = true;
+        if (selected == levelNames.size() - 1) {
+            Main.set(new MenuCanvas());
+        } else {
             try {
-                FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
-                if (fc.exists() & fc.isDirectory()) {
-                    list =  fc.list();
-                    while (list.hasMoreElements()) {
-                        v.addElement(path + list.nextElement());
-                    }
-                    return true;
-                }
-            } catch (IOException ex) {
-                //Main.showAlert(ex);
-                //ex.printStackTrace();
-            } catch (IllegalArgumentException ex) {
-                //Main.showAlert(ex);
-                //ex.printStackTrace();
+                startLevel((String) levelNames.elementAt(selected));
+            } catch (NullPointerException ex) {
+                Main.showAlert(ex.toString());
             } catch (SecurityException ex) {
                 
             }
         }
-        return false;
     }
     
-    public void setIsPaused(boolean isPaused) {
-        this.paused = isPaused;
-    }
 
     public void run() {
         start();
@@ -196,26 +145,30 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
         }
     }
     
-    public void startLevel(String path) {
-        GameplayCanvas gameCanvas = new GameplayCanvas();
-        gameCanvas.setWorld(readWorldFile(path));
-        Main.set(gameCanvas);
+    public void paint(Graphics g) {
+        g.setColor(0, 0, 0);
+        g.fillRect(0, 0, scW, scH);
+        menu.paint(g);
+        menu.tick();
+    }
+    
+    
+    protected void showNotify() {
+        scW = this.getWidth();
+        scH = this.getHeight();
+        menu.loadParams(scW, scH, levelNames, 1, levelNames.size() - 1, selected, fontSizeCache);
+        fontSizeCache = menu.getFontSize();
+        paused = false;
     }
 
-    private Enumeration getRoots() {
-        return FileSystemRegistry.listRoots();
+    protected void hideNotify() {
+        paused = true;
     }
-
-    /*public void commandAction(Command cmd, Displayable display) {
-        if (cmd == select) {
-            selectPressed();
-        }
-        if (cmd == back) {
-            mnCanvas m = new mnCanvas();
-            Main.set(m);
-            m.start();
-        }
-    }*/
+    
+    public void setIsPaused(boolean isPaused) {
+        this.paused = isPaused;
+    }
+    
     
     private void input() {
         int keyStates = getKeyStates();
@@ -243,39 +196,15 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
             selectPressed();
         }
     }
-
-    public void selectPressed() {
-        selected = menu.selected;
-        stopped = true;
-        if (selected == v.size() - 1) {
-            Main.set(new MenuCanvas());
-        } else {
-            try {
-                startLevel((String) v.elementAt(selected));
-            } catch (NullPointerException ex) {
-                Main.showAlert(ex.toString());
-            } catch (SecurityException ex) {
-                
-            }
+    
+    /*public void commandAction(Command cmd, Displayable display) {
+        if (cmd == select) {
+            selectPressed();
         }
-    }
-
-    public GraphicsWorld readWorldFile(String path) {
-        //GraphicsWorld gameWorld;
-        PhysicsFileReader reader;
-        try {
-            InputStream is;
-            FileConnection fc = (FileConnection) Connector.open(path);
-            is = fc.openInputStream();
-            //mCanvas.text += is.available();
-            reader = new PhysicsFileReader(is);
-            GraphicsWorld w = new GraphicsWorld(World.loadWorld(reader));
-            reader.close();
-            is.close();
-            return w;
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        if (cmd == back) {
+            mnCanvas m = new mnCanvas();
+            Main.set(m);
+            m.start();
         }
-        return null;
-    }
+    }*/
 }

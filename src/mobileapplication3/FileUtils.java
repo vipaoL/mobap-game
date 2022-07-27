@@ -7,6 +7,7 @@ package mobileapplication3;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
@@ -21,6 +22,8 @@ public class FileUtils {
     String sep = "/";
     String path;
     String root;
+    String prefixToDisable = null;
+    String workingFolderName = "Test";
     String[] folders = {"", "other" + sep};
     int counter = folders.length;
     
@@ -29,6 +32,22 @@ public class FileUtils {
     
     boolean photosChecked = false;
     boolean graphicsChecked = false;
+    
+    public FileUtils(String workingFolderName) {
+        this.workingFolderName = workingFolderName;
+    }
+    
+    private void refreshRoots() {
+        roots = FileSystemRegistry.listRoots();
+    }
+    
+    /**
+     * Sets the prefix, files with it will be ignored. Disabled by default
+     * @param prefix e.g: if prefix set to "-" then "-test.txt" will be ignored
+     */
+    public void setPrefixToDisable(String prefix) {
+        prefixToDisable = prefix;
+    }
     
     public DataInputStream fileToDataInputStream(String path) {
         Main.log(path);
@@ -41,10 +60,19 @@ public class FileUtils {
         return null;
     }
     
-    public DataInputStream loadNextMGStuct() throws SecurityException {
-        if (roots == null) {
-            roots = FileSystemRegistry.listRoots();
-        }
+    public InputStream fileToInputStream(String path) throws IOException {
+        FileConnection fc = (FileConnection) Connector.open(path);
+        return fc.openInputStream();
+    }
+    
+    /**
+     * Load next file in selected in constructor folder
+     * 
+     * @return DataInputStream of next file if is's available.
+     *          null if no more files available
+     * @throws SecurityException if cancelled by user or no read permission
+     */
+    public DataInputStream loadNext() throws SecurityException {
         if (list == null) {
             list = getNextList();
         }
@@ -56,16 +84,22 @@ public class FileUtils {
                 return null;
             }
             String name = list.nextElement().toString();
-            if (!name.startsWith("-")) {
-                return fileToDataInputStream(path + name);
-            } else {
-                Main.log("struct file \"" + name + "\" is disabled by name prefix \"-\"");
+            // don't load files with prefix (if set)
+            if (prefixToDisable != null) {
+                if (name.startsWith(prefixToDisable) & !prefixToDisable.equals("")) {
+                    Main.log("file \"" + name + "\" was ignored due to name prefix \"-\"");
+                    continue;
+                }
             }
+            return fileToDataInputStream(path + name);
         }
         return null;
     }
     
-    private Enumeration getNextList() throws SecurityException {
+    public Enumeration getNextList() throws SecurityException {
+        if (roots == null) {
+            refreshRoots();
+        }
         while (roots.hasMoreElements() | !photosChecked | !graphicsChecked) {
             if (roots.hasMoreElements()) {
                 if (counter >= folders.length) {
@@ -85,7 +119,7 @@ public class FileUtils {
             if (path == null) {
                 continue;
             }
-            path += "MGStructs" + sep;
+            path += workingFolderName + sep;
             try {
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 if (fc.exists() & fc.isDirectory()) {
