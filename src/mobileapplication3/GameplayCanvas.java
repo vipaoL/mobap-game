@@ -33,8 +33,10 @@ public class GameplayCanvas extends Canvas implements Runnable {
     public static boolean isDrawingNow = true;
     public static boolean uninterestingDebug = false;
     boolean isWorldLoaded = false;
+    
     static boolean paused = false;
     static boolean stopped = false;
+    public static boolean lock = false;
     
     // screen
     int scW, scH, maxScSide;
@@ -155,6 +157,18 @@ public class GameplayCanvas extends Canvas implements Runnable {
             sound.startBgMusic();
         }
         
+        // wait for stopping previous game instance if it still running
+        setLoadingProgress(80);
+        while (lock) {            
+            stopped = true;
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+        lock = true;
+        
         setLoadingProgress(85);
         // continue updating loading screen until worldgen is loaded
         log("thread:waiting for wg");
@@ -263,6 +277,9 @@ public class GameplayCanvas extends Canvas implements Runnable {
                         }
                     }
                 }
+                
+                if (pauseDelay > 0)
+                    pauseDelay--;
 
                 if (tick < 5) {
                     tick++;
@@ -332,6 +349,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 }
             }
         }
+        lock = false;
     }
 
     protected void paint(Graphics g) {
@@ -583,6 +601,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         // pause
         if (keyCode == KEY_SOFT_RIGHT/* | keyCode == GenericMenu.SIEMENS_KEYCODE_RIGHT_SOFT*/) {
             if (!paused) {
+                pauseDelay = 0;
                 hideNotify();
                 repaint();
             } else {
@@ -595,6 +614,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         } else  // pause too. i'll rework it later
         if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
             if (!paused) {
+                pauseDelay = 0;
                 hideNotify();
                 repaint();
             } else {
