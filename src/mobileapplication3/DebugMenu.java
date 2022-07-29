@@ -114,6 +114,10 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         } catch (NullPointerException ex) {
             
         }
+        if (!menu.isKnownButton) {
+            g.setColor(127, 127, 127);
+            g.drawString("Unknown keyCode=" + menu.currKeyCode, scW, scH, Graphics.BOTTOM | Graphics.RIGHT);
+        }
     }
     void selectPressed() {
         int selected = menu.selected;

@@ -20,8 +20,8 @@ public class GenericMenu {
     
     private int x0, y0, w, h, fontH, tick = 0, k, keyPressDelay = KEY_PRESS_DELAY,
             delayAfterShowing = 5, firstReachable, lastReachable,
-            firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY,
-            currKeyStates = 0, currKeyCode = 0;
+            firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY;
+    public int currKeyStates = 0, currKeyCode = 0;
     
     int selected;
     
@@ -34,7 +34,9 @@ public class GenericMenu {
     private boolean pressed, firstload = true,
             isSpecialOptionActivated = false, isSelectPressed = false,
             isSelectAlreadyPressed = false, isStatemapEnabled = false,
-            dontLoadStateMap = false, fontFound = false, isKnownButton = true;
+            dontLoadStateMap = false, fontFound = false;
+    
+    public boolean isKnownButton = true;
     private Font font;
     private int[] stateMap = null;
     public static final int OPTIONTYPE_UNREACHABLE = -1;
@@ -107,10 +109,6 @@ public class GenericMenu {
                     }
                 }
             }
-        }
-        if (!isKnownButton) {
-            g.setColor(127, 127, 127);
-            g.drawString("Unknown btn:keyStates=" + currKeyStates + ", keyCode=" + currKeyCode, x0 + w, y0 + h, Graphics.BOTTOM | Graphics.RIGHT);
         }
     }
     
@@ -320,7 +318,7 @@ public class GenericMenu {
                 break;
         }
         selected += firstReachable;
-        if (keyCode == GameCanvas.KEY_NUM0 | keyCode == -7/*right soft button*/ | keyCode == SIEMENS_KEY_LEFT) {
+        if (keyCode == GameCanvas.KEY_NUM0 | keyCode == /**/ -7/*right soft button*/ | keyCode == SIEMENS_KEY_LEFT /*| keyCode == GameCanvas.LEFT_PRESSED*/) {
             isKnownButton = true;
             selected = lastReachable; // back
             if (keyPressDelay < 1) {
@@ -329,7 +327,7 @@ public class GenericMenu {
             }
         }
         
-        if (!isKnownButton) {
+        if (!isKnownButton & !pressed) {
             currKeyCode = keyCode;
         }
         
