@@ -333,21 +333,20 @@ public class GameplayCanvas extends Canvas implements Runnable {
 
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
-
-                // fps/tps control
+            } else {
+                // if paused
+                if (paused) {
+                    sleep = 200;
+                } else {
+                    sleep = 5;
+                }
+            }
+            // fps/tps control
                 try {
                     Thread.sleep(sleep);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            } else {
-                // if paused
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-            }
         }
         lock = false;
     }
