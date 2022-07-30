@@ -137,7 +137,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         int tick = 0;
         Contact[][] contacts = new Contact[3][];
         
-        // while world is loading, draw loading screen
+        // while world is loading, wait and draw loading screen
         while (!isWorldLoaded) {
             repaint();
             try {
@@ -478,7 +478,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         }
         
         // draw beautiful(isn't it?) pause screen
-        if (paused & !worldgen.isResettingPosition) {
+        if (paused) {
             int d = 6 * scH / 240;
             // change color if debug enabled
             if (!DebugMenu.isDebugEnabled) {
@@ -534,10 +534,10 @@ public class GameplayCanvas extends Canvas implements Runnable {
     }
     
     public void openMenu() {
-        isFirstStart = false;
-        MenuCanvas.isWorldgenEnabled = false;
-        uninterestingDebug = false;
         stopped = true;
+        isFirstStart = false;
+        uninterestingDebug = false;
+        MenuCanvas.isWorldgenEnabled = false;
         Main.set(new MenuCanvas());
     }
 
@@ -587,6 +587,16 @@ public class GameplayCanvas extends Canvas implements Runnable {
         pauseDelay = PAUSE_DELAY;
         previousPauseState = paused;
     }
+    
+    private void pauseButtonPressed() {
+        if (!paused) {
+            pauseDelay = 0;
+            hideNotify();
+            repaint();
+        } else {
+            resume();
+        }
+    }
 
     // keyboard events
     protected void keyReleased(int keyCode) {
@@ -600,27 +610,13 @@ public class GameplayCanvas extends Canvas implements Runnable {
         int gameAction = getGameAction(keyCode);
         // pause
         if (keyCode == KEY_SOFT_RIGHT/* | keyCode == GenericMenu.SIEMENS_KEYCODE_RIGHT_SOFT*/) {
-            if (!paused) {
-                pauseDelay = 0;
-                hideNotify();
-                repaint();
-            } else {
-                paused = false;
-                resume();
-            }
+            pauseButtonPressed();
         } else // menu
         if (keyCode == KEY_POUND | gameAction == GAME_D) {
             openMenu();
         } else  // pause too. i'll rework it later
         if ((keyCode == KEY_STAR | gameAction == GAME_B)) {
-            if (!paused) {
-                pauseDelay = 0;
-                hideNotify();
-                repaint();
-            } else {
-                paused = false;
-                resume();
-            }
+            pauseButtonPressed();
             // no cheats. only pause
             /*if (DebugMenu.isDebugEnabled & DebugMenu.cheat) {
                 FXVector pos = w.carbody.positionFX();
@@ -657,15 +653,9 @@ public class GameplayCanvas extends Canvas implements Runnable {
     }
     protected void pointerReleased(int x, int y) {
         if (pauseTouched) {
-            if (!paused) {
-                hideNotify();
-                repaint();
-            } else {
-                resume();
-            }
+            pauseButtonPressed();
         }
         if (menuTouched) {
-            stopped = true;
             openMenu();
         }
         pauseTouched = false;
