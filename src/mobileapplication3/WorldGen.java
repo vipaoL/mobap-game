@@ -21,27 +21,33 @@ import java.util.Random;
 public class WorldGen implements Runnable {
     
     int stdStructsNumber = 6;
-    int structLogSize = 7;
     int floorWeightInRandom = 4;
+    int structLogSize = 7;
     
     private int prevStructRandomId;
     private int nextStructRandomId;
-    public static int zeroPoint = 0;
-    private int lastX = -8000;
-    private int lastY = 0;
-    private int segmentsNum = 36;       // how many lines will draw up a circle
-    private int segmentLen = 360 / segmentsNum;
-    private int tick = 0;
     public boolean isResettingPosition = false;
     private int[][] structLog = new int[structLogSize][];
     private int numberOfLoggedStructs = 0;
     private int ringLogTail = 0;
+    
+    private int lastX = -8000;
+    private int lastY = 0;
+    private int lowestY = 0;
+    
+    public static int zeroPoint = 0;
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX = lastX + POINTS_DIVIDER;
-    private int lowestY = 0;
+    
+    private int segmentsNum = 36;       // how many lines will draw up a circle
+    private int segmentLen = 360 / segmentsNum;
+    
+    
     private boolean paused = false;
     private boolean needSpeed = true;
     private boolean isReady = true;
+    private int tick = 0;
+    
     private Random rand;
     private GraphicsWorld w;
     private Landscape lndscp;

@@ -25,8 +25,7 @@ public class Main extends MIDlet {
     Display display = Display.getDisplay(this);
     public static Main thiss;
     public static Displayable current;
-    public static final int printCategory_info = 0;
-    public static final int printCategory_err = 1;
+    
     public static String[] onScreenLog = new String[1];
     public static int onScreenLogOffset = 0;
     public static boolean isScreenLogInited = false;
