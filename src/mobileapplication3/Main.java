@@ -66,28 +66,38 @@ public class Main extends MIDlet {
         showAlert(text, -1);
     }
     public static void showAlert(String text, int duration) {
+        Alert alert = null;
         try {
             //AlertType.ERROR.playSound(thiss.display);
             Image alertImage = null;
             try {
-                alertImage = Image.createImage("driver.png");
+                alertImage = Image.createImage("/driver.png");
             } catch (IOException ex1) {
                 //ex1.printStackTrace();
                 try {
-                    alertImage = Image.createImage("/driver.png");
+                    alertImage = Image.createImage("resourse://driver.png");
                 } catch (IOException e) {
                     e.printStackTrace();
+                    log("Can't load alert image");
                 }
             }
-            Alert alert = new Alert("Oh no!", text, alertImage, AlertType.ERROR);
+            alert = new Alert("Oh no!", text, alertImage, AlertType.ERROR);
             if (duration > 0) {
                 alert.setTimeout(duration);
             }
             Display.getDisplay(thiss).setCurrent(alert);
         } catch(IllegalArgumentException ex) {
-        ex.printStackTrace();
+            ex.printStackTrace();
+            log("Can't show alert:" + text);
         }
-        set(current);
+        log(text);
+        /*try {
+            Thread.sleep(alert.getTimeout());
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        } catch (NullPointerException ex) {
+            
+        }*/
     }
     
     public static void clear() {

@@ -89,7 +89,7 @@ public class GraphicsWorld extends World {
 
         removeBody(carbody);
         removeBody(leftwheel);
-        removeBody(leftwheel);
+        removeBody(rightwheel);
 
         addBody(carbody);
         carbody.addCollisionLayer(1);
