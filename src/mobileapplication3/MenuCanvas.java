@@ -26,7 +26,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     // states
     boolean isPaused = false;
     boolean isStopped = false;
-    boolean areExtStructsLoaded = false;
+    static boolean areExtStructsLoaded = false;
     boolean isInited = false;
     
     private Graphics g;
