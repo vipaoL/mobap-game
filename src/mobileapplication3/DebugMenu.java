@@ -172,6 +172,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             menu.setEnabledFor(speedo, 4);
             menu.setEnabledFor(Main.isScreenLogEnabled, 5);
             menu.setEnabledFor(music, 6);
+            menu.setStateFor(-1, 6); // set "music" as inactive button. it's buggy
             menu.setEnabledFor(fontSize, 7);
             //menu.setEnabledFor(mgstructOnly, 8);
             menu.setStateFor(-1, 8); // set ".mgstruct only" as inactive button. it's buggy
