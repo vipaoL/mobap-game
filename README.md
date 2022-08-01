@@ -1,6 +1,13 @@
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/59665125/182234781-e60b3a3a-1b6f-44e6-84b2-d21a12caa023.png"/>
+  <br>
+</p>
+
+
 # About
 J2ME game on emini physics engine
-- Endless gameplay and procedural generation (random combination of predefined structures)
+- Endless gameplay and procedural generation (random combination of predefined and custom structures)
+- Custom structures: you can create create your custom structures using [this](https://github.com/vipaoL/mobap-game-editor-android) editor and load them into the game
 - Custom levels (can be created through emini world designer. Some examples were pinned with first release. Game tries to find "Levels" folder with your levels in: [root] (e.g. c:/Levels), [root]/other and in your graphics and photos folders
 - Debug menu: Here i'm adding new unstable features before i can say that they are stable. But there are some things that may be interesting
 - Touch interface and screen rotation are supported
