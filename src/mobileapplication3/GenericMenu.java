@@ -443,10 +443,10 @@ public class GenericMenu {
                 isStatemapEnabled = true;
                 Main.log("stateMap loaded");
             } else {
-                Main.log("GenericMenu.loadParams: optionTypeMap.length must be == options.length", Main.printCategory_err);
+                Main.showAlert("GenericMenu.loadStatemap:optionTypeMap.length must be == options.length");
             }
         } else {
-            Main.log("null stateMap", Main.printCategory_err);
+            Main.showAlert("GenericMenu.loadStatemap:null stateMap");
         }
     }
     public void setDefaultColor(int color_hex) {

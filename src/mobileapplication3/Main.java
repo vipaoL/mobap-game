@@ -102,6 +102,10 @@ public class Main extends MIDlet {
     public static void clear() {
         System.gc();
     }
+    
+    /*public static void logErr(String text, int value) {
+        
+    }*/
 
     public static void log(String text, int value) {
         if (isScreenLogEnabled | DebugMenu.isDebugEnabled) {
