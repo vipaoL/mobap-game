@@ -391,6 +391,7 @@ public class WorldGen implements Runnable {
             int spacing = data[7];
             int l = data[8];
             int ang = data[9];
+            int n = (l + spacing) / (platfL+spacing);
             
             Shape rect = Shape.createRectangle(platfL, platfH);
             rect.setMass(1);
@@ -402,11 +403,10 @@ public class WorldGen implements Runnable {
             int spY = spacing * dy / l;
             int offsetX = platfL/2 * Mathh.cos(ang) / 1000;
             int offsetY = platfL/2 * Mathh.sin(ang) / 1000;
-            int n = (l + spacing) / (platfL+spacing);
+            
             for (int i = 0; i < n; i++) {
-                Body fallinPlatf = new Body(lastX + x1 + i*(dx+spX) + offsetX, lastY + y1 + i*(dy+spY) + offsetY, rect, true);
+                Body fallinPlatf = new Body(lastX + x1 + i*(dx+spX) + offsetX, lastY + y1 + i*(dy+spY) + offsetY, rect, false);
                 fallinPlatf.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
-                fallinPlatf.setDynamic(false);
                 w.addBody(fallinPlatf);
             }
             
