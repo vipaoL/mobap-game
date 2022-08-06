@@ -5,7 +5,6 @@
  */
 package mobileapplication3;
 
-import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
 
@@ -26,14 +25,16 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     // states
     boolean isPaused = false;
     boolean isStopped = false;
-    static boolean areExtStructsLoaded = false;
     boolean isInited = false;
+    boolean waitingToStartGame = false;
+    boolean isGameStarted = false;
     
     private Graphics g;
     private GenericMenu menu; // some generic code for drawing menus
     private MgStruct mgStruct; // for loading external structures
     
     public static boolean isWorldgenEnabled = false;
+    static boolean areExtStructsLoaded = false;
 
     public MenuCanvas() {
         super(false);
@@ -41,13 +42,9 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         scW = getWidth();
         scH = getHeight();
         if (Main.isScreenLogEnabled) {
-            if (!Main.isScreenLogInited) {
-                Main.onScreenLog = new String[scH/Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL).getHeight()];
-                Main.isScreenLogInited = true;
-            }
-        } else if (Main.isScreenLogInited) {
-            Main.onScreenLog = new String[1];
-            Main.isScreenLogInited = false;
+            Main.enableLog(scH);
+        } else {
+            Main.disableLog();
         }
         Main.log("menu:constructor");
         menu = new GenericMenu(this);
@@ -96,7 +93,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     public void setIsPaused(boolean isPaused) {
         this.isPaused = isPaused;
     }
-
+    
     public void run() {
         long sleep = 0; // for FPS/TPS control
         long start = 0; //
@@ -104,19 +101,23 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         //showNotify(); // init
 
         while (!isStopped) { // *** main cycle of menu drawing ***
-            start = System.currentTimeMillis();
-            input(); // listen keyboard
-            if (scW != getWidth()) { // refreshing some parameters when screen rotated
-                fontSizeCache = -1;
-                showNotify();
+            if (waitingToStartGame) {
+                startGame();
+                return;
             }
-            
             if (!isPaused) {
+                start = System.currentTimeMillis();
+                input(); // listen keyboard
+                if (scW != getWidth()) { // refreshing some parameters when screen rotated
+                    fontSizeCache = -1;
+                    showNotify();
+                }
                 repaint(); // refresh picture on screen
+                sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
+                sleep = Math.max(sleep, 0);
+            } else {
+                sleep = 100;
             }
-
-            sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
-            sleep = Math.max(sleep, 0);
 
             try {
                 Thread.sleep(sleep);
@@ -135,13 +136,18 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     }
 
     public void startGame() {
+        if (isGameStarted) {
+            return;
+        }
+        isGameStarted = true;
+        waitingToStartGame = false;
         Main.log("menu:startGame()");
         repaint();
         try {
             isStopped = true;
             Main.log("menu:new CGanvas");
-            GameplayCanvas gameCanvas = new GameplayCanvas();
             repaint();
+            GameplayCanvas gameCanvas = new GameplayCanvas();
             Main.log("menu:setting gcanvas displayable");
             repaint();
             Main.set(gameCanvas);
@@ -150,6 +156,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         } catch (Exception ex) {
             ex.printStackTrace();
             Main.log(ex.toString());
+            repaint();
         }
     }
     
@@ -187,7 +194,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             Main.log("menu:selected == 1 -> gen = true");
             isWorldgenEnabled = true;
             repaint();
-            startGame();
+            waitingToStartGame = true;
         }
         if (selected == 2) { // Ext Structs / Reload
             menu.setStateFor(1, 2);
@@ -199,7 +206,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             } else {
                 areExtStructsLoaded = false;
                 if (!mgStruct.loadCancelled) {
-                    menuOptions[2] = "Error, 0 loaded";
+                    menuOptions[2] = "Nothing loaded";
                 } else {
                     menuOptions[2] = "Cancelled";
                 }

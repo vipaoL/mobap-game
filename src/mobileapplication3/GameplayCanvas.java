@@ -152,7 +152,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         world.refreshScreenParameters();
         // init music player if enabled
         if (DebugMenu.isDebugEnabled & DebugMenu.music) {
-            Main.log("Starting sound");
+            log("Starting sound");
             Sound sound = new Sound();
             sound.startBgMusic();
         }
@@ -456,8 +456,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
         }
         
         if (!isWorldLoaded) {
-            return; // stop drawing GUI, because
-        } // if world and woldgen are not loaded yet,
+            return; // stop drawing GUI, if
+        } // world and woldgen are not loaded yet, else
         // we'll get errors executing code below
         
         // score counter
@@ -643,9 +643,13 @@ public class GameplayCanvas extends Canvas implements Runnable {
         pointerY = y;
     }
     protected void pointerDragged(int x, int y) {
-        if (pointerX != x | pointerY != y) {
-            pauseTouched = false;
-            menuTouched = false;
+        if (pauseTouched | menuTouched) {
+            if (x - pointerX > 3 | y - pointerY > 3) {
+                Main.log((x - pointerX) + "dx/dy" + (y - pointerY));
+                Main.log("btnPress cancelled:dragged");
+                pauseTouched = false;
+                menuTouched = false;
+            }
         }
         pointerX = x;
         pointerY = y;

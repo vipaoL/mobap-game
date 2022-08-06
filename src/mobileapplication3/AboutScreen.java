@@ -88,9 +88,13 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         g.fillRect(0, 0, Math.max(getWidth(), getHeight()), Math.max(getWidth(), getHeight()));
         drawHeaderAndQR(g);
         menuBtnsOffsetH = offset;
-        menu.loadParams(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH, menuOpts, 0, menuOpts.length - 1, menuOpts.length - 1, fontSizeCache);
-        fontSizeCache = menu.getFontSize();
-        menu.setFirstDrawable(1);
+        if (!menu.isInited) {
+            menu.loadParams(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH, menuOpts, 0, menuOpts.length - 1, menuOpts.length - 1, fontSizeCache);
+            fontSizeCache = menu.getFontSize();
+            menu.setFirstDrawable(1);
+        } else {
+            menu.reloadCanvasParameters(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH);
+        }
         paused = false;
         repaint();
         menu.handleShowNotify();
@@ -120,6 +124,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
                 input();
                 // catch screen rotation
                 if (scW != getWidth()) {
+                    fontSizeCache = -1;
                     showNotify();
                 }
                 

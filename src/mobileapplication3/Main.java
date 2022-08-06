@@ -9,6 +9,7 @@ import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Image;
 import javax.microedition.midlet.*;
 
@@ -122,19 +123,38 @@ public class Main extends MIDlet {
             System.out.println(text);
         }
         if (isScreenLogEnabled) {
-            if (onScreenLogOffset < onScreenLog.length - 1) {
-                onScreenLogOffset++;
-            } else {
+            if (onScreenLog[onScreenLogOffset] != null) {
                 for (int i = 0; i < onScreenLog.length - 1; i++) {
                     onScreenLog[i] = onScreenLog[i + 1];
                 }
             }
             onScreenLog[onScreenLogOffset] = text;
+            if (onScreenLogOffset < onScreenLog.length - 1) {
+                onScreenLogOffset++;
+            }
             try { // slowing for log readability
                 Thread.sleep(50);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
+        }
+    }
+    public static void enableLog(int screenHeight) {
+        isScreenLogEnabled = true;
+        if (!isScreenLogInited) {
+            onScreenLogOffset = 0;
+            onScreenLog = new String[screenHeight/Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL).getHeight()];
+            isScreenLogInited = true;
+            log("log enabled");
+        }
+    }
+    public static void disableLog() {
+        log("disabling log...");
+        isScreenLogEnabled = false;
+        if (isScreenLogInited) {
+            onScreenLog = new String[1];
+            isScreenLogInited = false;
+            onScreenLogOffset = 0;
         }
     }
 }

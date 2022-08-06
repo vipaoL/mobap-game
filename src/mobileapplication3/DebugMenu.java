@@ -6,6 +6,7 @@
 
 package mobileapplication3;
 
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.lcdui.Graphics;
 
@@ -26,7 +27,8 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         "show font size",
         ".mgstruct only",
         "show points of lines",
-        "back"};
+        "back"
+    };
     
     // array with states of all buttons (active/inactive/enabled)
     private final int[] statemap = new int[menuOpts.length]; 
@@ -48,7 +50,6 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     
     public DebugMenu() {
         super(true);
-        statemap[1] = -1; // set "-----" separator as inactive button
         setFullScreenMode(true);
         (new Thread(this, "about canvas")).start();
     }
@@ -67,6 +68,17 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     }
     
     protected void showNotify(){
+        scW = getWidth();
+        scH = getHeight();
+        if (!menu.isInited) {
+            statemap[1] = -1; // set "-----" separator as inactive button
+            menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
+            fontSizeCache = menu.getFontSize();
+            menu.setSpecialOption(0);
+        } else {
+            menu.reloadCanvasParameters(scW, scH);
+        }
+        refreshStates();
         isPaused = false;
         menu.handleShowNotify();
     }
@@ -74,21 +86,14 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public void run() {
         long sleep;
         long start;
-        
-        repaint();
 
         while (!stopped) {
             if (!isPaused) {
                 start = System.currentTimeMillis();
                 input();
                 if (scW != getWidth()) {
-                    scW = getWidth();
-                    scH = getHeight();
-                    System.out.println(statemap != null);
-                    menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
-                    fontSizeCache = menu.getFontSize();
-                    menu.setSpecialOption(0);
-                    refreshStates();
+                    fontSizeCache = -1;
+                    showNotify();
                 }
                 repaint();
 
@@ -107,13 +112,9 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     
     public void paint(Graphics g) {
         g.setColor(0, 0, 0);
-        g.fillRect(0, 0, scW, scH);
-        try {
-            menu.paint(g);
-            menu.tick();
-        } catch (NullPointerException ex) {
-            
-        }
+        g.fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));
+        menu.paint(g);
+        menu.tick();
         if (!menu.isKnownButton) {
             g.setColor(127, 127, 127);
             g.drawString("Unknown keyCode=" + menu.currKeyCode, scW, scH, Graphics.BOTTOM | Graphics.RIGHT);
@@ -136,6 +137,11 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         }
         if (selected == 5) {
             Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
+            if (Main.isScreenLogEnabled) {
+                Main.enableLog(scH);
+            } else {
+                Main.disableLog();
+            }
         }
         if (selected == 6) {
             music = !music;

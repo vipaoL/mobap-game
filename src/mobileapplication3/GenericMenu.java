@@ -18,7 +18,7 @@ public class GenericMenu {
     private static final int PAUSE_DELAY = 5;
     private static final int KEY_PRESS_DELAY = 5;
     
-    private int x0, y0, w, h, fontH, tick = 0, k, keyPressDelay = KEY_PRESS_DELAY,
+    private int x0, y0, w, h, fontH, tick = 0, k, keyPressDelay = 0,
             delayAfterShowing = 5, firstReachable, lastReachable,
             firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY;
     public int currKeyStates = 0, currKeyCode = 0;
@@ -34,9 +34,10 @@ public class GenericMenu {
     private boolean pressed, firstload = true,
             isSpecialOptionActivated = false, isSelectPressed = false,
             isSelectAlreadyPressed = false, isStatemapEnabled = false,
-            dontLoadStateMap = false, fontFound = false;
+            fontFound = false;
     
     public boolean isKnownButton = true;
+    public boolean isInited = false;
     private Font font;
     private int[] stateMap = null;
     public static final int OPTIONTYPE_UNREACHABLE = -1;
@@ -60,53 +61,58 @@ public class GenericMenu {
     }
     
     public void paint(Graphics g) {
-        for (int i = firstDrawable; i < options.length; i++) {
-            g.setFont(font);
-            g.setColor(normalColor);
-            int offset = 0;
-            
-            if (i == selected) { // highlighting selected option
-                offset = Mathh.sin(tick * 360 / 10); //waving
-                g.setColor(selectedColor);
-                if (pressed) {
-                    g.setColor(pressedColor);
-                    g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, font.getSize()));
-                }
-                
-            }
-            
-            if (isStatemapEnabled) { // coloring other options depending on theirs state (if we have this info)
-                if (stateMap[i] == OPTIONTYPE_REACHABLE_ENABLED) {
-                    g.setColor(colReachableEnabled);
-                } else if (stateMap[i] == OPTIONTYPE_UNREACHABLE) {
-                    g.setColor(colUnreachable);
-                }
-            }
-            
-            
-            if (i == specialOption & isSpecialOptionActivated) { // painting special option in a different color
-                g.setColor(specialOptionActivatedColor);
-            }
-            
-            int x = x0 + w / 2;
-            int y = y0 + k * (i + 1 - firstDrawable) - fontH / 2 - h / (options.length + 1 - firstDrawable) / 2 + offset*Font.getDefaultFont().getHeight() / 8000;
-            g.drawString(options[i], x, y, Graphics.HCENTER | Graphics.TOP); // draw option on (x, y) //
-            
-            if (DebugMenu.isDebugEnabled & DebugMenu.fontSize) {
-                g.drawString(String.valueOf(font.getSize()), x0, y0, 0); // display text size (for debug)
-            }
-            if (Main.isScreenLogEnabled) {
-                g.setColor(150, 255, 150);
-                Font font = Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL);
+        if (isInited) {
+            for (int i = firstDrawable; i < options.length; i++) {
                 g.setFont(font);
-                for (int j = 0; j < Main.onScreenLog.length; j++) {
-                    try {
-                        g.drawString(Main.onScreenLog[j], 0, font.getHeight() * j, Graphics.TOP | Graphics.LEFT);
-                    } catch (NullPointerException ex) {
+                g.setColor(normalColor);
+                int offset = 0;
 
-                    } catch (IllegalArgumentException ex) {
-
+                if (i == selected) { // highlighting selected option
+                    offset = Mathh.sin(tick * 360 / 10); //waving
+                    g.setColor(selectedColor);
+                    if (pressed) {
+                        g.setColor(pressedColor);
+                        g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, font.getSize()));
                     }
+
+                }
+
+                if (isStatemapEnabled) { // coloring other options depending on theirs state (if we have this info)
+                    if (stateMap[i] == OPTIONTYPE_REACHABLE_ENABLED) {
+                        g.setColor(colReachableEnabled);
+                    } else if (stateMap[i] == OPTIONTYPE_UNREACHABLE) {
+                        g.setColor(colUnreachable);
+                    }
+                }
+
+
+                if (i == specialOption & isSpecialOptionActivated) { // painting special option in a different color
+                    g.setColor(specialOptionActivatedColor);
+                }
+
+                int x = x0 + w / 2;
+                int y = y0 + k * (i + 1 - firstDrawable) - fontH / 2 - h / (options.length + 1 - firstDrawable) / 2 + offset*Font.getDefaultFont().getHeight() / 8000;
+                g.drawString(options[i], x, y, Graphics.HCENTER | Graphics.TOP); // draw option on (x, y) //
+
+                if (DebugMenu.isDebugEnabled & DebugMenu.fontSize) {
+                    g.drawString(String.valueOf(font.getSize()), x0, y0, 0); // display text size (for debug)
+                }
+            }
+        } else {
+            g.setColor(128, 128, 128);
+            g.drawString("Initializing the menu...", Main.sWidth / 2, Main.sHeight, Graphics.BOTTOM | Graphics.HCENTER);
+        }
+        if (Main.isScreenLogEnabled) {
+            g.setColor(150, 255, 150);
+            Font font = Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL);
+            g.setFont(font);
+            for (int j = 0; j <= Main.onScreenLogOffset; j++) {
+                try {
+                    g.drawString(Main.onScreenLog[j], 0, font.getHeight() * j, Graphics.TOP | Graphics.LEFT);
+                } catch (NullPointerException ex) {
+                    //g.drawString(j + "can't show log:NPE", 0, 0, Graphics.TOP | Graphics.LEFT);
+                } catch (IllegalArgumentException ex) {
+                    g.drawString(j + "can't show log:IAE", 0, 0, Graphics.TOP | Graphics.LEFT);
                 }
             }
         }
@@ -157,6 +163,9 @@ public class GenericMenu {
     public boolean handlePointer(int x, int y) {
         feedback.setIsPaused(false);
         int selected = firstDrawable + y / k;
+        if (selected < firstReachable & firstReachable < firstDrawable) {
+            selected = firstReachable;
+        }
         if (!isOptionAvailable(selected)) {
             pressed = false;
             return false;
@@ -165,8 +174,7 @@ public class GenericMenu {
         pressed = true;
         return true;
     }
-    
-    boolean inited = false;
+
     public boolean handleKeyStates(int keyStates) {
         if (keyStates != 0) {
             //Main.log("states", keyStates);
@@ -174,14 +182,7 @@ public class GenericMenu {
         isSelectAlreadyPressed = isSelectPressed;
         if (delayAfterShowing > 0) {
             delayAfterShowing--;
-            inited = false;
             return false;
-        } else {
-            if (!inited) {
-                inited = true;
-                keyPressDelay = 0;
-                isSelectAlreadyPressed = false;
-            }
         }
         
         if (keyPressDelay < 1) {
@@ -341,6 +342,32 @@ public class GenericMenu {
         return false;
     }
     
+    private void loadCanvasParams(int x0, int y0, int w, int h, int fontSize) {
+        this.x0 = x0;
+        this.y0 = y0;
+        this.w = w;
+        this.h = h;
+        k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
+        if (fontSize == -1) {
+            findOptimalFont();
+        } else {
+            Main.log(fontSize);
+            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
+            fontH = font.getHeight();
+            fontFound = true;
+        }
+    }
+    public void reloadCanvasParameters(int scW, int scH) {
+        reloadCanvasParameters(x0, y0, scW, scH);
+    }
+    public void reloadCanvasParameters(int x0, int y0, int w, int h) {
+        int fontSize = font.getSize();
+        if (w - x0 != this.w - this.x0 | h - y0 != this.h - this.y0) {
+            fontSize = -1;
+        }
+        loadCanvasParams(x0, y0, w, h, fontSize);
+    }
+    
     /**
      * Should be placed to showNotify.
      * <p>handleHideNotify() in its right place is also needed.
@@ -367,73 +394,37 @@ public class GenericMenu {
     
     
     
-    
-    
-    
-    
-    public void loadParams(int w, int h, String[] options) {
-        loadParams(0, 0, w, h, options, 0, options.length - 1, options.length - 1);
-    }
-    public void loadParams(int w, int h, String[] options, int[] statemap) {
-        dontLoadStateMap = true;
-        loadParams(0, 0, w, h, options, 0, options.length - 1, options.length - 1);
-        loadStatemap(statemap);
-    }
     public void loadParams(int w, int h, String[] options, int[] statemap, int fontSize) {
-        dontLoadStateMap = true;
-        loadParams(0, 0, w, h, options, 0, options.length - 1, options.length - 1, null, fontSize);
-        loadStatemap(statemap);
-    }
-    public void loadParams(int w, int h, Vector options, int firstReachable, int lastReachable, int defaultSelected) {
-        loadParams(0, 0, w, h, this.options, firstReachable, lastReachable, defaultSelected, -1);
-    }
-    public void loadParams(int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected) {
-        loadParams(0, 0, w, h, options, firstReachable, lastReachable, defaultSelected);
+        loadParams(0, 0, w, h, options, 0, options.length - 1, options.length - 1, statemap, fontSize);
     }
     public void loadParams(int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int fontSize) {
-        loadParams(0, 0, w, h, options, firstReachable, lastReachable, defaultSelected);
+        loadParams(0, 0, w, h, options, firstReachable, lastReachable, defaultSelected, fontSize);
     }
     public void loadParams(int w, int h, Vector options, int firstReachable, int lastReachable, int defaultSelected, int fontSize) {
         String[] optsArray = new String[options.size()];
         for (int i = 0; i < options.size(); i++) {
             optsArray[i] = (String) options.elementAt(i);
         }
-        loadParams(0, 0, w, h, optsArray, firstReachable, lastReachable, defaultSelected);
-    }
-    public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected) {
-        loadParams(x0, y0, w, h, options, firstReachable, lastReachable, defaultSelected, null);
+        loadParams(0, 0, w, h, optsArray, firstReachable, lastReachable, defaultSelected, fontSize);
     }
     public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int fontSize) {
         loadParams(x0, y0, w, h, options, firstReachable, lastReachable, defaultSelected, null, fontSize);
     }
-    public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int[] optionStateMap) {
-        loadParams(x0, y0, w, h, options, firstReachable, lastReachable, defaultSelected, optionStateMap, -1);
-    }
     public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int[] optionStateMap, int fontSize) {
-        this.x0 = x0;
-        this.y0 = y0;
-        this.w = w;
-        this.h = h;
         this.options = options;
-        if (!dontLoadStateMap & optionStateMap != null) {
+        
+        if (optionStateMap != null) {
             loadStatemap(optionStateMap);
         }
-        k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
+        
         this.firstReachable = firstReachable;
         this.lastReachable = lastReachable;
-        if (fontSize == -1) {
-            findOptimalFont();
-        } else {
-            Main.log(fontSize);
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
-            fontH = font.getHeight();
-            fontFound = true;
-        }
+        loadCanvasParams(x0, y0, w, h, fontSize);
         if (firstload) {
             selected = defaultSelected;
             firstload = false;
         }
-        dontLoadStateMap = false;
+        isInited = true;
     }
     public void loadStatemap(int[] stateMap) {
         isStatemapEnabled = false;

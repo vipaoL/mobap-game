@@ -22,22 +22,24 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
 
     //private Command select, back;
 
-    boolean stopped = false;
-    Vector levelNames;
+    Vector levelNames = new Vector();
 
     int scW = this.getWidth();
     int scH = this.getHeight();
-    int tick = 0;
-    int selected = 1;
-    int delay = 10;
-    private static int fontSizeCache = -1;
+    
     boolean paused = false;
+    boolean stopped = false;
+    
+    private static int fontSizeCache = -1;
     private GenericMenu menu = new GenericMenu(this);
+    
     FileUtils files = new FileUtils("Levels");
 
     Levels() {
         super(true);
+        Main.log("Levels:constructor");
         setFullScreenMode(true);
+        repaint();
         //select = new Command("Select", Command.OK, 1);
         //back = new Command("Back", Command.BACK, 2);
         (new Thread(this, "level picker")).start();
@@ -46,7 +48,8 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
     public void start() {
         stopped = false;
         levelNames = new Vector();
-
+        Main.log("Levels:start()");
+        repaint();
         try {
             levelNames.addElement("---levels---");
             getLevels();
@@ -59,6 +62,8 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
         }
         // TODO: separate with pages -----------------------!
         levelNames.addElement("--Back--");
+        menu.loadParams(scW, scH, levelNames, 1, levelNames.size() - 1, levelNames.size() - 1, fontSizeCache);
+        fontSizeCache = menu.getFontSize();
         showNotify();
 
         //addCommand(select);
@@ -67,15 +72,18 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
     }
     
     public void getLevels() {
+        Main.log("Levels:getLevels()");
         Enumeration list;
         while (true) {            
             list =  files.getNextList();
             
-            // if no more files
-            if (list == null) break;
-            
-            while (list.hasMoreElements()) {
-                levelNames.addElement(files.path + list.nextElement());
+            // if no more files, break the cycle
+            if (list == null) {
+                break;
+            } else {
+                while (list.hasMoreElements()) {
+                    levelNames.addElement(files.path + list.nextElement());
+                }
             }
         }
     }
@@ -103,13 +111,12 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
     }
     
     public void selectPressed() {
-        selected = menu.selected;
         stopped = true;
-        if (selected == levelNames.size() - 1) {
+        if (menu.selected == levelNames.size() - 1) {
             Main.set(new MenuCanvas());
         } else {
             try {
-                startLevel((String) levelNames.elementAt(selected));
+                startLevel((String) levelNames.elementAt(menu.selected));
             } catch (NullPointerException ex) {
                 Main.showAlert(ex.toString());
             } catch (SecurityException ex) {
@@ -121,11 +128,13 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
 
     public void run() {
         start();
+        Main.log("Levels:started");
         long sleep = 0;
         long start = 0;
 
         while (!stopped) {
             if (scW != getWidth()) {
+                fontSizeCache = -1;
                 showNotify();
             }
             if (!paused) {
@@ -152,12 +161,10 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
         menu.tick();
     }
     
-    
     protected void showNotify() {
-        scW = this.getWidth();
-        scH = this.getHeight();
-        menu.loadParams(scW, scH, levelNames, 1, levelNames.size() - 1, selected, fontSizeCache);
-        fontSizeCache = menu.getFontSize();
+        scW = getWidth();
+        scH = getHeight();
+        menu.reloadCanvasParameters(scW, scH);
         paused = false;
         menu.handleShowNotify();
     }

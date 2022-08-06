@@ -74,6 +74,7 @@ public class MgStruct {
                 dis = files.loadNext();
             } catch (SecurityException sex) {
                 Main.log("mgs:load cancelled");
+                sex.printStackTrace();
                 loadCancelled = true;
                 structsInBufferNumber = loadedStructsFromResNumber;
             } catch (NullPointerException ex) {
@@ -81,8 +82,9 @@ public class MgStruct {
             }
             if (dis != null) {
                 try {
-                    readFromDataInputStream(dis);
-                    loaded += 1;
+                    if (readFromDataInputStream(dis)) {
+                        loaded += 1;
+                    }
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
