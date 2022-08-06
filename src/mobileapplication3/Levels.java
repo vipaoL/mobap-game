@@ -24,8 +24,8 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
 
     Vector levelNames = new Vector();
 
-    int scW = this.getWidth();
-    int scH = this.getHeight();
+    int scW = 0;
+    int scH = 0;
     
     boolean paused = false;
     boolean stopped = false;
@@ -36,7 +36,7 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
     FileUtils files = new FileUtils("Levels");
 
     Levels() {
-        super(true);
+        super(false);
         Main.log("Levels:constructor");
         setFullScreenMode(true);
         repaint();
@@ -132,8 +132,11 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
         long sleep = 0;
         long start = 0;
 
+        showNotify();
+        
+        paused = false;
         while (!stopped) {
-            if (scW != getWidth()) {
+            if (scH != getHeight()) {
                 fontSizeCache = -1;
                 showNotify();
             }
@@ -144,12 +147,13 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
 
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
-
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            } else {
+                sleep = 100;
+            }
+            try {
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -162,10 +166,11 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
     }
     
     protected void showNotify() {
+        paused = false;
         scW = getWidth();
         scH = getHeight();
+        getGraphics().fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));
         menu.reloadCanvasParameters(scW, scH);
-        paused = false;
         menu.handleShowNotify();
     }
 

@@ -18,7 +18,7 @@ public class GenericMenu {
     private static final int PAUSE_DELAY = 5;
     private static final int KEY_PRESS_DELAY = 5;
     
-    private int x0, y0, w, h, fontH, tick = 0, k, keyPressDelay = 0,
+    private int x0, y0, w, h, fontH, tick = 0, k = 10, keyPressDelay = 0,
             delayAfterShowing = 5, firstReachable, lastReachable,
             firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY;
     public int currKeyStates = 0, currKeyCode = 0;
@@ -177,11 +177,13 @@ public class GenericMenu {
 
     public boolean handleKeyStates(int keyStates) {
         if (keyStates != 0) {
-            //Main.log("states", keyStates);
+            Main.log("states", keyStates);
         }
+        feedback.setIsPaused(false);
         isSelectAlreadyPressed = isSelectPressed;
         if (delayAfterShowing > 0) {
             delayAfterShowing--;
+            Main.log("delayAfterShowing");
             return false;
         }
         
@@ -199,7 +201,9 @@ public class GenericMenu {
                     } else {
                         selected = lastReachable;
                     }
+                    Main.log("up");
                 } else if ((keyStates & GameCanvas.DOWN_PRESSED) != 0) {
+                    Main.log("down");
                     isKnownButton = true;
                     feedback.setIsPaused(false);
                     if (selected < lastReachable) {
@@ -347,7 +351,9 @@ public class GenericMenu {
         this.y0 = y0;
         this.w = w;
         this.h = h;
-        k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
+        if (options != null) {
+            k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
+        }
         if (fontSize == -1) {
             findOptimalFont();
         } else {
