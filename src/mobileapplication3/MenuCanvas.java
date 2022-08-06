@@ -72,6 +72,8 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             }
             menu.setSpecialOption(menuOptions.length - 3); // to be able to highlight "Debug" option
             isInited = true;
+        } else {
+            menu.reloadCanvasParameters(scW, scH);
         }
         
         // enable screen refreshing
