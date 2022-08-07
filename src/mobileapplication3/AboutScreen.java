@@ -217,7 +217,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     }
 
     public void keyReleased(int keyCode) {
-        int gameAction = getGameAction(keyCode);
+        menu.handleKeyReleased(keyCode);
     }
 
     public void keyPressed(int keyCode) {

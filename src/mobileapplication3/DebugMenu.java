@@ -49,7 +49,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public static boolean showLinePoints = false;
     
     public DebugMenu() {
-        super(true);
+        super(false);
         setFullScreenMode(true);
         (new Thread(this, "about canvas")).start();
     }
@@ -117,7 +117,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         menu.tick();
         if (!menu.isKnownButton) {
             g.setColor(127, 127, 127);
-            g.drawString("Unknown keyCode=" + menu.currKeyCode, scW, scH, Graphics.BOTTOM | Graphics.RIGHT);
+            g.drawString("Unknown keyCode=" + menu.lastKeyCode, scW, scH, Graphics.BOTTOM | Graphics.RIGHT);
         }
     }
     void selectPressed() {
@@ -212,6 +212,9 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
         }
+    }
+    public void keyReleased(int keyCode) {
+        menu.handleKeyReleased(keyCode);
     }
 
     public void recheckInput() {

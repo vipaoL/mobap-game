@@ -196,6 +196,9 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
             selectPressed();
         }
     }
+    public void keyReleased(int keyCode) {
+        menu.handleKeyReleased(keyCode);
+    }
 
     protected void pointerPressed(int x, int y) {
         menu.handlePointer(x, y);

@@ -173,9 +173,9 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             selectPressed();
         }
     }
-    /*public void keyReleased(int keyCode) {
-        int gameAction = getGameAction(keyCode);
-    }*/
+    public void keyReleased(int keyCode) {
+        menu.handleKeyReleased(keyCode);
+    }
     
     protected void pointerPressed(int x, int y) { // Touch screen
         menu.handlePointer(x, y);
