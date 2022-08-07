@@ -110,27 +110,32 @@ public class FileUtils {
         return null;
     }
     boolean canRead = false;
+    boolean checkingRoot = true;
     public Enumeration getNextList() {
         if (roots == null) {
             refreshRoots();
         }
-        while (isNextRootAvaliable() | !photosChecked | !graphicsChecked) {
+        while (isNextRootAvaliable() | checkingRoot | !photosChecked | !graphicsChecked) {
             try {
-                if (isNextRootAvaliable()) {
-                    if (counter >= folders.length) {
+                if (isNextRootAvaliable() | counter < folders.length) {
+                    if (counter < folders.length) {
+                        counter++;
+                    } else {
                         root = (String) roots.nextElement();
                         counter = 1;
-                    } else {
-                        counter++;
                     }
                     path = prefix + root + folders[counter - 1];
-                } else if (!photosChecked) {
-                    path = System.getProperty("fileconn.dir.photos");
-                    photosChecked = true;
-                } else if (!graphicsChecked) {
-                    path = System.getProperty("fileconn.dir.graphics");
-                    graphicsChecked = true;
+                } else {
+                    checkingRoot = false;
+                    if (!photosChecked) {
+                        path = System.getProperty("fileconn.dir.photos");
+                        photosChecked = true;
+                    } else if (!graphicsChecked) {
+                        path = System.getProperty("fileconn.dir.graphics");
+                        graphicsChecked = true;
+                    }
                 }
+                Main.log(path);
                 if (path == null) {
                     continue;
                 }
@@ -138,7 +143,7 @@ public class FileUtils {
                 Main.log(path);
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 canRead = true;
-                Main.log(path + "succ");
+                Main.log(path + ":reachable");
                 if (fc.exists() & fc.isDirectory()) {
                     Enumeration list = fc.list();
                     if (list.hasMoreElements()) {

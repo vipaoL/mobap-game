@@ -373,23 +373,23 @@ public class GenericMenu {
         this.h = h;
         if (options != null) {
             k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
-        }
-        if (fontSize == -1) {
-            findOptimalFont();
-        } else {
-            Main.log(fontSize);
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
-            fontH = font.getHeight();
-            fontFound = true;
+            if (fontSize == -1) {
+                findOptimalFont();
+            } else {
+                Main.log(fontSize);
+                font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
+                fontH = font.getHeight();
+                fontFound = true;
+            }
         }
     }
     public void reloadCanvasParameters(int scW, int scH) {
         reloadCanvasParameters(x0, y0, scW, scH);
     }
     public void reloadCanvasParameters(int x0, int y0, int w, int h) {
-        int fontSize = font.getSize();
-        if (w - x0 != this.w - this.x0 | h - y0 != this.h - this.y0) {
-            fontSize = -1;
+        int fontSize = -1;
+        if (w - x0 == this.w - this.x0 & h - y0 == this.h - this.y0 & font != null) {
+            fontSize = font.getSize();
         }
         loadCanvasParams(x0, y0, w, h, fontSize);
     }
