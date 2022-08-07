@@ -169,6 +169,14 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         }
     }
     public void keyPressed(int keyCode) {
+        if (keyCode == GameCanvas.KEY_STAR | keyCode == -10) {
+            Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
+            if (Main.isScreenLogEnabled) {
+                Main.enableLog(scH);
+            } else {
+                Main.disableLog();
+            }
+        }
         if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
         }

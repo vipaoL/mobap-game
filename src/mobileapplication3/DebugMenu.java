@@ -137,8 +137,8 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         }
         if (selected == 5) {
             Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
-            if (Main.isScreenLogEnabled) {
-                Main.enableLog(scH);
+            if (Main.isScreenLogEnabled) { // TODO: move to Main.java to make common toggleLog()
+                Main.enableLog(scH); // in MenuCanvas also used this code
             } else {
                 Main.disableLog();
             }
