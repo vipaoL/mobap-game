@@ -104,7 +104,7 @@ public class GenericMenu {
             }
         } else {
             g.setColor(128, 128, 128);
-            g.drawString("Initializing the menu...", Main.sWidth / 2, Main.sHeight, Graphics.BOTTOM | Graphics.HCENTER);
+            g.drawString("Loading the menu...", Main.sWidth / 2, Main.sHeight, Graphics.BOTTOM | Graphics.HCENTER);
         }
         if (Main.isScreenLogEnabled) {
             g.setColor(150, 255, 150);
@@ -188,7 +188,10 @@ public class GenericMenu {
     
     public boolean handlePressingButton(int keyStates) {
         if (keyStates != 0) {
-            Main.log("states", keyStates);
+            //Main.log("states", keyStates);
+            if (keyStates == GameCanvas.RIGHT | keyStates == GameCanvas.FIRE |
+                    keyStates == GameCanvas.UP | keyStates == GameCanvas.DOWN)
+                isKnownButton = true;
         }
         feedback.setIsPaused(false);
         isSelectAlreadyPressed = isSelectPressed;
@@ -207,9 +210,9 @@ public class GenericMenu {
                     } else {
                         selected = lastReachable;
                     }
-                    Main.log("up");
+                    //Main.log("up");
                 } else if (keyStates == GameCanvas.DOWN) {
-                    Main.log("down");
+                    //Main.log("down");
                     isKnownButton = true;
                     feedback.setIsPaused(false);
                     if (selected < lastReachable) {
@@ -235,12 +238,13 @@ public class GenericMenu {
     
     public boolean handleKeyPressed(int keyCode) {
         lastKeyCode = keyCode;
+        isKnownButton = false;
         isKeyPressedNow = true;
         if (feedback.getIsPaused()) {
             feedback.recheckInput();
         }
         feedback.setIsPaused(false);
-        Main.log("pressed", keyCode);
+        Main.log("pressed:", keyCode);
         boolean pressed = false;
         int selected = -1;
         switch (keyCode) {
@@ -376,7 +380,7 @@ public class GenericMenu {
             if (fontSize == -1) {
                 findOptimalFont();
             } else {
-                Main.log(fontSize);
+                Main.log("got fontSize:", fontSize);
                 font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
                 fontH = font.getHeight();
                 fontFound = true;

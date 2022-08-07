@@ -135,7 +135,7 @@ public class FileUtils {
                         graphicsChecked = true;
                     }
                 }
-                Main.log(path);
+                //Main.log(path);
                 if (path == null) {
                     continue;
                 }
@@ -143,7 +143,7 @@ public class FileUtils {
                 Main.log(path);
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 canRead = true;
-                Main.log(path + ":reachable");
+                Main.log("reachable");
                 if (fc.exists() & fc.isDirectory()) {
                     Enumeration list = fc.list();
                     if (list.hasMoreElements()) {
