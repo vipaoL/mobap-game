@@ -367,6 +367,8 @@ public class GenericMenu {
     
     public void handleKeyReleased(int keyCode) {
         keyPressDelay = 0;
+        isSelectPressed = false;
+        isSelectAlreadyPressed = false;
         isKeyPressedNow = false;
     }
     
