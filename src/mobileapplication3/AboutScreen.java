@@ -51,6 +51,9 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     public AboutScreen() {
         super(false);
         setFullScreenMode(true);
+        if (Main.PRE_VERSION >= 0) {
+            menuOpts[menuOpts.length-2] += "-pre" + Main.PRE_VERSION;
+        }
         (new Thread(this, "about canvas")).start();
     }
 

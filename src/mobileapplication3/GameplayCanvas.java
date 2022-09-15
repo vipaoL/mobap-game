@@ -23,7 +23,9 @@ public class GameplayCanvas extends Canvas implements Runnable {
     String[] pausehint = {"PAUSE:", "here(touch), *,", "B, right soft"};
     int hintTime = 120; // in ticks
     
-    // to prevent siemens' bug that calls hideNotify right after showing canvas
+    public static final short EFFECT_SPEED = 0;
+    
+    // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
     private int pauseDelay = PAUSE_DELAY;
     private boolean previousPauseState = false;
@@ -68,6 +70,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
     static int timeFlying = 0;
     int timeMotorTurnedOff = 50;
     
+    static short[][] currentEffects = new short[1][];
+    
     // fonts
     Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     int sFontH = smallfont.getHeight();
@@ -92,6 +96,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         setFullScreenMode(true);
         scW = getWidth();
         scH = getHeight();
+        currentEffects = new short[1][];
         repaint();
         log("gcanvas:starting thread");
         (new Thread(this, "game canvas")).start();
@@ -210,7 +215,15 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 // set motor power according to car speed
                 // (fast start and saving limited speed)
                 FXVector velFX = world.carbody.velocityFX();
-                carVelocitySqr = velFX.xAsInt() * velFX.xAsInt() + velFX.yAsInt() * velFX.yAsInt();
+                int vX = velFX.xAsInt();
+                int vY = velFX.yAsInt();
+                if (currentEffects[EFFECT_SPEED] != null) {
+                    if (currentEffects[EFFECT_SPEED][0] > 0) {
+                        vX = vX * 100 / currentEffects[EFFECT_SPEED][2];
+                        vY = vY * 100 / currentEffects[EFFECT_SPEED][2];
+                    }
+                }
+                carVelocitySqr = vX * vX + vY * vY;
                 if (carVelocitySqr > 1000000) {
                     speedMultipiler = 2;
                     speedoState = 2;
@@ -240,8 +253,15 @@ public class GameplayCanvas extends Canvas implements Runnable {
                             world.carbody.applyTorque(FXUtil.toFX(-10000));
                         }
                     } else {
-                        int motorForceX = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(carAngle - 15) * speedMultipiler), TEN_FX * 5);
-                        int motorForceY = FXUtil.divideFX(FXUtil.toFX(Mathh.sin(carAngle - 15) * speedMultipiler), TEN_FX * 5);
+                        int directionOffset = 0;
+                        if (currentEffects[EFFECT_SPEED] != null) {
+                            if (currentEffects[EFFECT_SPEED][0] > 0) {
+                                directionOffset = currentEffects[EFFECT_SPEED][1];
+                                speedMultipiler = speedMultipiler * currentEffects[EFFECT_SPEED][2] / 100;
+                            }
+                        }
+                        int motorForceX = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(carAngle - 15 + directionOffset) * speedMultipiler), TEN_FX * 5);
+                        int motorForceY = FXUtil.divideFX(FXUtil.toFX(Mathh.sin(carAngle - 15 + directionOffset) * speedMultipiler), TEN_FX * 5);
                         world.carbody.applyMomentum(new FXVector(motorForceX, -motorForceY));
                         if ((!leftWheelContacts & world.getContactsForBody(world.carbody)[0] != null) | rightWheelContacts) {
                             world.carbody.applyTorque(FXUtil.toFX(-6000));
@@ -269,11 +289,40 @@ public class GameplayCanvas extends Canvas implements Runnable {
                     for (int i = 0; i < contacts[j].length; i++) {
                         if (contacts[j][i] != null) {
                             Body body = contacts[j][i].body1();
-                            if (!waitingForDynamic.contains(body) & body != world.carbody & body != world.leftwheel & body != world.rightwheel) {
-                                waitingForDynamic.addElement(body);
-                                waitingTime.addElement(new Integer(20));
-                                if (uninterestingDebug) world.removeBody(body);
+                            // as default value, will be overwritten if available
+                            int bodyType = MUserData.TYPE_FALLING_PLATFORM;
+                            MUserData bodyUserData = null;
+                            try {
+                                bodyUserData = (MUserData) body.getUserData();
+                                bodyType = bodyUserData.bodyType;
+                            } catch (ClassCastException ex) {
+                                
+                            } catch (NullPointerException ex) {
+                                
                             }
+                            if (bodyType == MUserData.TYPE_FALLING_PLATFORM) {
+                                if (!waitingForDynamic.contains(body) & body != world.carbody & body != world.leftwheel & body != world.rightwheel) {
+                                    waitingForDynamic.addElement(body);
+                                    waitingTime.addElement(new Integer(20));
+                                    if (uninterestingDebug) world.removeBody(body);
+                                }
+                            } else if (bodyType == MUserData.TYPE_ACCELERATOR) {
+                                giveEffect(bodyUserData.data);
+                                GraphicsWorld.currColWheel = bodyUserData.color;
+                            } else {
+                                log("unknown bodyType:" + bodyType);
+                            }
+                        }
+                    }
+                }
+                
+                for (int i = 0; i < currentEffects.length; i++) {
+                    if (currentEffects[i] != null) {
+                        if (currentEffects[i][0] > 0) {
+                            currentEffects[i][0]--;
+                            log("effect" + i + "," + currentEffects[i][0] + " ticks left");
+                        } else if (currentEffects[i][0] == 0) {
+                            currentEffects[i] = null;
                         }
                     }
                 }
@@ -530,6 +579,15 @@ public class GameplayCanvas extends Canvas implements Runnable {
     // blink point counter on flip
     public static void indicateFlip() {
         flipIndicator = 0;
+    }
+    
+    public void giveEffect(short[] data) {
+        int id = data[0];
+        int dataLength = data.length - 1;
+        currentEffects[id] = new short[dataLength];
+        for (int i = 1; i < data.length; i++) {
+            currentEffects[id][i - 1] = data[i];
+        }
     }
     
     public void openMenu() {

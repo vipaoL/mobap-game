@@ -17,7 +17,18 @@ public class MgStruct {
 
     static short supportedFileVer = 0;
     static short secondSupportedFileVer = 1;
-    static int[] args = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10};
+    
+    /*
+     * 0 - end of file
+     * 1 - end point of structure
+     * 2 - line
+     * 3 - circle/arc
+     * 4 - breakable line
+     * 5 - breakable circle (not implemented yet)
+     * 6 - sinus (not implemented yet)
+     * 7 - accellerator
+     */
+    static int[] args = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10, /*6*/5, /*7*/8};
     static final int structArrayBufferSize = 32;
 
     static short[][][] structBuffer = new short[structArrayBufferSize][][];

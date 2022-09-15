@@ -10,6 +10,7 @@ import at.emini.physics2D.Body;
 import at.emini.physics2D.Constraint;
 import at.emini.physics2D.Landscape;
 import at.emini.physics2D.Shape;
+import at.emini.physics2D.UserData;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import java.util.Random;
@@ -62,6 +63,7 @@ public class WorldGen implements Runnable {
     public void run() {
         tick = 1;
         Main.log("wg:run()");
+        //placeMGStructByID(10);
         while(MenuCanvas.isWorldgenEnabled) {
             if (!paused) {
                 if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) { // 
@@ -221,7 +223,7 @@ public class WorldGen implements Runnable {
             lndscp.removeSegment(0);
         }
     }
-    private void rmBodies() {
+    /*private void rmBodies() {
         Body[] bodies = w.getBodies();
         int to = w.getBodyCount();
         for (int i = to - 1; i >= 0; i--) {
@@ -229,7 +231,7 @@ public class WorldGen implements Runnable {
             w.removeBody(bodies[i]);
         }
         bodies = null;
-    }
+    }*/
     private void rmAllBodies() {
         Body[] bodies = w.getBodies();
         while (w.getBodyCount() > 0) {
@@ -407,11 +409,63 @@ public class WorldGen implements Runnable {
             for (int i = 0; i < n; i++) {
                 Body fallinPlatf = new Body(lastX + x1 + i*(dx+spX) + offsetX, lastY + y1 + i*(dy+spY) + offsetY, rect, false);
                 fallinPlatf.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
+                //UserData mUserData = new MUserData(MUserData.TYPE_ACCELERATOR, new short[] {/*GameplayCanvas.EFFECT_SPEED, 10, */105, 100});
+                //fallinPlatf.setUserData(mUserData);
+                fallinPlatf.setUserData(new MUserData(MUserData.TYPE_FALLING_PLATFORM, new short[] {20}));
                 w.addBody(fallinPlatf);
+                //Main.log(((MUserData) fallinPlatf.getUserData()).bodyType);
             }
             
         } else if (id == 5) {
             arc(data[1]+lastX, data[2]+lastY, data[3], 360, 0);
+        } else if (id == 6) {
+            sin(lastX + data[1], lastY + data[2], data[3], data[4], data[5], data[6]);
+        } else if (id == 7) {
+            int x = lastX + data[1];
+            int y = lastY + data[2];
+            int l = data[3];
+            int h = data[4];
+            int ang = data[5];
+            
+            short effectID = GameplayCanvas.EFFECT_SPEED;
+            short effectDuration = data[8];
+            short directionOffset = data[6];
+            short speedMultipiler = data[7];
+            
+            int centerX = x + l * Mathh.cos(ang) / 2000;
+            int centerY = y + l * Mathh.sin(ang) / 2000;
+            
+            int colorModifier = (speedMultipiler - 100) * 3;
+            int red = Math.min(255, Math.max(0, colorModifier));
+            int blue = Math.min(255, Math.max(0, -colorModifier));
+            if (red < 50 & blue < 50) {
+                red = 50;
+                blue = 50;
+            }
+            
+            String redStr = Integer.toHexString(red);
+            while (redStr.length() < 2) {                
+                redStr = "0" + redStr;
+            }
+            
+            String blueStr = Integer.toHexString(blue);
+            while (blueStr.length() < 2) {                
+                blueStr = "0" + blueStr;
+            }
+            
+            String greenStr = blueStr;
+            
+            String colorStr = redStr + greenStr + blueStr;
+            int color = Integer.parseInt(colorStr, 16);
+            
+            Shape plate = Shape.createRectangle(l, h);
+            Body pressurePlate = new Body(centerX, centerY, plate, false);
+            UserData mUserData = new MUserData(MUserData.TYPE_ACCELERATOR, new short[] {effectID, effectDuration, directionOffset, speedMultipiler});
+            ((MUserData) mUserData).color = color;
+            pressurePlate.setUserData(mUserData);
+            //Main.log(((MUserData) pressurePlate.getUserData()).bodyType);
+            pressurePlate.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
+            w.addBody(pressurePlate);
         }
         
         
@@ -502,6 +556,7 @@ public class WorldGen implements Runnable {
             rect.setElasticity(50);
             for (int i = 0; i < 2; i++) {
                 Body fallinPlatf = new Body(x+r-r2+i*l2+l2/2, y+platfHeight/2, rect, true);
+                fallinPlatf.setUserData(new MUserData(MUserData.TYPE_FALLING_PLATFORM, new short[] {20}));
                 fallinPlatf.setDynamic(false);
                 w.addBody(fallinPlatf);
             }

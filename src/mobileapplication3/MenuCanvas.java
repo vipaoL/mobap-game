@@ -198,7 +198,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     }
     
     
-    void selectPressed() { // Do something when pressed any option in menu
+    void selectPressed() { // Do something when pressed an option in the menu
         selected = menu.selected;
         if (selected == 1) { // Play
             Main.log("menu:selected == 1 -> gen = true");

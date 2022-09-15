@@ -18,6 +18,7 @@ public class GraphicsWorld extends World {
     int colBg = 0x000000;
     int colLandscape = 0x4444ff;
     int colBodies = 0xffffff;
+    int colFunctionalObjects = 0xff5500;
     
     int scWidth = 64;
     int halfScWidth = 32;
@@ -32,6 +33,7 @@ public class GraphicsWorld extends World {
     public static int viewField = 10;
     public static int points = 0;
     int currColBg = colBg;
+    public static int currColWheel = 0;
     int currColLandscape = colLandscape;
     int currColBodies = colBodies;
     
@@ -181,7 +183,6 @@ public class GraphicsWorld extends World {
             }
             drawLandscape(g);
             
-            g.setColor(currColBodies);
             drawBodies(g); // draw bodies, exclude car wheels
             drawCar(g); // draw car wheels
             drawConstraints(g); // disabled
@@ -200,6 +201,22 @@ public class GraphicsWorld extends World {
         int bodyCount = getBodyCount();
         for (int i = 0; i < bodyCount; i++) {
             if (bodies[i] != leftwheel & bodies[i] != rightwheel) {
+                // as default value, will be overwritten if available
+                int bodyType = MUserData.TYPE_FALLING_PLATFORM;
+                MUserData bodyUserData = null;
+                try {
+                    bodyUserData = (MUserData) bodies[i].getUserData();
+                    bodyType = bodyUserData.bodyType;
+                } catch (ClassCastException ex) {
+
+                } catch (NullPointerException ex) {
+
+                }
+                
+                g.setColor(currColBodies);
+                if (bodyType == MUserData.TYPE_ACCELERATOR) {
+                    g.setColor(bodyUserData.color);
+                }
                 drawBody(g, bodies[i]);
             }
         }
@@ -253,7 +270,7 @@ public class GraphicsWorld extends World {
     private void drawConstraints(Graphics g) {
         int constraintCount = getConstraintCount();
         Constraint[] constraints = getConstraints();
-        for (int i = 0; false & i < constraintCount; i++) {
+        for (int i = 0; /*!*/false &/*!*/ i < constraintCount; i++) {
             if (constraints[i] instanceof Spring) {
                 Spring spring = (Spring) constraints[i];
                 g.drawLine(xToPX(spring.getPoint1().xAsInt()),
@@ -266,7 +283,10 @@ public class GraphicsWorld extends World {
 
     void drawWheel(Graphics g, Body b) {
         int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
-        g.setColor(currColBg);
+        if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] == null) {
+            currColWheel = colBg;
+        }
+        g.setColor(currColWheel);
         g.fillArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
         g.setColor(currColBodies);
         g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
@@ -303,6 +323,13 @@ public class GraphicsWorld extends World {
 
     void calculateZoomOut() {
         zoomOut = (1000 * carY / scMinSide - 1000);
+        int zoomBase = this.zoomBase;
+        if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] != null) {
+            if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][0] > 0) {
+                zoomOut = zoomOut * GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
+                zoomBase = zoomBase * GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
+            }
+        }
         if (zoomOut < 1) {
             zoomOut = -zoomOut;
             zoomOut += 1;
