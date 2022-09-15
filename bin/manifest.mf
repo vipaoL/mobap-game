@@ -1,7 +1,7 @@
 MIDlet-1: mobapp-game,/icon.png,mobileapplication3.Main
 Nokia-Scaleable-Icon: /icon.png
 MIDlet-Vendor: vipaoL
-MIDlet-Version: 0.8.1
+MIDlet-Version: 0.9.0
 MIDlet-Name: mobapp-game
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
