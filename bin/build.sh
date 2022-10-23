@@ -22,7 +22,6 @@ YOUR_LIBS=../lib       # YOUR LIBRARIES
 RES=../rsc
 APP=MobileApplication3   # Output jar name
 MANIFEST=../manifest.mf
-CLASSPATH=${WTK_HOME}/lib/jsr75.jar
 ########
 ########
 
@@ -34,7 +33,7 @@ if [ ! -e ${MANIFEST} ] ; then
 		if [ ! -e ${MANIFEST} ] ; then
 			MANIFEST=./MANIFEST.MF
 			if [ ! -e ${MANIFEST} ] ; then
-				echo "No MANIFEST.MF or manifest.mf found in ./ and ../"
+				echo "No MANIFEST.MF or manifest.mf found in ./ or ../"
 				exit 2
 			fi
 		fi
@@ -42,6 +41,7 @@ if [ ! -e ${MANIFEST} ] ; then
 fi
 
 LIB_DIR=${WTK_HOME}/lib
+CLASSPATH=${LIB_DIR}/*
 CLDCAPI=${LIB_DIR}/cldcapi11.jar
 MIDPAPI=${LIB_DIR}/midpapi20.jar
 PREVERIFY=${WTK_HOME}/bin/preverify
