@@ -75,9 +75,9 @@ echo "Unpacking your libraries: " ${YOUR_LIBS}/*.jar
 cd ../tmpclasses
 ../bin/${JAR} xf ${YOUR_LIBS}/*.jar
 rm -rf META-INF
-cd ../bin
 
 
+cd ${WORK_DIR}
 echo "Compiling source files..."
 ${JAVAC} \
     -bootclasspath ${CLDCAPI}${PATHSEP}${MIDPAPI} \
