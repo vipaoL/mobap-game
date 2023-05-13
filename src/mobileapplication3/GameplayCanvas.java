@@ -22,6 +22,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
     String[] menuhint = {"MENU:", "here(touch),", "D, #"};
     String[] pausehint = {"PAUSE:", "here(touch), *,", "B, right soft"};
     int hintTime = 120; // in ticks
+    public static int gameSpeedMultiplier = 2;
+    int forceMultiplier = gameSpeedMultiplier*gameSpeedMultiplier;
     
     public static final short EFFECT_SPEED = 0;
     
@@ -106,7 +108,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         stopped = false;
         log("gamecanvas:setWorld()");
         this.world = w;
-        this.world.setGravity(FXVector.newVector(0, 250));
+        this.world.setGravity(FXVector.newVector(0, 250 * gameSpeedMultiplier));
         reset();
         isWorldLoaded = true;
     }
@@ -239,32 +241,35 @@ public class GameplayCanvas extends Canvas implements Runnable {
                     speedMultipiler = 30;
                 }
                 
+                speedMultipiler *= forceMultiplier;
+                
                 // getting car angle
                 carAngle = 360 - FXUtil.angleInDegrees2FX(world.carbody.rotation2FX());
 
                 // when the motor is turned on
                 if (accel) {
                     timeMotorTurnedOff = 0;
-                    // apply rotational force if needed
                     if (timeFlying > 2) {
+                        // apply rotational force
                         if (world.carbody.rotationVelocity2FX() > 50000000) {
-                            world.carbody.applyTorque(FXUtil.toFX(-world.carbody.rotationVelocity2FX()/16000));
+                            world.carbody.applyTorque(FXUtil.toFX(-world.carbody.rotationVelocity2FX()*forceMultiplier/16000));
                         } else {
-                            world.carbody.applyTorque(FXUtil.toFX(-10000));
+                            world.carbody.applyTorque(FXUtil.toFX(-10000*forceMultiplier));
                         }
                     } else {
+                        // apply motor force when on the ground
                         int directionOffset = 0;
                         if (currentEffects[EFFECT_SPEED] != null) {
                             if (currentEffects[EFFECT_SPEED][0] > 0) {
                                 directionOffset = currentEffects[EFFECT_SPEED][1];
-                                speedMultipiler = speedMultipiler * currentEffects[EFFECT_SPEED][2] / 100;
+                                speedMultipiler *= currentEffects[EFFECT_SPEED][2] / 100;
                             }
                         }
                         int motorForceX = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(carAngle - 15 + directionOffset) * speedMultipiler), TEN_FX * 5);
                         int motorForceY = FXUtil.divideFX(FXUtil.toFX(Mathh.sin(carAngle - 15 + directionOffset) * speedMultipiler), TEN_FX * 5);
                         world.carbody.applyMomentum(new FXVector(motorForceX, -motorForceY));
                         if ((!leftWheelContacts & world.getContactsForBody(world.carbody)[0] != null) | rightWheelContacts) {
-                            world.carbody.applyTorque(FXUtil.toFX(-6000));
+                            world.carbody.applyTorque(FXUtil.toFX(-6000*forceMultiplier));
                         }
                     }
                 } else {
@@ -272,10 +277,10 @@ public class GameplayCanvas extends Canvas implements Runnable {
                     if (timeMotorTurnedOff < 40 & !uninterestingDebug) {
                         try {
                             if (world.carbody.angularVelocity2FX() > 0) {
-                                world.carbody.applyTorque(FXUtil.toFX(world.carbody.angularVelocity2FX() / 4000));
+                                world.carbody.applyTorque(FXUtil.toFX(world.carbody.angularVelocity2FX() * gameSpeedMultiplier / 4000));
                             }
                             if (timeFlying < 2) {
-                                world.carbody.applyMomentum(new FXVector(-world.carbody.velocityFX().xFX/5, -world.carbody.velocityFX().yFX/5));
+                                world.carbody.applyMomentum(new FXVector(-world.carbody.velocityFX().xFX*gameSpeedMultiplier/5, -world.carbody.velocityFX().yFX*gameSpeedMultiplier/5));
                             }
                             timeMotorTurnedOff++;
                         } catch (NullPointerException ex) {
