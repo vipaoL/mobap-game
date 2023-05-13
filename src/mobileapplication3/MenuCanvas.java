@@ -12,7 +12,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feedback{
+public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feedback {
     
     String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Debug", "Exit", "-"};
     
@@ -36,7 +36,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     public static boolean isWorldgenEnabled = false;
     static boolean areExtStructsLoaded = false;
 
-    public MenuCanvas() {
+    public MenuCanvas() /*throws ClassNotFoundException*/ {
         super(false);
         setFullScreenMode(true);
         scW = getWidth();

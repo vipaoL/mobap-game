@@ -5,8 +5,8 @@
 package mobileapplication3;
 
 import at.emini.physics2D.*;
-import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.FXUtil;
+import at.emini.physics2D.util.FXVector;
 import javax.microedition.lcdui.Graphics;
 
 /**
@@ -19,10 +19,17 @@ public class GraphicsWorld extends World {
     int colLandscape = 0x4444ff;
     int colBodies = 0xffffff;
     int colFunctionalObjects = 0xff5500;
+    int currColBg = colBg;
+    public static int currColWheel = 0;
+    int currColLandscape = colLandscape;
+    int currColBodies = colBodies;
     
+    static boolean bg = false;
+    
+    // test values, will be replaced
     int scWidth = 64;
     int halfScWidth = 32;
-    int scHeight = 320; // test values, will be replaced
+    int scHeight = 320;
     int halfScHeight = 160;
     int scMinSide = 64;
     
@@ -32,12 +39,6 @@ public class GraphicsWorld extends World {
     int offsetY = 0;
     public static int viewField = 10;
     public static int points = 0;
-    int currColBg = colBg;
-    public static int currColWheel = 0;
-    int currColLandscape = colLandscape;
-    int currColBodies = colBodies;
-    
-    static boolean bg = false;
     
     public static int carX = 0;
     public static int carY = 0;
@@ -183,7 +184,7 @@ public class GraphicsWorld extends World {
             }
             drawLandscape(g);
             
-            drawBodies(g); // draw bodies, exclude car wheels
+            drawBodies(g); // draw all bodies, excluding car wheels
             drawCar(g); // draw car wheels
             drawConstraints(g); // disabled
             
@@ -201,7 +202,7 @@ public class GraphicsWorld extends World {
         int bodyCount = getBodyCount();
         for (int i = 0; i < bodyCount; i++) {
             if (bodies[i] != leftwheel & bodies[i] != rightwheel) {
-                // as default value, will be overwritten if available
+                // default value, will be overwritten if it is an other type of body
                 int bodyType = MUserData.TYPE_FALLING_PLATFORM;
                 MUserData bodyUserData = null;
                 try {
@@ -268,9 +269,13 @@ public class GraphicsWorld extends World {
     }
 
     private void drawConstraints(Graphics g) {
+        
+        // disable drawing constraints
+        if (true) return;
+        
         int constraintCount = getConstraintCount();
         Constraint[] constraints = getConstraints();
-        for (int i = 0; /*!*/false &/*!*/ i < constraintCount; i++) {
+        for (int i = 0; i < constraintCount; i++) {
             if (constraints[i] instanceof Spring) {
                 Spring spring = (Spring) constraints[i];
                 g.drawLine(xToPX(spring.getPoint1().xAsInt()),

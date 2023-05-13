@@ -27,20 +27,22 @@ public class Main extends MIDlet {
     // time for one frame. 1000ms / 50ms = 20fps
     public static final int TICK_DURATION = 50;
     static int sWidth, sHeight;
-    Display display = Display.getDisplay(this);
     public static Main thiss;
-    public static Displayable current;
     
     public static String[] onScreenLog = new String[1];
     public static int onScreenLogOffset = 0;
     public static boolean isScreenLogInited = false;
 
     public Main() {
-        MenuCanvas menuCanvas = new MenuCanvas();
-        sWidth = menuCanvas.getWidth();
-        sHeight = menuCanvas.getHeight();
         thiss = this;
-        set(menuCanvas);
+        //try {
+            MenuCanvas menuCanvas = new MenuCanvas();
+            set(menuCanvas);
+        /*} catch (ClassNotFoundException ex) {
+            showAlert(ex.getMessage());
+        } catch (NoClassDefFoundError ex) {
+            showAlert(ex.getMessage());
+        }*/
     }
 
     public void startApp() {
@@ -59,8 +61,9 @@ public class Main extends MIDlet {
     
     public static void set(Displayable d) {
         Display.getDisplay(thiss).setCurrent(d);
-        current = d;
-        clear();
+        System.gc();
+        sWidth = d.getWidth();
+        sHeight = d.getHeight();
     }
     
     public static void showAlert(Throwable ex) {
@@ -102,10 +105,6 @@ public class Main extends MIDlet {
         } catch (NullPointerException ex) {
             
         }*/
-    }
-    
-    public static void clear() {
-        System.gc();
     }
     
     /*public static void logErr(String text, int value) {
