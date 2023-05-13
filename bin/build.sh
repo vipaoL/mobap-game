@@ -62,7 +62,7 @@ fi
 #
 # Make possible to run this script from any directory'`
 #
-WORK_DIR=`dirname $0`
+WORK_DIR=`readlink -f $(dirname $0)`
 cd ${WORK_DIR}
 
 echo "Creating or cleaning directories..."
