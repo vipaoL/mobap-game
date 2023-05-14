@@ -217,8 +217,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 // set motor power according to car speed
                 // (fast start and saving limited speed)
                 FXVector velFX = world.carbody.velocityFX();
-                int vX = velFX.xAsInt();
-                int vY = velFX.yAsInt();
+                int vX = velFX.xAsInt() / gameSpeedMultiplier;
+                int vY = velFX.yAsInt() / gameSpeedMultiplier;
                 if (currentEffects[EFFECT_SPEED] != null) {
                     if (currentEffects[EFFECT_SPEED][0] > 0) {
                         vX = vX * 100 / currentEffects[EFFECT_SPEED][2];
@@ -262,7 +262,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
                         if (currentEffects[EFFECT_SPEED] != null) {
                             if (currentEffects[EFFECT_SPEED][0] > 0) {
                                 directionOffset = currentEffects[EFFECT_SPEED][1];
-                                speedMultipiler *= currentEffects[EFFECT_SPEED][2] / 100;
+                                speedMultipiler = speedMultipiler * currentEffects[EFFECT_SPEED][2] / 100;
+                                Main.log(speedMultipiler);
                             }
                         }
                         int motorForceX = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(carAngle - 15 + directionOffset) * speedMultipiler), TEN_FX * 5);
