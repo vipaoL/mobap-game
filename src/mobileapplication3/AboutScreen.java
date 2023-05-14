@@ -28,6 +28,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     int scH = getHeight();
     int offset = 0;
     int qrOffsetH = 0;
+    int extraVerticalMargin = 0;
     int menuBtnsOffsetH = 0;
     int qrSide = 0;
     int margin = 0;
@@ -67,6 +68,13 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
             qrSide = scW - margin*2;
         }
         
+        int headerAndQrH = fontH * (strings.length) + 3*margin + qrSide;
+        int buttonsFontH = menu.findOptimalFont(scW, scH - headerAndQrH - margin, menuOpts);
+        extraVerticalMargin = (scH - (headerAndQrH + (3*menuOpts.length/2)*buttonsFontH + margin)) / 4;
+        if (extraVerticalMargin < 0) {
+            extraVerticalMargin = 0;
+        }
+        
         try {
             qr = scale(Image.createImage("/qr.png"), qrSide, qrSide);
         } catch (IOException ex) {
@@ -92,7 +100,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         drawHeaderAndQR(g);
         menuBtnsOffsetH = offset;
         if (!menu.isInited) {
-            menu.loadParams(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH, menuOpts, 0, menuOpts.length - 1, menuOpts.length - 1, fontSizeCache);
+            menu.loadParams(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH - margin - extraVerticalMargin, menuOpts, 0, menuOpts.length - 1, menuOpts.length - 1, fontSizeCache);
             fontSizeCache = menu.getFontSize();
             menu.setFirstDrawable(1);
         } else {
@@ -168,7 +176,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     void drawHeaderAndQR(Graphics g) {
         g.setColor(255, 255, 255);
         
-        offset = margin;
+        offset = margin + extraVerticalMargin;
         //g.setFont(font2);
         //g.drawString("About:", scW/2, 0, Graphics.HCENTER | Graphics.TOP);
         //offset += font2H;
@@ -177,7 +185,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
             g.drawString(strings[i], scW/2, offset, Graphics.HCENTER | Graphics.TOP);
             offset += fontH;
         }
-        offset += margin;
+        offset += margin + extraVerticalMargin;
         try {
             g.drawImage(qr, scW / 2, offset, Graphics.HCENTER | Graphics.TOP);
         } catch (NullPointerException ex) {
@@ -192,6 +200,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
             g.drawString("could be here.", x, y, Graphics.HCENTER|Graphics.TOP);
         }
         offset += qrSide;
+        offset += margin + extraVerticalMargin;
         //g.drawLine(0, offset, scW, offset);
     }
     

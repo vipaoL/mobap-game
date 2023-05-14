@@ -122,31 +122,30 @@ public class GenericMenu {
         }
     }
     
-    public void findOptimalFont() {
+    public int findOptimalFont(int canvW, int canvH, String[] options) {
         font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
         
         // height
-        if (font.getHeight() * options.length - firstDrawable >= h - h/16) {
+        if (font.getHeight() * options.length - firstDrawable >= canvH - canvH/16) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
         }
-        if (font.getHeight() * options.length - firstDrawable >= h - h/16) {
+        if (font.getHeight() * options.length - firstDrawable >= canvH - canvH/16) {
             font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
         }
         
         // width
         if (font.getSize() != Font.SIZE_SMALL) {
             for (int i = firstDrawable; i < options.length - 1; i++) {
-                if (font.stringWidth((String) options[i]) >= w - w/16) {
+                if (font.stringWidth((String) options[i]) >= canvW - canvW/16) {
                     font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-                    if (font.stringWidth((String) options[i]) >= w - w/16) {
+                    if (font.stringWidth((String) options[i]) >= canvW - canvW/16) {
                         font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
                         break;
                     }
                 }
             }
         }
-        fontH = font.getHeight();
-        fontFound = true;
+        return font.getHeight();
     }
     
     private boolean isOptionAvailable(int n) {
@@ -380,13 +379,13 @@ public class GenericMenu {
         if (options != null) {
             k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
             if (fontSize == -1) {
-                findOptimalFont();
+                fontH = findOptimalFont(w, h, options);
             } else {
                 Main.log("got fontSize:", fontSize);
                 font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
                 fontH = font.getHeight();
-                fontFound = true;
             }
+            fontFound = true;
         }
     }
     public void reloadCanvasParameters(int scW, int scH) {
