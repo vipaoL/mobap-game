@@ -90,6 +90,9 @@ public class MgStruct {
                 structsInBufferNumber = loadedStructsFromResNumber;
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
+            } catch (NoClassDefFoundError err) {
+                Main.showAlert(err);
+                return false;
             }
             if (dis != null) {
                 try {
