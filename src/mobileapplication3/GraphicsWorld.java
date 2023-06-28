@@ -255,11 +255,13 @@ public class GraphicsWorld extends World {
             int endPointX = xToPX(landscape.endPoint(i).xAsInt());
             int endPointY = yToPX(landscape.endPoint(i).yAsInt());
             if (stPointX < scWidth | endPointX > 0) {
-                g.drawLine(
+                drawLine(
+                        g,
                         stPointX,
                         stPointY,
                         endPointX,
-                        endPointY);
+                        endPointY,
+                        50);
                 if (DebugMenu.showLinePoints) {
                     g.fillArc(stPointX - 2, stPointY - 2, 4, 4, 0, 360);
                     g.fillArc(endPointX - 2, endPointY - 2, 4, 4, 0, 360);
@@ -295,6 +297,35 @@ public class GraphicsWorld extends World {
         g.fillArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
         g.setColor(currColBodies);
         g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
+    }
+    
+    void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
+        if (thickness <= 1) {
+            g.drawLine(x1, y1, x2, y2);
+        } else {
+            int t2 = thickness/2;
+            int dx = x2 - x1;
+            int dy = y2 - y1;
+            int l = (int) Math.sqrt(dx*dx+dy*dy);
+            
+            if (l == 0) {
+                g.drawLine(x1, y1, x2, y2);
+                return;
+            }
+            
+            // normal vector
+            int nx = dy*t2 * 1000 / zoomOut / l;
+            int ny = dx*t2 * 1000 / zoomOut / l;
+            
+            if (nx == 0 && ny == 0) {
+                g.drawLine(x1, y1, x2, y2);
+                return;
+            }
+            
+            // draw bold line with two triangles (splitting by diagonal)
+            g.fillTriangle(x1-nx, y1+ny, x2-nx, y2+ny, x1+nx, y1-ny);
+            g.fillTriangle(x2-nx, y2+ny, x2+nx, y2-ny, x1+nx, y1-ny);
+        }
     }
 
     public int xToPX(int c) {
