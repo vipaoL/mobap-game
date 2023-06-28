@@ -25,6 +25,8 @@ public class GraphicsWorld extends World {
     int currColBodies = colBodies;
     
     static boolean bg = false;
+    public static boolean bigScreen = false;
+    public static final int BIGSCREEN_SIDE = 480;
     
     // test values, will be replaced
     int scWidth = 64;
@@ -232,12 +234,19 @@ public class GraphicsWorld extends World {
         }
         else { // if not a circle, then a polygon
             for (int i = 0; i < positions.length - 1; i++) {
-                g.drawLine(xToPX(positions[i].xAsInt()),
+                drawLine(g,
+                        xToPX(positions[i].xAsInt()),
                         yToPX(positions[i].yAsInt()),
                         xToPX(positions[i + 1].xAsInt()),
-                        yToPX(positions[i + 1].yAsInt()));
+                        yToPX(positions[i + 1].yAsInt()),
+                        10);
             }
-            g.drawLine(xToPX(positions[positions.length - 1].xAsInt()), yToPX(positions[positions.length - 1].yAsInt()), xToPX(positions[0].xAsInt()), yToPX(positions[0].yAsInt()));
+            drawLine(g,
+                    xToPX(positions[positions.length - 1].xAsInt()),
+                    yToPX(positions[positions.length - 1].yAsInt()),
+                    xToPX(positions[0].xAsInt()),
+                    yToPX(positions[0].yAsInt()),
+                    10);
         }
     }
 
@@ -300,9 +309,7 @@ public class GraphicsWorld extends World {
     }
     
     void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
-        if (thickness <= 1) {
-            g.drawLine(x1, y1, x2, y2);
-        } else {
+        if (thickness > 2 && bigScreen) {
             int t2 = thickness/2;
             int dx = x2 - x1;
             int dy = y2 - y1;
@@ -325,6 +332,12 @@ public class GraphicsWorld extends World {
             // draw bold line with two triangles (splitting by diagonal)
             g.fillTriangle(x1-nx, y1+ny, x2-nx, y2+ny, x1+nx, y1-ny);
             g.fillTriangle(x2-nx, y2+ny, x2+nx, y2-ny, x1+nx, y1-ny);
+            int r = t2 * 1000 / zoomOut;
+            int d = r * 2;
+            g.fillArc(x1-r, y1-r, d, d, 0, 360);
+            g.fillArc(x2-r, y2-r, d, d, 0, 360);
+        } else {
+            g.drawLine(x1, y1, x2, y2);
         }
     }
 
