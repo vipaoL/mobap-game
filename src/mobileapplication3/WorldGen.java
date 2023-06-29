@@ -70,9 +70,12 @@ public class WorldGen implements Runnable {
                     placeNext();
                 }
                 
+                // World cycling
+                //(the physics engine is working weird when the coordinate reaches around 10000
+                //  then we need to move all structures and bodies to the left when the car is to the right of 8000)
                 if (numberOfLoggedStructs >= structLog.length) {
                     if (GraphicsWorld.carX > 8000 & (GameplayCanvas.timeFlying > 1 | GameplayCanvas.uninterestingDebug)) {
-                        if (!GameplayCanvas.isDrawingNow) {
+                        if (true /*!GameplayCanvas.isDrawingNow*/) {
                             resetPosition();
                         }
                     }
