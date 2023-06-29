@@ -228,7 +228,7 @@ public class GraphicsWorld extends World {
     public void drawBody(Graphics g, Body b) {
         FXVector[] positions = b.getVertices();
         
-        if (positions.length == 1) { // if shape of this body is a circle
+        if (positions.length == 1) { // if shape of the body is circle
             int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
             g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
         }
@@ -270,7 +270,7 @@ public class GraphicsWorld extends World {
                         stPointY,
                         endPointX,
                         endPointY,
-                        50);
+                        24);
                 if (DebugMenu.showLinePoints) {
                     g.fillArc(stPointX - 2, stPointY - 2, 4, 4, 0, 360);
                     g.fillArc(endPointX - 2, endPointY - 2, 4, 4, 0, 360);
