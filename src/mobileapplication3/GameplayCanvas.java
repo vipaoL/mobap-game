@@ -42,6 +42,9 @@ public class GameplayCanvas extends Canvas implements Runnable {
     static boolean stopped = false;
     public static boolean lock = false;
     
+    public static boolean shouldWait = false;
+    public static boolean isWaiting = false;
+    
     // screen
     int scW, scH, maxScSide;
     
@@ -200,7 +203,6 @@ public class GameplayCanvas extends Canvas implements Runnable {
             }
             
             if (!paused && worldgen.isReady()) {
-                isDrawingNow = true;
                 start = System.currentTimeMillis();
                 // chech if car contacts with the ground or sth else
                 contacts[0] = world.getContactsForBody(world.leftwheel);
@@ -380,6 +382,17 @@ public class GameplayCanvas extends Canvas implements Runnable {
                         }
                     }
                 }
+                
+                while (shouldWait) {
+                    isWaiting = true;
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                
+                isDrawingNow = true;
                 
                 world.tick();
                 repaint();

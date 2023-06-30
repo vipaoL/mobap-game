@@ -73,8 +73,11 @@ public class WorldGen implements Runnable {
                 //  then we need to move all structures and bodies to the left when the car is to the right of 8000)
                 if (structlogger.isFull()) {
                     if (GraphicsWorld.carX > 8000) {// && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
+                        GameplayCanvas.shouldWait = true;
+                        while (GameplayCanvas.isDrawingNow) {}
                         if (true /*!GameplayCanvas.isDrawingNow*/) {
                             resetPosition();
+                            GameplayCanvas.shouldWait = false;
                         }
                     }
                 }

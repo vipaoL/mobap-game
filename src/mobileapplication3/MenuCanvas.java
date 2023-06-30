@@ -33,7 +33,9 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     private GenericMenu menu; // some generic code for drawing menus
     private MgStruct mgStruct; // for loading external structures
     
+    // TODO: move to GameplayCanvas
     public static boolean isWorldgenEnabled = false;
+    
     static boolean areExtStructsLoaded = false;
 
     public MenuCanvas() /*throws ClassNotFoundException*/ {
