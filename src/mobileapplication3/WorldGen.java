@@ -254,22 +254,37 @@ public class WorldGen implements Runnable {
         isReady = false;
         isResettingPosition = true;
         needSpeed = true;
-        int prevLastX = lastX;
-        lastX = -14000;
+        
+        int dx = -8000 - GraphicsWorld.carX;
+        lastX = lastX + dx;
         
         Main.log("resetting pos");
         
-        rmSegs();
-        reproduce();
-        
-        moveBodies(lastX - prevLastX);
+        moveLandscape(dx);
+        moveBodies(dx);
         zeroPoint = w.carbody.positionFX().xAsInt();
         
-        nextPointsCounterTargetX -= (prevLastX - lastX);
+        nextPointsCounterTargetX += dx;
 
         isResettingPosition = false;
         needSpeed = false;
         isReady = true;
+    }
+    
+    private void moveLandscape(int dx) {
+        movePoints(lndscp.elementStartPoints(), dx);
+        movePoints(lndscp.elementEndPoints(), dx);
+    }
+    
+    private void movePoints(FXVector[] points, int dx) {
+        try {
+            for (int i = 0; i < lndscp.segmentCount(); i++) {
+                FXVector point = points[i];
+                points[i] = new FXVector(point.xFX + FXUtil.toFX(dx), point.yFX);
+            }
+        } catch(NullPointerException e) {
+            e.printStackTrace();
+        }
     }
     
     private void reproduce() {
