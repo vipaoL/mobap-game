@@ -443,8 +443,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
         }
         
         // draw some debug info if debug is enabled
+        int debugTextOffset = 0;
         if (DebugMenu.isDebugEnabled) {
-            int debugTextOffset = 0;
             setFont(smallfont, g);
             // speedometer
             if (DebugMenu.speedo) {
@@ -464,12 +464,6 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 g.drawString(String.valueOf(carVelocitySqr), 0, debugTextOffset, 0);
                 debugTextOffset += currentFontH;
             }
-            // show coordinates of car
-            if (DebugMenu.coordinates) {
-                g.setColor(255, 255, 255);
-                g.drawString(GraphicsWorld.carX + " " + GraphicsWorld.carY, 0, debugTextOffset, 0); 
-                debugTextOffset += currentFontH;
-            }
             // car angle
             if (DebugMenu.showAngle) {
                 if (timeFlying > 0) {
@@ -481,6 +475,13 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 debugTextOffset += currentFontH;
             }
         }
+        // show coordinates of car if enabled
+        if (DebugMenu.coordinates) {
+            g.setColor(127, 127, 127);
+            g.drawString(GraphicsWorld.carX + " " + GraphicsWorld.carY, 0, debugTextOffset, 0); 
+            debugTextOffset += currentFontH;
+        }
+        
         // game over screen
         if (gameoverCountdown > 1) {
             g.setFont(largefont);
