@@ -28,9 +28,7 @@ public class WorldGen implements Runnable {
     private int prevStructRandomId;
     private int nextStructRandomId;
     public boolean isResettingPosition = false;
-    private int[][] structLog = new int[structLogSize][];
-    private int numberOfLoggedStructs = 0;
-    private int ringLogTail = 0;
+    StructLog structlogger = new StructLog(structLogSize);
     
     private int lastX = -8000;
     private int lastY = 0;
@@ -73,8 +71,8 @@ public class WorldGen implements Runnable {
                 // World cycling
                 //(the physics engine is working weird when the coordinate reaches around 10000
                 //  then we need to move all structures and bodies to the left when the car is to the right of 8000)
-                if (numberOfLoggedStructs >= structLog.length) {
-                    if (GraphicsWorld.carX > 8000 & (GameplayCanvas.timeFlying > 1 | GameplayCanvas.uninterestingDebug)) {
+                if (structlogger.isFull()) {
+                    if (GraphicsWorld.carX > 8000) {// && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
                         if (true /*!GameplayCanvas.isDrawingNow*/) {
                             resetPosition();
                         }
@@ -249,28 +247,6 @@ public class WorldGen implements Runnable {
         return lowestY;
     }
     
-    private void structlogger(int[] a) {
-        if (!isResettingPosition) {
-            if (numberOfLoggedStructs < structLog.length) {
-                numberOfLoggedStructs++;
-            }
-            
-            int index = (ringLogTail) % structLog.length;
-            structLog[index] = a;
-            //Main.log(structLog[index][0]);
-            //Main.log(index);
-            if (ringLogTail >= structLog.length - 1) {
-                ringLogTail = 0;
-            } else {
-                ringLogTail++;
-            }
-        }
-    }
-    
-    private int[] structlog_getElementAt(int i) {
-        return structLog[(i+ringLogTail)%structLog.length];
-    }
-    
     private void resetPosition() { // world cycling
         isReady = false;
         isResettingPosition = true;
@@ -294,9 +270,9 @@ public class WorldGen implements Runnable {
     }
     
     private void reproduce() {
-        Main.log("to reproduce: ", numberOfLoggedStructs);
-        for (int i = 0; i < numberOfLoggedStructs; i++) {
-            int[] struct = structlog_getElementAt(i);
+        Main.log("to reproduce: ", structlogger.getNumberOfLogged());
+        for (int i = 0; i < structlogger.getNumberOfLogged(); i++) {
+            int[] struct = structlogger.getElementAt(i);
             int structID = struct[0];
 
             int y = struct[2];
@@ -358,7 +334,7 @@ public class WorldGen implements Runnable {
         int id = relID - floorWeightInRandom - stdStructsNumber;
         if (!isResettingPosition) {
             int[] log = {relID, lastX, lastY};
-            structlogger(log);
+            structlogger.add(log);
         }
         placeMGStructByID(id);
     }
@@ -515,7 +491,7 @@ public class WorldGen implements Runnable {
         lastX += l;
         if (!isResettingPosition) {
             h[1] = l;
-            structlogger(h);
+            structlogger.add(h);
         }
     }
     
@@ -569,7 +545,7 @@ public class WorldGen implements Runnable {
         lastX += l;
         if (!isResettingPosition) {
             h[1] = l;
-            structlogger(h);
+            structlogger.add(h);
         }
     }
     
@@ -580,7 +556,7 @@ public class WorldGen implements Runnable {
     private void floorStat(int x, int y, int l) {      // 1
         if (!isResettingPosition) {
             int[] h = {1, l, y, l};
-            structlogger(h);
+            structlogger.add(h);
         }
         line1(x, y, x + l, y);
         lastX += l;
@@ -588,7 +564,7 @@ public class WorldGen implements Runnable {
     private void abyss(int x, int y, int l) {
         if (!isResettingPosition) {
             int[] h = {2, x, y, l};
-            structlogger(h);
+            structlogger.add(h);
         }
         int prLength = 1000;
         line(x, y, x + prLength, y);
@@ -604,7 +580,7 @@ public class WorldGen implements Runnable {
     private void dotline(int x, int y, int n) {
         if (!isResettingPosition) {
             int[] h = {5, x, y, n};
-            structlogger(h);
+            structlogger.add(h);
         }
         int offsetL = 600;
         for (int i = 0; i < n; i++) {
@@ -619,7 +595,7 @@ public class WorldGen implements Runnable {
     private void sin(int x, int y, int l, int halfperiods, int offset, int amp) {    //3
         if (!isResettingPosition) {
             int[] h = {3, l, y, l, halfperiods, offset, amp};
-            structlogger(h);
+            structlogger.add(h);
         }
         if (amp == 0) {
             line(x, y, x + l, y);
@@ -670,5 +646,46 @@ public class WorldGen implements Runnable {
     }
     private void line1(int x1, int y1, int x2, int y2) {
         lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), (short) 0);
+    }
+    
+    private class StructLog {
+        private int[][] structLog;
+        private int numberOfLoggedStructs = 0;
+        private int ringLogTail = 0;
+        
+        public StructLog(int structLogSize) {
+            structLog = new int[structLogSize][];
+        }
+        
+        public void add(int[] a) {
+            if (isResettingPosition) {
+                return;
+            }
+            
+            if (numberOfLoggedStructs < structLog.length) {
+                numberOfLoggedStructs++;
+            }
+
+            int i = (ringLogTail) % structLog.length;
+            structLog[i] = a;
+            
+            ringLogTail = (ringLogTail + 1) % structLog.length;
+        }
+
+        public int[] getElementAt(int i) {
+            return structLog[(i+ringLogTail)%structLog.length];
+        }
+        
+        public int getNumberOfLogged() {
+            return numberOfLoggedStructs;
+        }
+        
+        public int getSize() {
+            return structLog.length;
+        }
+        
+        public boolean isFull() {
+            return getNumberOfLogged() >= getSize();
+        }
     }
 }

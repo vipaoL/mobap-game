@@ -57,6 +57,13 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         // screen initialization
         scW = getWidth();
         scH = getHeight();
+        if (Settings.bigScreen == Settings.UNDEF) {
+            if (Math.max(scW, scH) >= GraphicsWorld.BIGSCREEN_SIDE) {
+                Settings.bigScreen = Settings.TRUE;
+            } else {
+                Settings.bigScreen = Settings.FALSE;
+            }
+        }
         g = getGraphics();
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));

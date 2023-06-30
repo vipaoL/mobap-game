@@ -98,9 +98,6 @@ public class GameplayCanvas extends Canvas implements Runnable {
         setFullScreenMode(true);
         scW = getWidth();
         scH = getHeight();
-        if (Math.max(scW, scH) >= GraphicsWorld.BIGSCREEN_SIDE) {
-            GraphicsWorld.bigScreen = true;
-        }
         currentEffects = new short[1][];
         repaint();
         log("gcanvas:starting thread");

@@ -25,7 +25,6 @@ public class GraphicsWorld extends World {
     int currColBodies = colBodies;
     
     static boolean bg = false;
-    public static boolean bigScreen = false;
     public static final int BIGSCREEN_SIDE = 480;
     
     // test values, will be replaced
@@ -309,7 +308,7 @@ public class GraphicsWorld extends World {
     }
     
     void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
-        if (thickness > 2 && bigScreen) {
+        if (thickness > 2 && Settings.bigScreen == Settings.TRUE) {
             int t2 = thickness/2;
             int dx = x2 - x1;
             int dy = y2 - y1;
