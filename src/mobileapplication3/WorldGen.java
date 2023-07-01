@@ -45,7 +45,6 @@ public class WorldGen implements Runnable {
     private boolean paused = false;
     private boolean needSpeed = true;
     private boolean isReady = true;
-    private int tick = 0;
     
     private Random rand;
     private GraphicsWorld w;
@@ -62,13 +61,24 @@ public class WorldGen implements Runnable {
     }
     
     public void run() {
-        tick = 1;
         Main.log("wg:run()");
         //placeMGStructByID(10);
         while(MenuCanvas.isWorldgenEnabled) {
-            if (!paused) {
+            if (!paused || needSpeed) {
                 if ((GraphicsWorld.carX + GraphicsWorld.viewField*2 > lastX)) {
+                    if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
+                        needSpeed = true;
+                        GameplayCanvas.shouldWait = true;
+                        Main.log("worldgen can't keep up, waiting;");
+                    } else if (!isResettingPosition) {
+                        GameplayCanvas.shouldWait = false;
+                    }
                     placeNext();
+                } else {
+                    if (!isResettingPosition) {
+                        GameplayCanvas.shouldWait = false;
+                    }
+                    needSpeed = false;
                 }
                 
                 // World cycling
@@ -88,20 +98,10 @@ public class WorldGen implements Runnable {
                 }
                 
                 rmFarStructures();
-                
-                if (tick <= 10) {
-                    tick++;
-                } else {
-                    tick = 1;
-                }
             }
             try {
                 if (!needSpeed) {
                     Thread.sleep(200);
-                } else {
-                    if (tick > 9 & !isResettingPosition) {
-                        needSpeed = false;
-                    }
                 }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
@@ -181,7 +181,8 @@ public class WorldGen implements Runnable {
         (new Thread(this, "world generator")).start();
     }
     public void pause() {
-        Main.log("wg paused");
+        Main.log("wg pause");
+        needSpeed = true;
         paused = true;
     }
     public void resume() {
@@ -206,7 +207,6 @@ public class WorldGen implements Runnable {
         Main.log("wg:adding start platform");
         line(lastX - 600, lastY - 100, lastX, lastY);
         structlogger.add(lastX, linesInStructure);
-        tick = 2;
         GraphicsWorld.points = 0;
         Main.log("wg:adding car");
         w.addCar();
