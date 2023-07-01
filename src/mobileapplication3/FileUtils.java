@@ -23,7 +23,7 @@ public class FileUtils {
     String path;
     String root;
     String prefixToDisable = null;
-    String workingFolderName = "Test";
+    String workingFolderName;
     String[] folders = {"", "other" + sep};
     int counter = folders.length;
     

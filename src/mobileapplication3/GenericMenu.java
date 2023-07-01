@@ -114,7 +114,7 @@ public class GenericMenu {
                 try {
                     g.drawString(Main.onScreenLog[j], 0, font.getHeight() * j, Graphics.TOP | Graphics.LEFT);
                 } catch (NullPointerException ex) {
-                    //g.drawString(j + "can't show log:NPE", 0, 0, Graphics.TOP | Graphics.LEFT);
+                    g.drawString(j + "can't show log:NPE", 0, 0, Graphics.TOP | Graphics.LEFT);
                 } catch (IllegalArgumentException ex) {
                     g.drawString(j + "can't show log:IAE", 0, 0, Graphics.TOP | Graphics.LEFT);
                 }

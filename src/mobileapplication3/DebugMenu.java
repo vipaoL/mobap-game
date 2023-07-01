@@ -53,7 +53,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public DebugMenu() {
         super(false);
         setFullScreenMode(true);
-        (new Thread(this, "about canvas")).start();
+        (new Thread(this, "debug menu")).start();
     }
     
     public boolean getIsPaused() {
@@ -156,7 +156,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             fontSize = !fontSize;
         }
         if (selected == 8) {
-            if (MgStruct.structsInBufferNumber > 0) {
+            if (MgStruct.loadedStructsNumber > 0) {
                 mgstructOnly = !mgstructOnly;
             } else {
                 mgstructOnly = false;

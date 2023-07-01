@@ -20,7 +20,7 @@ public class Main extends MIDlet {
     
     // for numbering snapshots. e.g.: '1', '2', '3', ... .
     // '-1' if release
-    public static int PRE_VERSION = 1;
+    public static int PRE_VERSION = 2;
     
     // enable or disable on-screen log on start
     public static boolean isScreenLogEnabled = false;
@@ -35,14 +35,8 @@ public class Main extends MIDlet {
 
     public Main() {
         thiss = this;
-        //try {
-            MenuCanvas menuCanvas = new MenuCanvas();
-            set(menuCanvas);
-        /*} catch (ClassNotFoundException ex) {
-            showAlert(ex.getMessage());
-        } catch (NoClassDefFoundError ex) {
-            showAlert(ex.getMessage());
-        }*/
+        MenuCanvas menuCanvas = new MenuCanvas();
+        set(menuCanvas);
     }
 
     public void startApp() {
@@ -80,7 +74,6 @@ public class Main extends MIDlet {
             try {
                 alertImage = Image.createImage("/driver.png");
             } catch (IOException ex1) {
-                //ex1.printStackTrace();
                 try {
                     alertImage = Image.createImage("resourse://driver.png");
                 } catch (IOException e) {
@@ -92,19 +85,12 @@ public class Main extends MIDlet {
             if (duration > 0) {
                 alert.setTimeout(duration);
             }
-            Display.getDisplay(thiss).setCurrent(alert);
+            Display.getDisplay(thiss).setCurrent(alert); // TODO: implement nextDisplayable
         } catch(IllegalArgumentException ex) {
             ex.printStackTrace();
             log("Can't show alert:" + text);
         }
         log(text);
-        /*try {
-            Thread.sleep(alert.getTimeout());
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } catch (NullPointerException ex) {
-            
-        }*/
     }
     
     /*public static void logErr(String text, int value) {

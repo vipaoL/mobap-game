@@ -5,7 +5,6 @@
  */
 package mobileapplication3;
 
-import java.io.IOException;
 import javax.microedition.media.Manager;
 import javax.microedition.media.MediaException;
 import javax.microedition.media.Player;
@@ -16,7 +15,7 @@ import javax.microedition.media.Player;
  */
 public class Sound {
     Player midiPlayer = null;
-    String guide = "ou need to repack the game and place your .mid music named as \"a.mid\" into it";
+    String guide = "repack the game with your .mid music named as \"a.mid\"";
     public void startBgMusic() {
         if (!load("/a.mid", true)) {
             load("resource://a.mid", false);
@@ -35,20 +34,15 @@ public class Sound {
         try {
             midiPlayer = Manager.createPlayer(Main.thiss.getClass().getResourceAsStream(path_res), "audio/midi");
             return true;
-        } catch (IOException ex) {
-            if (!supressAlert) {
-                Main.showAlert("Can't load music (" + ex.toString() + "). Y" + guide, 10000);
-            }
-            ex.printStackTrace();
-        } catch (MediaException ex) {
-            if (!supressAlert) {
-                Main.showAlert("Can't load music (" + ex.toString() + "). Maybe your device doesn't support it. If it does, then y" + guide, 10000);
-            }
-            ex.printStackTrace();
         } catch (IllegalArgumentException ex) {
             if (!supressAlert) {
-                Main.showAlert("Can't load music (" + ex.toString() + "). Maybe your device doesn't support it. If it does, then y" + guide, 10000);
+                Main.showAlert("Can't load music (" + ex.toString() + "). No music found, " + guide, 10000);
             }
+        } catch (Exception ex) {
+            if (!supressAlert) {
+                Main.showAlert("Can't load music (" + ex.toString() + "). Maybe your device doesn't support it. If it does, " + guide, 10000);
+            }
+            ex.printStackTrace();
         }
         return false;
     }

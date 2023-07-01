@@ -100,7 +100,15 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         drawHeaderAndQR(g);
         menuBtnsOffsetH = offset;
         if (!menu.isInited) {
-            menu.loadParams(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH - margin - extraVerticalMargin, menuOpts, 0, menuOpts.length - 1, menuOpts.length - 1, fontSizeCache);
+            menu.loadParams(0,
+                    menuBtnsOffsetH,
+                    scW,
+                    scH - menuBtnsOffsetH - margin - extraVerticalMargin,
+                    menuOpts, 0,
+                    menuOpts.length - 1,
+                    menuOpts.length - 1,
+                    fontSizeCache);
+            
             fontSizeCache = menu.getFontSize();
             menu.setFirstDrawable(1);
         } else {

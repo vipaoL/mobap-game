@@ -38,7 +38,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     
     static boolean areExtStructsLoaded = false;
 
-    public MenuCanvas() /*throws ClassNotFoundException*/ {
+    public MenuCanvas() {
         super(false);
         setFullScreenMode(true);
         scW = getWidth();
@@ -108,8 +108,6 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     public void run() {
         long sleep = 0; // for FPS/TPS control
         long start = 0; //
-        
-        //showNotify(); // init
 
         while (!isStopped) { // *** main cycle of menu drawing ***
             if (waitingToStartGame) {
@@ -156,10 +154,10 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         repaint();
         try {
             isStopped = true;
-            Main.log("menu:new CGanvas");
+            Main.log("menu:new gCanvas");
             repaint();
             GameplayCanvas gameCanvas = new GameplayCanvas();
-            Main.log("menu:setting gcanvas displayable");
+            Main.log("menu:setting gCanvas displayable");
             repaint();
             Main.set(gameCanvas);
             gameCanvas.setLoadingProgress(5);
@@ -220,7 +218,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             mgStruct = new MgStruct();
             if (mgStruct.loadFromFiles()) {
                 areExtStructsLoaded = true;
-                menuOptions[2] = (MgStruct.structsInBufferNumber - MgStruct.loadedStructsFromResNumber) + " loaded";
+                menuOptions[2] = (MgStruct.loadedStructsNumber - MgStruct.loadedFromResNumber) + " loaded";
                 menu.setColorEnabledOption(0x0099ff00);
             } else {
                 areExtStructsLoaded = false;

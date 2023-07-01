@@ -18,9 +18,7 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class Levels extends GameCanvas implements Runnable/*, CommandListener*/, GenericMenu.Feedback {
-
-    //private Command select, back;
+public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback {
 
     Vector levelNames = new Vector();
 
@@ -40,8 +38,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
         Main.log("Levels:constructor");
         setFullScreenMode(true);
         repaint();
-        //select = new Command("Select", Command.OK, 1);
-        //back = new Command("Back", Command.BACK, 2);
         (new Thread(this, "level picker")).start();
     }
 
@@ -65,10 +61,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
         menu.loadParams(scW, scH, levelNames, 1, levelNames.size() - 1, levelNames.size() - 1, fontSizeCache);
         fontSizeCache = menu.getFontSize();
         showNotify();
-
-        //addCommand(select);
-        //addCommand(back);
-        //setCommandListener(this);
     }
     
     public void getLevels() {
@@ -213,17 +205,6 @@ public class Levels extends GameCanvas implements Runnable/*, CommandListener*/,
             selectPressed();
         }
     }
-    
-    /*public void commandAction(Command cmd, Displayable display) {
-        if (cmd == select) {
-            selectPressed();
-        }
-        if (cmd == back) {
-            mnCanvas m = new mnCanvas();
-            Main.set(m);
-            m.start();
-        }
-    }*/
 
     public boolean getIsPaused() {
         return paused;

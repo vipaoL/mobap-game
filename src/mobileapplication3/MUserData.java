@@ -14,7 +14,7 @@ import at.emini.physics2D.UserData;
 public class MUserData implements UserData {
         public static final int TYPE_FALLING_PLATFORM = 10;
         public static final int TYPE_ACCELERATOR = 11;
-        public String string = "Unused";
+        public String string;
         public int i = 1;
         public int bodyType = -1;
         public short[] data = null;
@@ -33,11 +33,6 @@ public class MUserData implements UserData {
             MUserData mUserData = new MUserData(bodyType, data);
             mUserData.i = i;
             mUserData.string = string;
-            /*try {
-                throw new UnsupportedOperationException("Not supported.");
-            } catch (UnsupportedOperationException message) {
-                message.printStackTrace();
-            }*/
             return mUserData;
         }
     }
