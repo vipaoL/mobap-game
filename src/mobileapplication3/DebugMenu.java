@@ -6,7 +6,6 @@
 
 package mobileapplication3;
 
-import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.lcdui.Graphics;
 
@@ -19,14 +18,15 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     private String[] menuOpts = {
         "Enable debug options",
         "-----",
-        "closer worldgen trigger",
         "show coordinates",
+        "DISCO MODE!",
         "show speedometer",
         "show log",
         "music",
         "show font size",
         ".mgstruct only",
         "show points of lines",
+        "simulation mode",
         "back"
     };
     
@@ -38,7 +38,8 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     private static int fontSizeCache = -1;
     public static boolean isDebugEnabled = false;
     public static boolean closerWorldgen = false;
-    public static boolean coordinates = false;
+    public static boolean coordinates = true;
+    public static boolean discoMode = false;
     public static boolean speedo = false;
     public static boolean cheat = false;
     public static boolean music = false;
@@ -47,6 +48,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public static boolean dontCountFlips = false;
     public static boolean showAngle = false;
     public static boolean showLinePoints = false;
+    public static boolean simulationMode = false;
     
     public DebugMenu() {
         super(false);
@@ -127,10 +129,10 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             menu.setIsSpecialOptnActivated(isDebugEnabled);
         }
         if (selected == 2) {
-            closerWorldgen = !closerWorldgen;
+            coordinates = !coordinates;
         }
         if (selected == 3) {
-            coordinates = !coordinates;
+            discoMode = !discoMode;
         }
         if (selected == 4) {
             speedo = !speedo;
@@ -163,6 +165,9 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         if (selected == 9) {
             showLinePoints = !showLinePoints;
         }
+        if (selected == 10) {
+            simulationMode = !simulationMode;
+        }
         if (selected == menuOpts.length - 1) {
             stopped = true;
             Main.set(new MenuCanvas());
@@ -173,8 +178,8 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     void refreshStates() {
         menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         if (DebugMenu.isDebugEnabled) {
-            menu.setEnabledFor(closerWorldgen, 2);
-            menu.setEnabledFor(coordinates, 3);
+            menu.setEnabledFor(coordinates, 2);
+            menu.setEnabledFor(discoMode, 3);
             menu.setEnabledFor(speedo, 4);
             menu.setEnabledFor(Main.isScreenLogEnabled, 5);
             menu.setEnabledFor(music, 6);
@@ -183,6 +188,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             //menu.setEnabledFor(mgstructOnly, 8);
             menu.setStateFor(-1, 8); // set ".mgstruct only" as inactive button. it's buggy
             menu.setEnabledFor(showLinePoints, 9);
+            menu.setEnabledFor(simulationMode, 10);
         } else {
             for (int i = 2; i < menuOpts.length - 1; i++) {
                 menu.setStateFor(-1, i);

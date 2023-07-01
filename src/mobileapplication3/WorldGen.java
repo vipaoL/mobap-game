@@ -23,7 +23,7 @@ public class WorldGen implements Runnable {
     
     int stdStructsNumber = 6;
     int floorWeightInRandom = 4;
-    int structLogSize = 7;
+    int structLogSize = 15;
     
     private int prevStructRandomId;
     private int nextStructRandomId;
@@ -52,6 +52,9 @@ public class WorldGen implements Runnable {
     private Landscape lndscp;
     private MgStruct mgStruct;
     
+    // counter
+    private int linesInStructure = 0;
+    
     public WorldGen(GraphicsWorld w) {
         Main.log("wg:constructor");
         this.w = w;
@@ -64,22 +67,18 @@ public class WorldGen implements Runnable {
         //placeMGStructByID(10);
         while(MenuCanvas.isWorldgenEnabled) {
             if (!paused) {
-                if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) { // 
+                if ((GraphicsWorld.carX + GraphicsWorld.viewField*2 > lastX)) {
                     placeNext();
                 }
                 
                 // World cycling
                 //(the physics engine is working weird when the coordinate reaches around 10000
                 //  then we need to move all structures and bodies to the left when the car is to the right of 8000)
-                if (structlogger.isFull()) {
-                    if (GraphicsWorld.carX > 8000) {// && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
-                        GameplayCanvas.shouldWait = true;
-                        while (GameplayCanvas.isDrawingNow) {}
-                        if (true /*!GameplayCanvas.isDrawingNow*/) {
-                            resetPosition();
-                            GameplayCanvas.shouldWait = false;
-                        }
-                    }
+                if (GraphicsWorld.carX > 8000 && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
+                    GameplayCanvas.shouldWait = true;
+                    while (GameplayCanvas.isDrawingNow) {}
+                    resetPosition();
+                    GameplayCanvas.shouldWait = false;
                 }
                 
                 w.refreshPos();
@@ -87,6 +86,8 @@ public class WorldGen implements Runnable {
                     nextPointsCounterTargetX += POINTS_DIVIDER;
                     GraphicsWorld.points++;
                 }
+                
+                rmFarStructures();
                 
                 if (tick <= 10) {
                     tick++;
@@ -204,6 +205,7 @@ public class WorldGen implements Runnable {
         }
         Main.log("wg:adding start platform");
         line(lastX - 600, lastY - 100, lastX, lastY);
+        structlogger.add(lastX, linesInStructure);
         tick = 2;
         GraphicsWorld.points = 0;
         Main.log("wg:adding car");
@@ -227,6 +229,22 @@ public class WorldGen implements Runnable {
             lndscp.removeSegment(0);
         }
     }
+    
+    private void rmFarStructures() {
+        int maxDist = 10000;
+        if (DebugMenu.simulationMode) {
+            maxDist = 300;
+        }
+        if (structlogger.getNumberOfLogged() > 0) {
+            if (GraphicsWorld.carX - structlogger.getElementAt(0)[0] > maxDist) {
+                for (int i = 0; i < structlogger.getElementAt(0)[1]; i++) {
+                    lndscp.removeSegment(0);
+                }
+                structlogger.rmFirstElement();
+            }
+        }
+    }
+    
     /*private void rmBodies() {
         Body[] bodies = w.getBodies();
         int to = w.getBodyCount();
@@ -255,13 +273,14 @@ public class WorldGen implements Runnable {
         isResettingPosition = true;
         needSpeed = true;
         
-        int dx = -8000 - GraphicsWorld.carX;
+        int dx = -8000 - w.carbody.positionFX().xAsInt();
         lastX = lastX + dx;
         
         Main.log("resetting pos");
         
         moveLandscape(dx);
         moveBodies(dx);
+        structlogger.moveXAllElements(dx);
         zeroPoint = w.carbody.positionFX().xAsInt();
         
         nextPointsCounterTargetX += dx;
@@ -287,56 +306,6 @@ public class WorldGen implements Runnable {
         }
     }
     
-    private void reproduce() {
-        Main.log("to reproduce: ", structlogger.getNumberOfLogged());
-        for (int i = 0; i < structlogger.getNumberOfLogged(); i++) {
-            int[] struct = structlogger.getElementAt(i);
-            int structID = struct[0];
-
-            int y = struct[2];
-            lastY = y;
-            if (structID == 0) {
-                int r = struct[3];
-                int sn = struct[4];
-                int va = struct[5];
-                circ1(lastX, y, r, sn, va);
-                Main.log("placing circ1");
-            }
-            if (structID == 1) {
-                int l = struct[3];
-                floorStat(lastX, y, l);
-                Main.log("placing flStat");
-            }
-            if (structID == 2) { // {2, l, y}
-                int l = struct[3];
-                abyss(lastX, y, l);
-                Main.log("placing abyss");
-            }
-            if (structID == 3) {
-                int l = struct[3];
-                int halfperiods = struct[4];
-                int offset = struct[5];
-                int amp = struct[6];
-                sin(lastX, y, l, halfperiods, offset, amp);
-                Main.log("placing sin");
-            }
-            if (structID == 4) {
-                int r = struct[3];
-                int sn = struct[4];
-                circ2(lastX, y, r, sn);
-                Main.log("placing circ2");
-            }
-            if (structID == 5) {
-                int n = struct[3];
-                dotline(lastX, y, n);
-                Main.log("placing dotline");
-            }
-            if (structID >= stdStructsNumber + floorWeightInRandom) {
-                placeMGStructByRelativeID(structID);
-            }
-        }
-    }
-    
     private void moveBodies(int dx) {
         Body[] bodies = w.getBodies();
         for (int i = 0; i < w.getBodyCount(); i++) {
@@ -344,16 +313,63 @@ public class WorldGen implements Runnable {
         }
     }
     
-    
-    
+    private class StructLog {
+        private int[][] structLog;
+        private int numberOfLoggedStructs = 0;
+        private int ringLogStart = 0;
+        
+        public StructLog(int structLogSize) {
+            structLog = new int[structLogSize][];
+        }
+        
+        public void add(int endX, int segsNumber) {
+            //Main.log("strL:add "+endX+" "+segsNumber);
+            linesInStructure = 0;
+            
+            int[] a = {endX, segsNumber};
+            int nextID = (ringLogStart + numberOfLoggedStructs) % structLog.length;
+            structLog[nextID] = a;
+            
+            if (numberOfLoggedStructs < structLog.length) {
+                numberOfLoggedStructs++;
+            } else {
+                ringLogStart = (ringLogStart + 1) % structLog.length;
+            }
+        }
+
+        public int[] getElementAt(int i) {
+            int id = (ringLogStart+i)%structLog.length;
+            return structLog[id];
+        }
+        
+        public int getNumberOfLogged() {
+            return numberOfLoggedStructs;
+        }
+        
+        public int getSize() {
+            return structLog.length;
+        }
+        
+        public boolean isFull() {
+            return getNumberOfLogged() >= getSize();
+        }
+        
+        public void rmFirstElement() {
+            ringLogStart = (ringLogStart + 1) % structLog.length;
+            numberOfLoggedStructs--;
+        }
+        
+        public void moveXAllElements(int dx) {
+            for (int i = 0; i < getSize(); i++) {
+                if (structLog[i] == null) return;
+                structLog[i][0] = structLog[i][0] + dx;
+            }
+        }
+    }
     
     
     void placeMGStructByRelativeID(int relID) {
         int id = relID - floorWeightInRandom - stdStructsNumber;
-        if (!isResettingPosition) {
-            int[] log = {relID, lastX, lastY};
-            structlogger.add(log);
-        }
         placeMGStructByID(id);
     }
     
@@ -369,6 +385,7 @@ public class WorldGen implements Runnable {
         }
         lastX+=data[0][1];
         lastY+=data[0][2];
+        structlogger.add(lastX, linesInStructure);
     }
     
     void placePrimitive(short[] data) {
@@ -464,22 +481,6 @@ public class WorldGen implements Runnable {
             pressurePlate.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
             w.addBody(pressurePlate);
         }
-        
-        
-        
-        /*for (int i = f0off+sl/2; i < 60; i+=sl) {
-            Body fallinPlatf = new Body(x+r+Mathh.cos(i+f0off)*(r+platfHeight/2)/1000, y-r+Mathh.sin(i+f0off)*(r+platfHeight/2)/1000, rect, true);
-            fallinPlatf.setDynamic(false);
-            fallinPlatf.setRotationDeg(i+f0off-90);
-            w.addBody(fallinPlatf);
-        }
-        rect = Shape.createRectangle(l2, platfHeight);
-        rect.setMass(1);
-        rect.setFriction(0);
-        rect.setElasticity(50);
-        */
-        
-        
     }
     
         
@@ -495,8 +496,6 @@ public class WorldGen implements Runnable {
     
     
     private void circ1(int x, int y, int r, int sn, int va) { // 0
-        int[] h = {0, x, y, r, sn, va};
-        
         x+=r;
         int r2 = r*3/2;
         
@@ -507,14 +506,10 @@ public class WorldGen implements Runnable {
         
         int l = r2+r2-ofs;
         lastX += l;
-        if (!isResettingPosition) {
-            h[1] = l;
-            structlogger.add(h);
-        }
+        structlogger.add(lastX, linesInStructure);
     }
     
     private void circ2(int x, int y, int r, int sn) { // 4
-        int[] h = {4, x, y, r, sn};
         int sl = 360 / sn;
         
         int f0off = 30;
@@ -561,10 +556,7 @@ public class WorldGen implements Runnable {
         
         int l = r+r;
         lastX += l;
-        if (!isResettingPosition) {
-            h[1] = l;
-            structlogger.add(h);
-        }
+        structlogger.add(lastX, linesInStructure);
     }
     
     private void floor(int x, int y, int l, int y2) {
@@ -572,18 +564,11 @@ public class WorldGen implements Runnable {
         sin(x, y + amp, l, 1, 270, amp);
     }
     private void floorStat(int x, int y, int l) {      // 1
-        if (!isResettingPosition) {
-            int[] h = {1, l, y, l};
-            structlogger.add(h);
-        }
         line1(x, y, x + l, y);
         lastX += l;
+        structlogger.add(lastX, linesInStructure);
     }
     private void abyss(int x, int y, int l) {
-        if (!isResettingPosition) {
-            int[] h = {2, x, y, l};
-            structlogger.add(h);
-        }
         int prLength = 1000;
         line(x, y, x + prLength, y);
         lastX += prLength;
@@ -594,27 +579,21 @@ public class WorldGen implements Runnable {
         line(x+l - l / 5, y - r * Mathh.cos(ang) / 1000, x+l, y - r * Mathh.cos(ang) / 1000);
         lastX += l;
         lastY -= r * Mathh.cos(ang) / 1000;
+        structlogger.add(lastX, linesInStructure);
     }
     private void dotline(int x, int y, int n) {
-        if (!isResettingPosition) {
-            int[] h = {5, x, y, n};
-            structlogger.add(h);
-        }
         int offsetL = 600;
         for (int i = 0; i < n; i++) {
             line(x + i*offsetL, y + i * 300/n, x + i*offsetL + 300, y + i * 300/n - 300);
         }
         lastX += n * offsetL;
+        structlogger.add(lastX, linesInStructure);
     }
     
     
     
     
     private void sin(int x, int y, int l, int halfperiods, int offset, int amp) {    //3
-        if (!isResettingPosition) {
-            int[] h = {3, l, y, l, halfperiods, offset, amp};
-            structlogger.add(h);
-        }
         if (amp == 0) {
             line(x, y, x + l, y);
         } else {
@@ -626,6 +605,7 @@ public class WorldGen implements Runnable {
             lastY = y + Mathh.sin(offset+180*halfperiods) * amp / 1000;
         }
         lastX += l;
+        structlogger.add(lastX, linesInStructure);
     }
     private void arc(int x, int y, int r, int ang, int of) {
         while (of < 0) {
@@ -659,51 +639,10 @@ public class WorldGen implements Runnable {
     }
     /*int*/void line(int x1, int y1, int x2, int y2) {
         lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), (short) 0);
-        //return x2 - x1;
-        //waitinForDel.addElement(new Integer(1));
+        linesInStructure++;
     }
     private void line1(int x1, int y1, int x2, int y2) {
         lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), (short) 0);
-    }
-    
-    private class StructLog {
-        private int[][] structLog;
-        private int numberOfLoggedStructs = 0;
-        private int ringLogTail = 0;
-        
-        public StructLog(int structLogSize) {
-            structLog = new int[structLogSize][];
-        }
-        
-        public void add(int[] a) {
-            if (isResettingPosition) {
-                return;
-            }
-            
-            if (numberOfLoggedStructs < structLog.length) {
-                numberOfLoggedStructs++;
-            }
-
-            int i = (ringLogTail) % structLog.length;
-            structLog[i] = a;
-            
-            ringLogTail = (ringLogTail + 1) % structLog.length;
-        }
-
-        public int[] getElementAt(int i) {
-            return structLog[(i+ringLogTail)%structLog.length];
-        }
-        
-        public int getNumberOfLogged() {
-            return numberOfLoggedStructs;
-        }
-        
-        public int getSize() {
-            return structLog.length;
-        }
-        
-        public boolean isFull() {
-            return getNumberOfLogged() >= getSize();
-        }
+        linesInStructure++;
     }
 }

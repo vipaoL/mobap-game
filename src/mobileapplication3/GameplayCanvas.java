@@ -335,6 +335,16 @@ public class GameplayCanvas extends Canvas implements Runnable {
                     }
                 }
                 
+                if (DebugMenu.simulationMode) {
+                    world.rightwheel.setDynamic(false);
+                    world.carbody.setDynamic(false);
+                    world.leftwheel.setDynamic(false);
+
+                    world.carbody.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                    world.leftwheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                    world.rightwheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                }
+                
                 if (pauseDelay > 0)
                     pauseDelay--;
 

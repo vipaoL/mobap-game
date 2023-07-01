@@ -7,6 +7,7 @@ package mobileapplication3;
 import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
+import java.util.Random;
 import javax.microedition.lcdui.Graphics;
 
 /**
@@ -48,6 +49,7 @@ public class GraphicsWorld extends World {
     public Body carbody;
     public Body leftwheel;
     public Body rightwheel;
+    Random random = new Random();
     
     public GraphicsWorld(World w) {
         super(w);
@@ -302,12 +304,21 @@ public class GraphicsWorld extends World {
             currColWheel = colBg;
         }
         g.setColor(currColWheel);
+        if (DebugMenu.discoMode) {
+            g.setColor(random.nextInt(16777216));
+        }
         g.fillArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
+        if (DebugMenu.discoMode) {
+            g.setColor(random.nextInt(16777216));
+        }
         g.setColor(currColBodies);
         g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
     }
     
     void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
+        if (DebugMenu.discoMode) {
+            g.setColor(random.nextInt(16777216));
+        }
         if (thickness > 2 && Settings.bigScreen == Settings.TRUE) {
             int t2 = thickness/2;
             int dx = x2 - x1;
@@ -370,6 +381,12 @@ public class GraphicsWorld extends World {
     }
 
     void calculateZoomOut() {
+        
+        if (DebugMenu.simulationMode) {
+            zoomOut = 50000;
+            return;
+        }
+        
         zoomOut = (1000 * carY / scMinSide - 1000);
         int zoomBase = this.zoomBase;
         if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] != null) {
