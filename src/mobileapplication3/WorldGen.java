@@ -14,6 +14,7 @@ import at.emini.physics2D.UserData;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import java.util.Random;
+import java.util.Vector;
 
 /**
  *
@@ -29,6 +30,9 @@ public class WorldGen implements Runnable {
     private int nextStructRandomId;
     public boolean isResettingPosition = false;
     StructLog structlogger = new StructLog(structLogSize);
+    // list of all bodies car touched (for falling platforms)
+    Vector waitingForDynamic = new Vector();
+    Vector waitingTime = new Vector();
     
     private int lastX = -8000;
     private int lastY = 0;
@@ -64,50 +68,72 @@ public class WorldGen implements Runnable {
         Main.log("wg:run()");
         //placeMGStructByID(10);
         while(MenuCanvas.isWorldgenEnabled) {
-            if (!paused || needSpeed) {
-                if ((GraphicsWorld.carX + GraphicsWorld.viewField*2 > lastX)) {
-                    if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
-                        needSpeed = true;
-                        GameplayCanvas.shouldWait = true;
-                        Main.log("worldgen can't keep up, waiting;");
-                    } else if (!isResettingPosition) {
-                        GameplayCanvas.shouldWait = false;
-                    }
-                    placeNext();
-                } else {
-                    if (!isResettingPosition) {
-                        GameplayCanvas.shouldWait = false;
-                    }
-                    needSpeed = false;
-                }
-                
-                // World cycling
-                //(the physics engine is working weird when the coordinate reaches around 10000
-                //  then we need to move all structures and bodies to the left when the car is to the right of 8000)
-                if (GraphicsWorld.carX > 8000 && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
-                    GameplayCanvas.shouldWait = true;
-                    while (GameplayCanvas.isDrawingNow) {}
-                    resetPosition();
-                    GameplayCanvas.shouldWait = false;
-                }
-                
-                w.refreshPos();
-                if (GraphicsWorld.carX > nextPointsCounterTargetX) {
-                    nextPointsCounterTargetX += POINTS_DIVIDER;
-                    GraphicsWorld.points++;
-                }
-                
-                rmFarStructures();
-            }
-            try {
-                if (!needSpeed) {
-                    Thread.sleep(200);
-                }
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
+            tick();
         }
         Main.log("wg stopped.");
+    }
+    
+    public void tick() {
+        if (!paused || needSpeed) {
+            if ((GraphicsWorld.carX + GraphicsWorld.viewField*2 > lastX)) {
+                if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
+                    needSpeed = true;
+                    GameplayCanvas.shouldWait = true;
+                    Main.log("worldgen can't keep up, waiting;");
+                } else if (!isResettingPosition) {
+                    GameplayCanvas.shouldWait = false;
+                }
+                placeNext();
+            } else {
+                if (!isResettingPosition) {
+                    GameplayCanvas.shouldWait = false;
+                }
+                needSpeed = false;
+            }
+            
+            // World cycling
+            //(the physics engine is working weird when the coordinate reaches around 10000
+            //  then we need to move all structures and bodies to the left when the car is to the right of 8000)
+            if (GraphicsWorld.carX > 8000 && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
+                GameplayCanvas.shouldWait = true;
+                while (GameplayCanvas.isDrawingNow) {}
+                resetPosition();
+                GameplayCanvas.shouldWait = false;
+            }
+
+            w.refreshPos();
+            if (GraphicsWorld.carX > nextPointsCounterTargetX) {
+                nextPointsCounterTargetX += POINTS_DIVIDER;
+                GameplayCanvas.points++;
+            }
+
+            rmFarStructures();
+            // removing all that fell out the world or got too left
+            for (int i = 0; i < w.getBodyCount(); i++) {
+                Body[] bodies = w.getBodies();
+                if (bodies[i].positionFX().yAsInt() > 20000 + getLowestY() | GraphicsWorld.carX - bodies[i].positionFX().xAsInt() > GraphicsWorld.viewField * 2) {
+                    w.removeBody(bodies[i]);
+                }
+            }
+            // ticking timers on each body car touched and set it as dynamic
+            // for falling platforms
+            for (int i = 0; i < waitingForDynamic.size(); i++) {
+                if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) > 0) {
+                    waitingTime.setElementAt(new Integer(Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) - 10), i);
+                } else {
+                    ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
+                    waitingForDynamic.removeElementAt(i);
+                    waitingTime.removeElementAt(i);
+                }
+            }
+        }
+        try {
+            if (!needSpeed) {
+                Thread.sleep(200);
+            }
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
     }
     
     private void placeNext() {
@@ -207,7 +233,6 @@ public class WorldGen implements Runnable {
         Main.log("wg:adding start platform");
         line(lastX - 600, lastY - 100, lastX, lastY);
         structlogger.add(lastX, linesInStructure);
-        GraphicsWorld.points = 0;
         Main.log("wg:adding car");
         w.addCar();
         Main.log("wg ready.");

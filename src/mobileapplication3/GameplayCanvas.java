@@ -8,16 +8,15 @@ import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
-import java.util.Vector;
-import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.game.GameCanvas;
 
 /**
  *
  * @author vipaol
  */
-public class GameplayCanvas extends Canvas implements Runnable {
+public class GameplayCanvas extends GameCanvas implements Runnable {
     
     String[] menuhint = {"MENU:", "here(touch),", "D, #"};
     String[] pausehint = {"PAUSE:", "here(touch), *,", "B, right soft"};
@@ -66,11 +65,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
     // motor state
     boolean accel = false;
     
-    // list of all bodies car touched (for falling platforms)
-    Vector waitingForDynamic = new Vector();
-    Vector waitingTime = new Vector();
-    
     // counters
+    public static int points = 0;
     int gameoverCountdown;
     static int timeFlying = 0;
     int timeMotorTurnedOff = 50;
@@ -94,15 +90,17 @@ public class GameplayCanvas extends Canvas implements Runnable {
     
     GraphicsWorld world;
     WorldGen worldgen;
+    FlipCounter flipCounter;
 
     public GameplayCanvas() {
+        super(false);
         log("gcanvas constructor");
         setLoadingProgress(15);
         setFullScreenMode(true);
         scW = getWidth();
         scH = getHeight();
         currentEffects = new short[1][];
-        repaint();
+        paint();
         log("gcanvas:starting thread");
         (new Thread(this, "game canvas")).start();
     }
@@ -149,7 +147,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         
         // while world is loading, wait and draw loading screen
         while (!isWorldLoaded) {
-            repaint();
+            paint();
             try {
                 Thread.sleep(20);
             } catch (InterruptedException ex) {
@@ -183,7 +181,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         // continue updating loading screen until worldgen is loaded
         log("thread:waiting for wg");
         while(!worldgen.isReady()) {
-            repaint();
+            paint();
             try {
                 Thread.sleep(20);
             } catch (InterruptedException ex) {
@@ -309,9 +307,9 @@ public class GameplayCanvas extends Canvas implements Runnable {
                                 
                             }
                             if (bodyType == MUserData.TYPE_FALLING_PLATFORM) {
-                                if (!waitingForDynamic.contains(body) & body != world.carbody & body != world.leftwheel & body != world.rightwheel) {
-                                    waitingForDynamic.addElement(body);
-                                    waitingTime.addElement(new Integer(20));
+                                if (!worldgen.waitingForDynamic.contains(body) & body != world.carbody & body != world.leftwheel & body != world.rightwheel) {
+                                    worldgen.waitingForDynamic.addElement(body);
+                                    worldgen.waitingTime.addElement(new Integer(20));
                                     if (uninterestingDebug) world.removeBody(body);
                                 }
                             } else if (bodyType == MUserData.TYPE_ACCELERATOR) {
@@ -347,25 +345,16 @@ public class GameplayCanvas extends Canvas implements Runnable {
                 
                 if (pauseDelay > 0)
                     pauseDelay--;
+                
+                flipCounter.tick();
 
                 if (tick < 5) {
                     tick++;
                 } else {
                     tick = 1;
-                    // ticking timers on each body car touched and set it as dynamic
-                    // for falling platforms
-                    for (int i = 0; i < waitingForDynamic.size(); i++) {
-                        if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) > 0) {
-                            waitingTime.setElementAt(new Integer(Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) - 10), i);
-                        } else {
-                            ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
-                            waitingForDynamic.removeElementAt(i);
-                            waitingTime.removeElementAt(i);
-                        }
-                    }
                     // start the final countdown and open main menu if the car
                     // lies upside down or fell out of the world
-                    if (GraphicsWorld.carY > 2000 + worldgen.getLowestY() | (carAngle > 140 & carAngle < 220 & world.carbody.getContacts()[0] != null)) {
+                    if (GraphicsWorld.carY > 2000 + worldgen.getLowestY() || (carAngle > 140 && carAngle < 220 && world.carbody.getContacts()[0] != null)) {
                         if (gameoverCountdown < 8) {
                             gameoverCountdown++;
                         } else {
@@ -382,15 +371,6 @@ public class GameplayCanvas extends Canvas implements Runnable {
                             gameoverCountdown = 0;
                         }
                     }
-                    
-                    // removing all that fell out the world or got too left
-                    // TODO: move to WorldGen.java
-                    for (int i = 0; i < world.getBodyCount(); i++) {
-                        Body[] bodies = world.getBodies();
-                        if (bodies[i].positionFX().yAsInt() > 20000 + worldgen.getLowestY() | world.carbody.positionFX().xAsInt() - bodies[i].positionFX().xAsInt() > GraphicsWorld.viewField * 2) {
-                            world.removeBody(bodies[i]);
-                        }
-                    }
                 }
                 
                 while (shouldWait) {
@@ -402,10 +382,11 @@ public class GameplayCanvas extends Canvas implements Runnable {
                     }
                 }
                 
+                isWaiting = false;
                 isDrawingNow = true;
                 
                 world.tick();
-                repaint();
+                paint();
                 
                 isDrawingNow = false;
 
@@ -429,7 +410,8 @@ public class GameplayCanvas extends Canvas implements Runnable {
         lock = false;
     }
 
-    protected void paint(Graphics g) {
+    void paint() {
+        Graphics g = getGraphics();
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, maxScSide, maxScSide);
         if (isWorldLoaded) {
@@ -438,6 +420,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
             drawLoading(g);
         }
         drawHUD(g);
+        flushGraphics();
     }
     
     // point counter, very beautiful pause menu,
@@ -543,7 +526,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         if (MenuCanvas.isWorldgenEnabled) {
             g.setColor(flipIndicator, flipIndicator, 255);
             setFont(largefont, g);
-            g.drawString(String.valueOf(world.points), world.halfScWidth, world.scHeight - currentFontH * 3 / 2,
+            g.drawString(String.valueOf(points), world.halfScWidth, world.scHeight - currentFontH * 3 / 2,
                     Graphics.HCENTER | Graphics.TOP);
             
             // coloring when flip
@@ -595,20 +578,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
     // local method for autorefreshing screen after each logging
     private void log(String text) {
         Main.log(text);
-        if (Main.isScreenLogEnabled) repaint();
-    }
-    /*private void log(String text, int value) {
-        Main.log(text, value);
-        if (Main.isScreenLogEnabled) repaint();
-    }
-    private void log(int value) {
-        Main.log(value);
-        if (Main.isScreenLogEnabled) repaint();
-    }*/
-    
-    // blink point counter on flip
-    public static void indicateFlip() {
-        flipIndicator = 0;
+        if (Main.isScreenLogEnabled) paint();
     }
     
     public void giveEffect(short[] data) {
@@ -631,8 +601,10 @@ public class GameplayCanvas extends Canvas implements Runnable {
     // reset some parameters, init worldgen
     public void reset() {
         Main.log("reset");
+        points = 0;
         gameoverCountdown = 0;
         worldgen = new WorldGen(world);
+        flipCounter = new FlipCounter();
         Main.log("wg inited, starting");
         if (MenuCanvas.isWorldgenEnabled) {
             worldgen.start();
@@ -647,7 +619,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         if (worldgen != null) {
             worldgen.resume();
         }
-        repaint();
+        paint();
     }
 
     // also used as pause
@@ -657,7 +629,7 @@ public class GameplayCanvas extends Canvas implements Runnable {
         if (worldgen != null) {
             worldgen.pause();
         }
-        repaint();
+        paint();
         // to prevent siemens' bug that calls hideNotify right after showing canvas
         if (pauseDelay > 0) {
             if (previousPauseState == false) {
@@ -668,18 +640,33 @@ public class GameplayCanvas extends Canvas implements Runnable {
     
     protected void showNotify() {
         log("showNotify");
-        refreshScreenParameters();
-        repaint();
+        
+        // idk if it needed, but why not?
+        sizeChanged(getWidth(), getHeight());
+        
+        paint();
+        
         // to prevent siemens' bug that calls hideNotify right after showing canvas
         pauseDelay = PAUSE_DELAY;
         previousPauseState = paused;
+    }
+    
+    protected void sizeChanged(int w, int h) {
+        scW = w;
+        scH = h;
+        maxScSide = Math.max(scW, scH);
+        Main.sWidth = scW;
+        Main.sHeight = scH;
+        if (isWorldLoaded) {
+            world.refreshScreenParameters();
+        }
     }
     
     private void pauseButtonPressed() {
         if (!paused) {
             pauseDelay = 0;
             hideNotify();
-            repaint();
+            paint();
         } else {
             resume();
         }
@@ -754,18 +741,80 @@ public class GameplayCanvas extends Canvas implements Runnable {
         // turn off the motor
         accel = false;
     }
-    void refreshScreenParameters() {
-        scW = getWidth();
-        scH = getHeight();
-        maxScSide = Math.max(scW, scH);
-        Main.sWidth = scW;
-        Main.sHeight = scH;
-        if (isWorldLoaded) {
-            world.refreshScreenParameters();
+    
+    class FlipCounter {
+        boolean flipWaiting = false;
+        boolean backFlipWaiting = false;
+        boolean step1Done = false;
+        boolean step2Done = false;
+
+        int backFlipsCount = 0;
+        int upperAng = 0;
+
+        void tick() {
+            if (DebugMenu.dontCountFlips) {
+                return;
+            }
+            if (world.carbody.rotationVelocity2FX() >= 0) {
+                if (flipWaiting) {
+                    flipWaiting = false;
+                    step1Done = false;
+                    step2Done = false;
+                }
+                backFlipWaiting = true;
+            } else {
+                if (backFlipWaiting) {
+                    backFlipsCount = 0;
+                    backFlipWaiting = false;
+                    step1Done = false;
+                    step2Done = false;
+                }
+                flipWaiting = true;
+            }
+            int ang = world.carbody.rotation2FX();
+            if (!step1Done) {
+                if (ang < 13176794 | ang > 92237561) {
+                    step1Done = true;
+                }
+            } else {
+                // cancel when touched the ground
+                if (GameplayCanvas.timeFlying < 1 & !GameplayCanvas.uninterestingDebug) {
+                    step2Done = false;
+                    backFlipsCount = 0;
+                    return;
+                }
+                if (!step2Done) {
+                    if (!(ang < 13176794 | ang > 92237561))
+                        step2Done = true;
+                } else {
+                    if ((ang < 13176794 | ang > 92237561)) {
+                        if (world.carbody.rotationVelocity2FX() >= 0) {
+                            if (backFlipWaiting) {
+                                backFlipsCount++;
+                                if (backFlipsCount > 1) {
+                                    points += 1;
+                                    backFlipsCount = 0;
+                                    indicateFlip();
+                                }
+                            }
+                        } else {
+                            if (flipWaiting) {
+                                points += 1;
+                                indicateFlip();
+                            }
+                            backFlipsCount = 0;
+                            //FXUtil.
+                        }
+                        step1Done = false;
+                        step2Done = false;
+                    }
+                }
+            }
+        }
+
+        // blink point counter on flip
+        public void indicateFlip() {
+            flipIndicator = 0;
         }
     }
-
-    /*public synchronized void end() {
-        //stopped = true;
-    }*/
 }

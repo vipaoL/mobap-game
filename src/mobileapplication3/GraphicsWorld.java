@@ -40,7 +40,6 @@ public class GraphicsWorld extends World {
     int offsetX = 0;
     int offsetY = 0;
     public static int viewField = 10;
-    public static int points = 0;
     
     public static int carX = 0;
     public static int carY = 0;
@@ -138,10 +137,10 @@ public class GraphicsWorld extends World {
             }
 
             // some very boring code
-            if (points > 291 & points < 293) {
+            if (GameplayCanvas.points > 291 & GameplayCanvas.points < 293) {
                 currColBg = 0x2f92cd;
                 currColLandscape = 0xffffff;
-            } else if (points > 293 & points < 300) {
+            } else if (GameplayCanvas.points > 293 & GameplayCanvas.points < 300) {
                 currColBg = colBg;
                 currColLandscape = colLandscape;
             }
@@ -190,13 +189,12 @@ public class GraphicsWorld extends World {
             drawBodies(g); // draw all bodies, excluding car wheels
             drawCar(g); // draw car wheels
             drawConstraints(g); // disabled
-            
-            countFlips();
         } catch (NullPointerException ex) {
             int l = scWidth * 2 / 3;
             int h = scHeight / 24;
             g.drawRect(scWidth / 2 - l / 2, scHeight * 2 / 3, l, h);
             g.fillRect(scWidth / 2 - l / 2, scHeight * 2 / 3, l/5, h);
+            ex.printStackTrace();
         }
     }
 
@@ -400,74 +398,5 @@ public class GraphicsWorld extends World {
             zoomOut += 1;
         }
         zoomOut += zoomBase;
-    }
-    
-    boolean flipWaiting = false;
-    boolean backFlipWaiting = false;
-    boolean step1Done = false;
-    boolean step2Done = false;
-    
-    int backFlipsCount = 0;
-    int upperAng = 0;
-    
-    void countFlips() {
-        if (DebugMenu.dontCountFlips) {
-            return;
-        }
-        if (carbody.rotationVelocity2FX() >= 0) {
-            if (flipWaiting) {
-                flipWaiting = false;
-                step1Done = false;
-                step2Done = false;
-            }
-            backFlipWaiting = true;
-        } else {
-            if (backFlipWaiting) {
-                backFlipsCount = 0;
-                backFlipWaiting = false;
-                step1Done = false;
-                step2Done = false;
-            }
-            flipWaiting = true;
-        }
-        int ang = carbody.rotation2FX();
-        if (!step1Done) {
-            if (ang < 13176794 | ang > 92237561) {
-                step1Done = true;
-            }
-        } else {
-            if (GameplayCanvas.timeFlying < 1 & !GameplayCanvas.uninterestingDebug) { // cancel when touched the ground
-                step2Done = false;
-                backFlipsCount = 0;
-                return;
-            }
-            if (!step2Done) {
-                if (!(ang < 13176794 | ang > 92237561))
-                    step2Done = true;
-            } else {
-                if ((ang < 13176794 | ang > 92237561)) {
-                    if (carbody.rotationVelocity2FX() >= 0) {
-                        if (backFlipWaiting) {
-                            backFlipsCount++;
-                            //System.out.println("backFlipsCount" + backFlipsCount);
-                            if (backFlipsCount > 1) {
-                                points += 1;
-                                backFlipsCount = 0;
-                                GameplayCanvas.indicateFlip();
-                            }
-                        }
-                    } else {
-                        if (flipWaiting) {
-                            points += 1;
-                            GameplayCanvas.indicateFlip();
-                        }
-                        backFlipsCount = 0;
-                        //FXUtil.
-                    }
-                    step1Done = false;
-                    step2Done = false;
-                }
-            }
-        }
     }
 }
