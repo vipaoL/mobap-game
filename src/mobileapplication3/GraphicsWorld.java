@@ -57,7 +57,7 @@ public class GraphicsWorld extends World {
     public void addCar() {
         int x = 0;
         if (MenuCanvas.isWorldgenEnabled) {
-            x = -8000;
+            x = -3000;
         }
         addCar(x, -400, FXUtil.TWO_PI_2FX / 360 * 30, null);
     }
@@ -219,7 +219,12 @@ public class GraphicsWorld extends World {
                 if (bodyType == MUserData.TYPE_ACCELERATOR) {
                     g.setColor(bodyUserData.color);
                 }
-                drawBody(g, bodies[i]);
+                try {
+                    drawBody(g, bodies[i]);
+                } catch (NullPointerException ex) {
+                    ex.printStackTrace();
+                    Main.log("can't draw" + bodyType);
+                }
             }
         }
     }

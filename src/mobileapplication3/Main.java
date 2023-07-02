@@ -32,6 +32,7 @@ public class Main extends MIDlet {
     public static String[] onScreenLog = new String[1];
     public static int onScreenLogOffset = 0;
     public static boolean isScreenLogInited = false;
+    public static int logMessageDelay = 50;
 
     public Main() {
         thiss = this;
@@ -122,7 +123,9 @@ public class Main extends MIDlet {
                 onScreenLogOffset++;
             }
             try { // slowing for log readability
-                Thread.sleep(50);
+                if (logMessageDelay > 0) {
+                    Thread.sleep(logMessageDelay);
+                }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }

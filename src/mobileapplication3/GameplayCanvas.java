@@ -33,7 +33,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     
     // state and mode
     static boolean isFirstStart = true; // for displaying hints only on first start
-    public static boolean isDrawingNow = true;
+    public static boolean isBusy = true;
     public static boolean uninterestingDebug = false;
     boolean isWorldLoaded = false;
     
@@ -57,6 +57,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     static int flipIndicator = 255; // for blinking counter when flip done
     int loadingProgress = 0;
     int speedoState = 0;
+    int fps = 0;
     
     // touchscreen
     int pointerX = 0, pointerY = 0;
@@ -94,6 +95,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
     public GameplayCanvas() {
         super(false);
+        Main.logMessageDelay = 50;
         log("gcanvas constructor");
         setLoadingProgress(15);
         setFullScreenMode(true);
@@ -138,6 +140,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
     // game thread with main cycle and preparing
     public void run() {
+        try {
         log("gcanvas:thread started");
         
         long sleep = 0;
@@ -192,6 +195,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         
         log("thread:starting game cycle");
         
+        Main.logMessageDelay = 0;
+        
         // Main game cycle
         while (!stopped) {
             // catch screen rotation
@@ -201,6 +206,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             }
             
             if (!paused && worldgen.isReady()) {
+                fps = 1000 / ((int) (System.currentTimeMillis() - start));
                 start = System.currentTimeMillis();
                 // chech if car contacts with the ground or sth else
                 contacts[0] = world.getContactsForBody(world.leftwheel);
@@ -290,13 +296,14 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     }
                 }
                 
-                // adding timer on each body car touched
+                // if touched an interactive object (falling platform, effect plate)
                 for (int j = 0; j < 3; j++) {
                     for (int i = 0; i < contacts[j].length; i++) {
                         if (contacts[j][i] != null) {
                             Body body = contacts[j][i].body1();
-                            // as default value, will be overwritten if available
+                            // default value, will be overwritten if other is available
                             int bodyType = MUserData.TYPE_FALLING_PLATFORM;
+                            
                             MUserData bodyUserData = null;
                             try {
                                 bodyUserData = (MUserData) body.getUserData();
@@ -306,17 +313,22 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                             } catch (NullPointerException ex) {
                                 
                             }
-                            if (bodyType == MUserData.TYPE_FALLING_PLATFORM) {
-                                if (!worldgen.waitingForDynamic.contains(body) & body != world.carbody & body != world.leftwheel & body != world.rightwheel) {
-                                    worldgen.waitingForDynamic.addElement(body);
-                                    worldgen.waitingTime.addElement(new Integer(20));
-                                    if (uninterestingDebug) world.removeBody(body);
-                                }
-                            } else if (bodyType == MUserData.TYPE_ACCELERATOR) {
-                                giveEffect(bodyUserData.data);
-                                GraphicsWorld.currColWheel = bodyUserData.color;
-                            } else {
-                                log("unknown bodyType:" + bodyType);
+                            switch (bodyType) {
+                                // add fall countdown timer on falling platform
+                                case MUserData.TYPE_FALLING_PLATFORM:
+                                    if (!worldgen.waitingForDynamic.contains(body) & body != world.carbody & body != world.leftwheel & body != world.rightwheel) {
+                                        worldgen.waitingForDynamic.addElement(body);
+                                        worldgen.waitingTime.addElement(new Integer(20));
+                                        if (uninterestingDebug) world.removeBody(body);
+                                    }   break;
+                                // apply effect if touched an effect plate
+                                case MUserData.TYPE_ACCELERATOR:
+                                    giveEffect(bodyUserData.data);
+                                    GraphicsWorld.currColWheel = bodyUserData.color;
+                                    break;
+                                default:
+                                    log("unknown bodyType:" + bodyType);
+                                    break;
                             }
                         }
                     }
@@ -348,10 +360,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 
                 flipCounter.tick();
 
-                if (tick < 5) {
+                if (tick < 3) {
                     tick++;
                 } else {
-                    tick = 1;
+                    tick = 0;
                     // start the final countdown and open main menu if the car
                     // lies upside down or fell out of the world
                     if (GraphicsWorld.carY > 2000 + worldgen.getLowestY() || (carAngle > 140 && carAngle < 220 && world.carbody.getContacts()[0] != null)) {
@@ -373,6 +385,13 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     }
                 }
                 
+                isBusy = true;
+                world.tick();
+                if (!DebugMenu.oneFrameTwoTicks || tick%2 == 0) {
+                    paint();
+                }
+                
+                isBusy = false;
                 while (shouldWait) {
                     isWaiting = true;
                     try {
@@ -381,14 +400,12 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         ex.printStackTrace();
                     }
                 }
+                if (isWaiting && paused){
+                    paint();
+                    System.out.println("done");
+                }
                 
                 isWaiting = false;
-                isDrawingNow = true;
-                
-                world.tick();
-                paint();
-                
-                isDrawingNow = false;
 
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
@@ -397,17 +414,22 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 if (paused) {
                     sleep = 200;
                 } else {
-                    sleep = 5;
+                    sleep = 0;
                 }
             }
             // fps/tps control
-                try {
+            try {
+                if (sleep > 0) {
                     Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         lock = false;
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
     }
 
     void paint() {
@@ -470,7 +492,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 g.drawString(String.valueOf(carVelocitySqr), 0, debugTextOffset, 0);
                 debugTextOffset += currentFontH;
             }
-            // car angle
+            // car angled
             if (DebugMenu.showAngle) {
                 if (timeFlying > 0) {
                     g.setColor(0, 0, 255);
@@ -485,6 +507,22 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         if (DebugMenu.coordinates) {
             g.setColor(127, 127, 127);
             g.drawString(GraphicsWorld.carX + " " + GraphicsWorld.carY, 0, debugTextOffset, 0); 
+            debugTextOffset += currentFontH;
+        }
+        
+        if (DebugMenu.showFPS) {
+            g.setColor(0, 255, 0);
+            if (fps < 19) {
+                g.setColor(127, 127, 0);
+                if (fps < 15) {
+                    g.setColor(255, 0, 0);
+                }
+            }
+            if (DebugMenu.oneFrameTwoTicks) {
+                g.drawString("FPS:" + fps/2, 0, debugTextOffset, 0); 
+            } else {
+                g.drawString("FPS:" + fps, 0, debugTextOffset, 0); 
+            }
             debugTextOffset += currentFontH;
         }
         
@@ -548,8 +586,16 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 g.setColor(0, 255, 0);
             }
             
+            if (shouldWait) {
+                g.setColor(127, 0, 0);
+            }
             for (int i = 0; i <= scH; i++) {
                 g.drawLine(scW / 2, 0, d * i, scH);
+            }
+            if (shouldWait) {
+                g.setColor(255, 0, 0);
+                g.drawString("Thread is locked", 0, 0, 0);
+                g.drawString("(WorldGen is busy)", 0, g.getFont().getHeight(), 0);
             }
             setFont(largefont, g);
             g.setColor(255, 255, 255);
@@ -660,6 +706,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         if (isWorldLoaded) {
             world.refreshScreenParameters();
         }
+        paint();
     }
     
     private void pauseButtonPressed() {

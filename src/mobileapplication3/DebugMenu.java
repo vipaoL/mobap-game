@@ -19,13 +19,13 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         "Enable debug options",
         "-----",
         "show coordinates",
-        "DISCO MODE!",
+        "GAMING MODE",
         "show speedometer",
         "show log",
         "music",
         "show font size",
         ".mgstruct only",
-        "show points of lines",
+        "10 FPS screen",
         "simulation mode",
         "back"
     };
@@ -38,7 +38,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     private static int fontSizeCache = -1;
     public static boolean isDebugEnabled = false;
     public static boolean closerWorldgen = false;
-    public static boolean coordinates = true;
+    public static boolean coordinates = false;
     public static boolean discoMode = false;
     public static boolean speedo = false;
     public static boolean cheat = false;
@@ -49,6 +49,8 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public static boolean showAngle = false;
     public static boolean showLinePoints = false;
     public static boolean simulationMode = false;
+    public static boolean showFPS = false;
+    public static boolean oneFrameTwoTicks = false;
     
     public DebugMenu() {
         super(false);
@@ -126,6 +128,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         int selected = menu.selected;
         if (selected == 0) {
             isDebugEnabled = !isDebugEnabled;
+            showFPS = isDebugEnabled;
             menu.setIsSpecialOptnActivated(isDebugEnabled);
         }
         if (selected == 2) {
@@ -133,6 +136,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         }
         if (selected == 3) {
             discoMode = !discoMode;
+            GraphicsWorld.bg = discoMode;
         }
         if (selected == 4) {
             speedo = !speedo;
@@ -163,7 +167,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             }
         }
         if (selected == 9) {
-            showLinePoints = !showLinePoints;
+            oneFrameTwoTicks = !oneFrameTwoTicks;
         }
         if (selected == 10) {
             simulationMode = !simulationMode;
@@ -187,7 +191,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             menu.setEnabledFor(fontSize, 7);
             //menu.setEnabledFor(mgstructOnly, 8);
             menu.setStateFor(-1, 8); // set ".mgstruct only" as inactive button. it's buggy
-            menu.setEnabledFor(showLinePoints, 9);
+            menu.setEnabledFor(oneFrameTwoTicks, 9);
             menu.setEnabledFor(simulationMode, 10);
         } else {
             for (int i = 2; i < menuOpts.length - 1; i++) {

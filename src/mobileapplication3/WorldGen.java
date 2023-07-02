@@ -24,12 +24,11 @@ public class WorldGen implements Runnable {
     
     int stdStructsNumber = 6;
     int floorWeightInRandom = 4;
-    int structLogSize = 15;
     
     private int prevStructRandomId;
     private int nextStructRandomId;
     public boolean isResettingPosition = false;
-    StructLog structlogger = new StructLog(structLogSize);
+    StructLog structlogger = new StructLog(1);
     // list of all bodies car touched (for falling platforms)
     Vector waitingForDynamic = new Vector();
     Vector waitingTime = new Vector();
@@ -41,6 +40,7 @@ public class WorldGen implements Runnable {
     public static int zeroPoint = 0;
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX = lastX + POINTS_DIVIDER;
+    int tick = 0;
     
     private int segmentsNum = 36;       // how many lines will draw up a circle
     private int segmentLen = 360 / segmentsNum;
@@ -66,70 +66,92 @@ public class WorldGen implements Runnable {
     
     public void run() {
         Main.log("wg:run()");
-        //placeMGStructByID(10);
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
         while(MenuCanvas.isWorldgenEnabled) {
+            try {
             tick();
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+            }
         }
         Main.log("wg stopped.");
     }
     
     public void tick() {
         if (!paused || needSpeed) {
+            w.refreshPos();
             if ((GraphicsWorld.carX + GraphicsWorld.viewField*2 > lastX)) {
                 if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
                     needSpeed = true;
-                    GameplayCanvas.shouldWait = true;
+                    lockGameThread();
                     Main.log("worldgen can't keep up, waiting;");
-                } else if (!isResettingPosition) {
-                    GameplayCanvas.shouldWait = false;
+                } else if (!isResettingPosition && !shouldRmFirstStruct()) {
+                    unlockGameThread();
                 }
                 placeNext();
             } else {
-                if (!isResettingPosition) {
-                    GameplayCanvas.shouldWait = false;
+                unlockGameThread();
+                if (!shouldRmFirstStruct()) {
+                    needSpeed = false;
                 }
-                needSpeed = false;
             }
             
-            // World cycling
-            //(the physics engine is working weird when the coordinate reaches around 10000
-            //  then we need to move all structures and bodies to the left when the car is to the right of 8000)
-            if (GraphicsWorld.carX > 8000 && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
-                GameplayCanvas.shouldWait = true;
-                while (GameplayCanvas.isDrawingNow) {}
-                resetPosition();
-                GameplayCanvas.shouldWait = false;
-            }
+            if (tick == 0) {
+                // World cycling
+                //(the physics engine is working weird when the coordinate reaches around 10000
+                //  then we need to move all structures and bodies to the left when the car is to the right of 3000)
+                if (GraphicsWorld.carX > 3000 && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
+                    resetPosition();
+                }
 
-            w.refreshPos();
-            if (GraphicsWorld.carX > nextPointsCounterTargetX) {
-                nextPointsCounterTargetX += POINTS_DIVIDER;
-                GameplayCanvas.points++;
+                w.refreshPos();
+                if (GraphicsWorld.carX > nextPointsCounterTargetX) {
+                    nextPointsCounterTargetX += POINTS_DIVIDER;
+                    GameplayCanvas.points++;
+                }
             }
 
             rmFarStructures();
-            // removing all that fell out the world or got too left
-            for (int i = 0; i < w.getBodyCount(); i++) {
-                Body[] bodies = w.getBodies();
-                if (bodies[i].positionFX().yAsInt() > 20000 + getLowestY() | GraphicsWorld.carX - bodies[i].positionFX().xAsInt() > GraphicsWorld.viewField * 2) {
-                    w.removeBody(bodies[i]);
+            
+            if (tick == 0) {
+                // ticking timers on each body car touched and set it as dynamic
+                // for falling platforms
+                for (int i = 0; i < waitingForDynamic.size(); i++) {
+                    try {
+                        if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) > 0) {
+                            waitingTime.setElementAt(new Integer(Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) - 10), i);
+                        } else {
+                            ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
+                            waitingForDynamic.removeElementAt(i);
+                            waitingTime.removeElementAt(i);
+                        }
+                    } catch (ArrayIndexOutOfBoundsException ex) {
+
+                    }
                 }
-            }
-            // ticking timers on each body car touched and set it as dynamic
-            // for falling platforms
-            for (int i = 0; i < waitingForDynamic.size(); i++) {
-                if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) > 0) {
-                    waitingTime.setElementAt(new Integer(Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) - 10), i);
-                } else {
-                    ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
-                    waitingForDynamic.removeElementAt(i);
-                    waitingTime.removeElementAt(i);
+
+                // removing all that fell out the world or got too left
+                for (int i = 0; i < w.getBodyCount(); i++) {
+                    Body[] bodies = w.getBodies();
+                    if (bodies[i].positionFX().yAsInt() > 20000 + getLowestY() | GraphicsWorld.carX - bodies[i].positionFX().xAsInt() > GraphicsWorld.viewField * 2) {
+                        lockGameThread();
+                        w.removeBody(bodies[i]);
+                    }
                 }
+                unlockGameThread();
             }
+        }
+        tick++;
+        if (tick >= 10) {
+            tick = 0;
         }
         try {
             if (!needSpeed) {
-                Thread.sleep(200);
+                Thread.sleep(20);
             }
         } catch (InterruptedException ex) {
             ex.printStackTrace();
@@ -141,7 +163,7 @@ public class WorldGen implements Runnable {
         if (DebugMenu.mgstructOnly) {
             idsCount = mgStruct.loadedStructsNumber;
         } else {
-            idsCount = stdStructsNumber + floorWeightInRandom + mgStruct.loadedStructsNumber;;
+            idsCount = stdStructsNumber + floorWeightInRandom + mgStruct.loadedStructsNumber;
         }
         while (nextStructRandomId == prevStructRandomId) {
             nextStructRandomId = rand.nextInt(idsCount); // 10: 0-9
@@ -222,7 +244,7 @@ public class WorldGen implements Runnable {
         Main.log("wg:restart()");
         prevStructRandomId = 1;
         nextStructRandomId = 2;
-        lastX = -7900;
+        lastX = -2900;
         lastY = 0;
         try {
             Main.log("wg:cleaning world");
@@ -255,19 +277,61 @@ public class WorldGen implements Runnable {
         }
     }
     
+    int maxDist = 4000;
     private void rmFarStructures() {
-        int maxDist = 10000;
         if (DebugMenu.simulationMode) {
             maxDist = 300;
         }
-        if (structlogger.getNumberOfLogged() > 0) {
-            if (GraphicsWorld.carX - structlogger.getElementAt(0)[0] > maxDist) {
-                for (int i = 0; i < structlogger.getElementAt(0)[1]; i++) {
-                    lndscp.removeSegment(0);
-                }
+        if (shouldRmFirstStruct()) {
+            int c = 0;
+            //lockGameThread();
+            for (int i = 0; i < Math.min(structlogger.getElementAt(0)[1], 3); i++) {
+                lndscp.removeSegment(0);
+                c++;
+            }
+            //unlockGameThread();
+            int id = structlogger.getElementID(0);
+            structlogger.structLog[id][1] = (short) (structlogger.structLog[id][1] - ((short)c));
+            if (structlogger.getElementAt(0)[1] == 0) {
                 structlogger.rmFirstElement();
             }
+        } else {
+            //System.out.println("nothing to remove");
         }
+    }
+    
+    private boolean shouldRmFirstStruct() {
+        try {
+            if (structlogger.getNumberOfLogged() > 0) {
+                return GraphicsWorld.carX - structlogger.getElementAt(0)[0] > maxDist;
+            } else
+                return false;
+        } catch(NullPointerException ex) {
+            Main.enableLog(Main.sHeight);
+            Main.log(ex.toString());
+            Main.log("ringBuffer:critical error");
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    
+    public void lockGameThread() {
+        //Main.log("locking game thread");
+        GameplayCanvas.shouldWait = true;
+        if (GameplayCanvas.isBusy) {
+            while (!GameplayCanvas.isWaiting && GameplayCanvas.isBusy) {
+                try {
+                    Thread.sleep(0);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        //Main.log("locked game thread");
+    }
+    
+    public void unlockGameThread() {
+        GameplayCanvas.shouldWait = false;
     }
     
     /*private void rmBodies() {
@@ -294,11 +358,10 @@ public class WorldGen implements Runnable {
     }
     
     private void resetPosition() { // world cycling
-        isReady = false;
+        lockGameThread();
         isResettingPosition = true;
-        needSpeed = true;
         
-        int dx = -8000 - w.carbody.positionFX().xAsInt();
+        int dx = -3000 - w.carbody.positionFX().xAsInt();
         lastX = lastX + dx;
         
         Main.log("resetting pos");
@@ -311,8 +374,7 @@ public class WorldGen implements Runnable {
         nextPointsCounterTargetX += dx;
 
         isResettingPosition = false;
-        needSpeed = false;
-        isReady = true;
+        unlockGameThread();
     }
     
     private void moveLandscape(int dx) {
@@ -339,32 +401,57 @@ public class WorldGen implements Runnable {
     }
     
     private class StructLog {
-        private int[][] structLog;
+        private short[][] structLog;
         private int numberOfLoggedStructs = 0;
         private int ringLogStart = 0;
         
         public StructLog(int structLogSize) {
-            structLog = new int[structLogSize][];
+            structLog = new short[structLogSize][];
         }
         
         public void add(int endX, int segsNumber) {
             //Main.log("strL:add "+endX+" "+segsNumber);
             linesInStructure = 0;
             
-            int[] a = {endX, segsNumber};
+            if (numberOfLoggedStructs >= structLog.length) {
+                int ns = structLog.length+1;
+                Main.log("strcLog is too small. to " + ns);
+                increase(ns);
+            }
+            
+            short[] a = {(short) endX, (short) segsNumber};
             int nextID = (ringLogStart + numberOfLoggedStructs) % structLog.length;
+            Main.log("logging struct, to " + nextID);
             structLog[nextID] = a;
             
-            if (numberOfLoggedStructs < structLog.length) {
-                numberOfLoggedStructs++;
-            } else {
-                ringLogStart = (ringLogStart + 1) % structLog.length;
+            numberOfLoggedStructs++;
+        }
+        
+        public void increase(int newSize) {
+            if (newSize < structLog.length) {
+                throw new IllegalArgumentException("newSize can't be less than current size");
             }
+            short[][] tmp = structLog;
+            structLog = new short[newSize][];
+            // copying from start of ringlog to end of array
+            System.arraycopy(tmp, ringLogStart, structLog, 0, tmp.length - ringLogStart);
+            // copying from start of array to tail of ringlog
+            System.arraycopy(tmp, 0, structLog, tmp.length - ringLogStart, ringLogStart);
+            ringLogStart = 0;
         }
 
-        public int[] getElementAt(int i) {
-            int id = (ringLogStart+i)%structLog.length;
+        public short[] getElementAt(int i) {
+            int id = getElementID(i);
+            if (structLog[id] == null) {
+                for (int j = 0; j < 10; j++) {
+                    System.out.println(id + "null!!!!!!!!!!");
+                }
+            }
             return structLog[id];
+        }
+        
+        public int getElementID(int i) {
+            return (ringLogStart+i)%structLog.length;
         }
         
         public int getNumberOfLogged() {
@@ -387,7 +474,7 @@ public class WorldGen implements Runnable {
         public void moveXAllElements(int dx) {
             for (int i = 0; i < getSize(); i++) {
                 if (structLog[i] == null) return;
-                structLog[i][0] = structLog[i][0] + dx;
+                structLog[i][0] = (short) (structLog[i][0] + ((short) dx));
             }
         }
     }
