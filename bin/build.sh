@@ -40,6 +40,15 @@ if [ ! -e ${MANIFEST} ] ; then
 	fi
 fi
 
+MANIFEST_TMP=./manifest-tmp.mf
+cp $MANIFEST $MANIFEST_TMP
+MANIFEST=$MANIFEST_TMP
+
+# add commit number to manifest
+COMMIT=$(git rev-parse --short HEAD)
+echo Adding commit hash $COMMIT to $MANIFEST
+echo Commit: $COMMIT >> ${MANIFEST}
+
 LIB_DIR=${WTK_HOME}/lib
 CLASSPATH=${LIB_DIR}/*
 CLDCAPI=${LIB_DIR}/cldcapi11.jar

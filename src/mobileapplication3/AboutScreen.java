@@ -22,7 +22,11 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     String url = "https://github.com/vipaoL/mobap-game";
     String urlPrew = "github: vipaoL/mobap-game";
     String[] strings = {"J2ME game on emini", "physics engine"};
-    String[] menuOpts = {"", urlPrew, "Version: " + Main.thiss.getAppProperty("MIDlet-Version"), "Back"};
+    String[] menuOpts = {"", //there is qr code
+        urlPrew,
+        "Version: " + Main.thiss.getAppProperty("MIDlet-Version"),
+        "Commit: " + Main.thiss.getAppProperty("Commit"),
+        "Back"};
     int counter = 17;
     int scW = getWidth();
     int scH = getHeight();
@@ -53,7 +57,12 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         super(false);
         setFullScreenMode(true);
         if (Main.PRE_VERSION >= 0) {
-            menuOpts[menuOpts.length-2] += "-pre" + Main.PRE_VERSION;
+            for (int i = 0; i < menuOpts.length; i++) {
+                if (menuOpts[i].startsWith("Version: ")) {
+                    menuOpts[i] += "-pre" + Main.PRE_VERSION;
+                    break;
+                }
+            }
         }
         (new Thread(this, "about canvas")).start();
     }
@@ -272,10 +281,10 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
 
     void selectPressed() {
         int selected = menu.selected;
-        if (selected == menuOpts.length - 3) {
+        if (selected == menuOpts.length - 4) {
             openLink();
         }
-        if (selected == menuOpts.length - 2) {
+        if (selected == menuOpts.length - 3) {
             counter+=1;
             if (counter == 20) {
                 MenuCanvas.isWorldgenEnabled = true;
