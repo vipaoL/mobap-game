@@ -26,25 +26,23 @@ public class GraphicsWorld extends World {
     int currColBodies = colBodies;
     
     static boolean bg = false;
+    public static int bgLineStep = Main.sWidth / 3;
     public static final int BIGSCREEN_SIDE = 480;
     
-    // test values, will be replaced
-    int scWidth = 64;
-    int halfScWidth = 32;
-    int scHeight = 320;
-    int halfScHeight = 160;
-    int scMinSide = 64;
+    int scWidth = Main.sWidth;
+    int halfScWidth = scWidth/2;
+    int scHeight = Main.sHeight;
+    int halfScHeight = scHeight/2;
+    int scMinSide = Math.min(scWidth, scHeight);
     
     int zoomBase = 0;
     int zoomOut = 100;
     int offsetX = 0;
     int offsetY = 0;
-    public static int viewField = 10;
+    public static int viewField;
     
     public static int carX = 0;
     public static int carY = 0;
-    int prevAng = 0;
-    int ang = 0;
     public Body carbody;
     public Body leftwheel;
     public Body rightwheel;
@@ -59,10 +57,12 @@ public class GraphicsWorld extends World {
         if (MenuCanvas.isWorldgenEnabled) {
             x = -3000;
         }
-        addCar(x, -400, FXUtil.TWO_PI_2FX / 360 * 30, null);
+        addCar(x, -400, FXUtil.TWO_PI_2FX / 360 * 30);
     }
 
-    public void addCar(int spawnX, int spawnY, int ang2FX, Object[] vel) {
+    public void addCar(int spawnX, int spawnY, int ang2FX) {
+        carX = spawnX;
+        carY = spawnY;
         int carbodyLength = 240;
         int carbodyHeight = 40;
         int wheelRadius = 40;
@@ -98,23 +98,18 @@ public class GraphicsWorld extends World {
 
         addBody(carbody);
         carbody.addCollisionLayer(1);
-
         addBody(leftwheel);
-        addBody(rightwheel);
         leftwheel.addCollisionLayer(1);
+        addBody(rightwheel);
         rightwheel.addCollisionLayer(1);
 
         Joint leftjoint = new Joint(carbody, leftwheel, FXVector.newVector(-carbodyLength / 2 + wheelRadius - 2, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
         Joint rightjoint = new Joint(carbody, rightwheel, FXVector.newVector(carbodyLength / 2 - wheelRadius + 2, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
         addConstraint(leftjoint);
         addConstraint(rightjoint);
-
-        if (vel != null) {
-            FXVector velFX = (FXVector) vel[0];
-            int rVel2FX = ((Integer) vel[1]).intValue();
-            carbody.angularVelocity2FX(rVel2FX);
-        }
+        
         WorldGen.zeroPoint = spawnX;
+        calculateZoomOut();
     }
     
     public void drawWorld(Graphics g) {
@@ -130,46 +125,30 @@ public class GraphicsWorld extends World {
             offsetX = -carX * 1000 / zoomOut + scWidth / 3;
             offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
 
-            // for timely track generation and deleting waste objects
-            viewField = scWidth * zoomOut / 1000;
-            if (DebugMenu.isDebugEnabled & DebugMenu.closerWorldgen) {
-                viewField /= 4;
-            }
-
             // some very boring code
-            if (GameplayCanvas.points > 291 & GameplayCanvas.points < 293) {
-                currColBg = 0x2f92cd;
+            if (GameplayCanvas.points > 291 && GameplayCanvas.points < 293) {
+                currColBg = 0x2f92ff;
                 currColLandscape = 0xffffff;
-            } else if (GameplayCanvas.points > 293 & GameplayCanvas.points < 300) {
+            } else if (GameplayCanvas.points > 293 && GameplayCanvas.points < 300) {
                 currColBg = colBg;
                 currColLandscape = colLandscape;
             }
             
             if (bg) {
                 currColLandscape = 0x0000ff;
-                /*for (int i = 0; i < scHeight / 8; i++) {
-                    g.setColor(0, Math.abs(255 * (i+1 - scHeight / 4) / (scHeight / 4)), 0);
-                    int y1 = Math.abs(i * 8 + carY) % scHeight;
-                    int y2 = Math.abs((scHeight - i) * 8 + carY) % scHeight;
-                    g.drawLine(0, Math.abs(scHeight - y1 * 2), scWidth, Math.abs(scHeight - y2 * 2));
-                */
-                //g.setColor(0, 63, 0);
                 g.setColor(63, 0, 31);
                 int offset = (carX - WorldGen.zeroPoint) / 16;
                 int l = (scWidth * 16);
-                int step = scWidth / 3;
-                for (int i = 0; i < l; i+=step) {
-                    int x2 = -((i + offset) % l - l/2)/*  *64/8  */;
+                for (int i = 0; i < l; i+=bgLineStep) {
+                    int x2 = -(i + (offset) % bgLineStep - l/2)/*  *64/8  */;
                     int x1 = x2 / 32;
                     g.drawLine(x1 + scWidth / 2, scHeight * 2 / 3, x2 + scWidth / 2, scHeight);
                 }
                 g.setColor(63, 31, 0);
-                //g.setColor(0, 63, 0);
                 int lines = 6;
                 int r = Math.min(scWidth, scHeight) / 4;
                 g.fillArc(scWidth / 2 - r, scHeight * 2 / 5 - r, r * 2, r * 2, 0, 360);
-                g.setColor(0, 0, 0);
-                //g.setColor(63, 0, 31);
+                g.setColor(currColBg);
                 for (int i = 0; i < lines; i++) {
                     int y = i * r / lines + scHeight * 2 / 5 - r / 12;
                     g.drawLine(0, y-1, scWidth, y-1);
@@ -196,6 +175,7 @@ public class GraphicsWorld extends World {
             g.fillRect(scWidth / 2 - l / 2, scHeight * 2 / 3, l/5, h);
             ex.printStackTrace();
         }
+        //g.fillTriangle(xToPX(carX+viewField/2-10), 0, xToPX(carX+viewField/2), scHeight, xToPX(carX+viewField/2+10), 0);
     }
 
     public void drawBodies(Graphics g) {
@@ -304,18 +284,28 @@ public class GraphicsWorld extends World {
     void drawWheel(Graphics g, Body b) {
         int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
         if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] == null) {
-            currColWheel = colBg;
+            currColWheel = currColBg;
+            if (DebugMenu.discoMode) {
+                currColWheel = random.nextInt(16777216);
+                currColBodies = random.nextInt(16777216);
+            }
         }
+        
         g.setColor(currColWheel);
-        if (DebugMenu.discoMode) {
-            g.setColor(random.nextInt(16777216));
-        }
-        g.fillArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
-        if (DebugMenu.discoMode) {
-            g.setColor(random.nextInt(16777216));
-        }
+        g.fillArc(
+                xToPX(b.positionFX().xAsInt() - radius),
+                yToPX(b.positionFX().yAsInt() - radius),
+                radius * 2000 / zoomOut,
+                radius * 2000 / zoomOut,
+                0, 360);
+        
         g.setColor(currColBodies);
-        g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
+        g.drawArc(
+                xToPX(b.positionFX().xAsInt() - radius),
+                yToPX(b.positionFX().yAsInt() - radius),
+                radius * 2000 / zoomOut,
+                radius * 2000 / zoomOut,
+                0, 360);
     }
     
     void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
@@ -403,5 +393,11 @@ public class GraphicsWorld extends World {
             zoomOut += 1;
         }
         zoomOut += zoomBase;
+        
+        // for timely track generation and deleting waste objects
+        viewField = scWidth * zoomOut / 1000;
+        if (DebugMenu.isDebugEnabled && DebugMenu.closerWorldgen) {
+            viewField /= 4;
+        }
     }
 }

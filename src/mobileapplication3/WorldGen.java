@@ -42,8 +42,8 @@ public class WorldGen implements Runnable {
     private int nextPointsCounterTargetX = lastX + POINTS_DIVIDER;
     int tick = 0;
     
-    private int segmentsNum = 36;       // how many lines will draw up a circle
-    private int segmentLen = 360 / segmentsNum;
+    private final int SEGMENTS_IN_CIRCLE = 36;       // how many lines will draw up a circle
+    private final int CIRCLE_SEGMENT_LEN = 360 / SEGMENTS_IN_CIRCLE;
     
     
     private boolean paused = false;
@@ -66,11 +66,6 @@ public class WorldGen implements Runnable {
     
     public void run() {
         Main.log("wg:run()");
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }
         while(MenuCanvas.isWorldgenEnabled) {
             try {
             tick();
@@ -123,7 +118,7 @@ public class WorldGen implements Runnable {
                 for (int i = 0; i < waitingForDynamic.size(); i++) {
                     try {
                         if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) > 0) {
-                            waitingTime.setElementAt(new Integer(Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) - 10), i);
+                            waitingTime.setElementAt(new Integer(((Integer) waitingTime.elementAt(i)).intValue() - 10), i);
                         } else {
                             ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
                             waitingForDynamic.removeElementAt(i);
@@ -137,7 +132,7 @@ public class WorldGen implements Runnable {
                 // removing all that fell out the world or got too left
                 for (int i = 0; i < w.getBodyCount(); i++) {
                     Body[] bodies = w.getBodies();
-                    if (bodies[i].positionFX().yAsInt() > 20000 + getLowestY() | GraphicsWorld.carX - bodies[i].positionFX().xAsInt() > GraphicsWorld.viewField * 2) {
+                    if ((GraphicsWorld.carX - bodies[i].positionFX().xAsInt()) > GraphicsWorld.viewField * 2) {
                         lockGameThread();
                         w.removeBody(bodies[i]);
                     }
@@ -369,7 +364,7 @@ public class WorldGen implements Runnable {
         moveLandscape(dx);
         moveBodies(dx);
         structlogger.moveXAllElements(dx);
-        zeroPoint = w.carbody.positionFX().xAsInt();
+        zeroPoint += dx;
         
         nextPointsCounterTargetX += dx;
 
@@ -725,12 +720,12 @@ public class WorldGen implements Runnable {
         }
         
         int lastAng = 0;
-        for(int i = 0; i <= ang - segmentLen; i+=segmentLen) {
-            line(x+Mathh.cos(i+of)*r/1000, y+Mathh.sin(i+of)*r/1000, x+Mathh.cos(i+segmentLen+of)*r/1000,y+Mathh.sin(i+segmentLen+of)*r/1000);
-            lastAng = i + segmentLen;
+        for(int i = 0; i <= ang - CIRCLE_SEGMENT_LEN; i+=CIRCLE_SEGMENT_LEN) {
+            line(x+Mathh.cos(i+of)*r/1000, y+Mathh.sin(i+of)*r/1000, x+Mathh.cos(i+CIRCLE_SEGMENT_LEN+of)*r/1000,y+Mathh.sin(i+CIRCLE_SEGMENT_LEN+of)*r/1000);
+            lastAng = i + CIRCLE_SEGMENT_LEN;
         }
         
-        if (ang % segmentLen != 0) {
+        if (ang % CIRCLE_SEGMENT_LEN != 0) {
             line(x+Mathh.cos(lastAng+of)*r/1000, y+Mathh.sin(lastAng+of)*r/1000, x+Mathh.cos(ang+of)*r/1000,y+Mathh.sin(ang+of)*r/1000);
         }
     }
@@ -740,12 +735,12 @@ public class WorldGen implements Runnable {
         }
         
         int lastAng = 0;
-        for(int i = 0; i <= ang - segmentLen; i+=segmentLen) {
-            line(x+Mathh.cos(i+of)*kx*r/10000, y+Mathh.sin(i+of)*ky*r/10000, x+Mathh.cos(i+segmentLen+of)*kx*r/10000,y+Mathh.sin(i+segmentLen+of)*ky*r/10000);
-            lastAng = i + segmentLen;
+        for(int i = 0; i <= ang - CIRCLE_SEGMENT_LEN; i+=CIRCLE_SEGMENT_LEN) {
+            line(x+Mathh.cos(i+of)*kx*r/10000, y+Mathh.sin(i+of)*ky*r/10000, x+Mathh.cos(i+CIRCLE_SEGMENT_LEN+of)*kx*r/10000,y+Mathh.sin(i+CIRCLE_SEGMENT_LEN+of)*ky*r/10000);
+            lastAng = i + CIRCLE_SEGMENT_LEN;
         }
         
-        if (ang % segmentLen != 0) {
+        if (ang % CIRCLE_SEGMENT_LEN != 0) {
             line(x+Mathh.cos(lastAng+of)*kx*r/10000, y+Mathh.sin(lastAng+of)*ky*r/10000, x+Mathh.cos(ang+of)*kx*r/10000,y+Mathh.sin(ang+of)*ky*r/10000);
         }
     }
