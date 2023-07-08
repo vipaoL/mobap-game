@@ -41,6 +41,7 @@ public class WorldGen implements Runnable {
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX = lastX + POINTS_DIVIDER;
     int tick = 0;
+    public static int mspt;
     
     private final int SEGMENTS_IN_CIRCLE = 36;       // how many lines will draw up a circle
     private final int CIRCLE_SEGMENT_LEN = 360 / SEGMENTS_IN_CIRCLE;
@@ -58,6 +59,15 @@ public class WorldGen implements Runnable {
     // counter
     private int linesInStructure = 0;
     
+    public static int currStep;
+    public static final int STEP_IDLE = 0;
+    public static final int STEP_ADD = 1;
+    public static final int STEP_RES_POS = 2;
+    public static final int STEP_CLEAN_SGS = 3;
+    public static final int STEP_DYN_BDS = 4;
+    public static final int STEP_CLEAN_BDS = 5;
+    
+    
     public WorldGen(GraphicsWorld w) {
         Main.log("wg:constructor");
         this.w = w;
@@ -68,7 +78,9 @@ public class WorldGen implements Runnable {
         Main.log("wg:run()");
         while(MenuCanvas.isWorldgenEnabled) {
             try {
-            tick();
+                long startTime = System.currentTimeMillis();
+                tick();
+                mspt = (int) (System.currentTimeMillis() - startTime);
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
             }
@@ -87,6 +99,7 @@ public class WorldGen implements Runnable {
                 } else if (!isResettingPosition && !shouldRmFirstStruct()) {
                     unlockGameThread();
                 }
+                currStep = STEP_ADD;
                 placeNext();
             } else {
                 unlockGameThread();
@@ -96,6 +109,7 @@ public class WorldGen implements Runnable {
             }
             
             if (tick == 0) {
+                currStep = STEP_RES_POS;
                 // World cycling
                 //(the physics engine is working weird when the coordinate reaches around 10000
                 //  then we need to move all structures and bodies to the left when the car is to the right of 3000)
@@ -110,9 +124,11 @@ public class WorldGen implements Runnable {
                 }
             }
 
+            currStep = STEP_CLEAN_SGS;
             rmFarStructures();
             
             if (tick == 0) {
+                currStep = STEP_DYN_BDS;
                 // ticking timers on each body car touched and set it as dynamic
                 // for falling platforms
                 for (int i = 0; i < waitingForDynamic.size(); i++) {
@@ -128,11 +144,11 @@ public class WorldGen implements Runnable {
 
                     }
                 }
-
                 // removing all that fell out the world or got too left
                 for (int i = 0; i < w.getBodyCount(); i++) {
                     Body[] bodies = w.getBodies();
                     if ((GraphicsWorld.carX - bodies[i].positionFX().xAsInt()) > GraphicsWorld.viewField * 2) {
+                        currStep = STEP_CLEAN_BDS;
                         lockGameThread();
                         w.removeBody(bodies[i]);
                     }
@@ -140,6 +156,7 @@ public class WorldGen implements Runnable {
                 unlockGameThread();
             }
         }
+        currStep = STEP_IDLE;
         tick++;
         if (tick >= 10) {
             tick = 0;
@@ -350,6 +367,13 @@ public class WorldGen implements Runnable {
     }
     public int getLowestY() {
         return lowestY;
+    }
+    public int getSegmentCount() {
+        try {
+            return lndscp.segmentCount();
+        } catch(NullPointerException ex) {
+            return 0;
+        }
     }
     
     private void resetPosition() { // world cycling

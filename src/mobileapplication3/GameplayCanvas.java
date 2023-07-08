@@ -519,11 +519,42 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 }
             }
             if (DebugMenu.oneFrameTwoTicks) {
-                g.drawString("FPS:" + fps/2, 0, debugTextOffset, 0); 
+                g.drawString("FPS:" + fps/2, 0, debugTextOffset, 0);
             } else {
-                g.drawString("FPS:" + fps, 0, debugTextOffset, 0); 
+                g.drawString("FPS:" + fps, 0, debugTextOffset, 0);
             }
             debugTextOffset += currentFontH;
+        }
+        
+        try {
+            if (DebugMenu.isDebugEnabled) {
+                switch (WorldGen.currStep) {
+                    case 0:
+                        g.setColor(0, 255, 0);
+                        break;
+                    case 1:
+                        g.setColor(127, 127, 255);
+                        break;
+                    case 2:
+                        g.setColor(127, 127, 0);
+                        break;
+                    case 3:
+                        g.setColor(255, 0, 0);
+                        break;
+                    case 4:
+                        g.setColor(127, 0, 191);
+                        break;
+                    case 5:
+                        g.setColor(127, 63, 0);
+                        break;
+                    default:
+                        break;
+                }
+                g.drawString("wg: mspt" + WorldGen.mspt + " sgs" + worldgen.getSegmentCount() + " step:" + WorldGen.currStep, 0, debugTextOffset, 0);
+                debugTextOffset += currentFontH;
+            }
+        } catch(NullPointerException ex) {
+            
         }
         
         // game over screen
