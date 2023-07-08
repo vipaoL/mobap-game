@@ -56,6 +56,8 @@ public class GenericMenu {
     public static final int SIEMENS_KEY_RIGHT = -62;
     public static final int SIEMENS_KEY_LEFT_SOFT = -1;
     public static final int SIEMENS_KEY_RIGHT_SOFT = -4;
+    public static final int SE_KEY_BACK = -11;
+    public static final int KEY_SOFT_RIGHT = -7;
     
     Feedback feedback;
     Canvas util = new Canvas() {protected void paint(Graphics g) {}};
@@ -289,7 +291,9 @@ public class GenericMenu {
                 break;
             case GameCanvas.KEY_NUM0:
                 break;
-            case -7:
+            case KEY_SOFT_RIGHT:
+                break;
+            case SE_KEY_BACK:
                 break;
             case SIEMENS_KEY_LEFT:
                 break;
@@ -345,7 +349,7 @@ public class GenericMenu {
                 return handlePressingButton(lastGameAction);
         }
         selected += firstReachable;
-        if (keyCode == GameCanvas.KEY_NUM0 | keyCode == /**/ -7/*right soft button*/ | keyCode == SIEMENS_KEY_LEFT /*| keyCode == GameCanvas.LEFT_PRESSED*/) {
+        if (keyCode == GameCanvas.KEY_NUM0 || keyCode == KEY_SOFT_RIGHT || keyCode == SIEMENS_KEY_LEFT /*|| keyCode == GameCanvas.LEFT_PRESSED*/ || keyCode == SE_KEY_BACK) {
             isKnownButton = true;
             selected = lastReachable; // back
             if (keyPressDelay < 1) {
