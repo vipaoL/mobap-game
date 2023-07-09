@@ -25,7 +25,6 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     String[] menuOpts = {"", //there is qr code
         urlPrew,
         "Version: " + Main.thiss.getAppProperty("MIDlet-Version"),
-        "Commit: " + Main.thiss.getAppProperty("Commit"),
         "Back"};
     int counter = 17;
     int scW = getWidth();
@@ -60,6 +59,15 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
             for (int i = 0; i < menuOpts.length; i++) {
                 if (menuOpts[i].startsWith("Version: ")) {
                     menuOpts[i] += "-pre" + Main.PRE_VERSION;
+                    break;
+                }
+            }
+        }
+        String commitHash = Main.thiss.getAppProperty("Commit");
+        if (commitHash != null) {
+            for (int i = 0; i < menuOpts.length; i++) {
+                if (menuOpts[i].startsWith("Version: ")) {
+                    menuOpts[i] += "-" + commitHash;
                     break;
                 }
             }
@@ -281,10 +289,10 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
 
     void selectPressed() {
         int selected = menu.selected;
-        if (selected == menuOpts.length - 4) {
+        if (selected == menuOpts.length - 3) {
             openLink();
         }
-        if (selected == menuOpts.length - 3) {
+        if (selected == menuOpts.length - 2) {
             counter+=1;
             if (counter == 20) {
                 MenuCanvas.isWorldgenEnabled = true;
