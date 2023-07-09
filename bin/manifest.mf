@@ -1,7 +1,10 @@
 MIDlet-1: mobapp-game,/icon.png,mobileapplication3.Main
-Nokia-Scaleable-Icon: /icon.png
+Nokia-Scaleable-Icon: /icon.svg
 MIDlet-Vendor: vipaoL
 MIDlet-Version: 0.9.0
+LGE-MIDlet-On-Screen-Keypad: no
+Nokia-MIDlet-Category: Game
 MIDlet-Name: mobapp-game
+Nokia-MIDlet-On-Screen-Keypad: no
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
