@@ -13,7 +13,7 @@ J2ME game on emini physics engine
 - Touch interface and screen rotation are supported
 - Can adapt to any (or almost any) screen size
 
-tested on: default emulator; Nokia 6303c, n8, e6, 308; Samsung c3200, b320; SE w580i, z550i; j2me loader.
+tested on: default emulator; Nokia 6303c, n8, e6, 308, phoneME/n900; Samsung c3200, b320; SE w580i, z550i; j2me loader.
 
 ![Gameplay](https://user-images.githubusercontent.com/59665125/170510578-16867f63-9968-4163-9282-d138356c4738.png)
 ![About screen](https://user-images.githubusercontent.com/59665125/170510649-ac57e0da-7374-4ada-bf7d-33956d262575.png)
