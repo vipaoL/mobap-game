@@ -28,18 +28,17 @@ public class WorldGen implements Runnable {
     private int prevStructRandomId;
     private int nextStructRandomId;
     public boolean isResettingPosition = false;
-    StructLog structlogger = new StructLog(1);
     // list of all bodies car touched (for falling platforms)
     Vector waitingForDynamic = new Vector();
     Vector waitingTime = new Vector();
     
-    private int lastX = -8000;
-    private int lastY = 0;
-    private int lowestY = 0;
+    private int lastX;
+    private int lastY;
+    private int lowestY;
     
-    public static int zeroPoint = 0;
+    public static int bgZeroPoint = 0;
     private final int POINTS_DIVIDER = 2000;
-    private int nextPointsCounterTargetX = lastX + POINTS_DIVIDER;
+    private int nextPointsCounterTargetX;
     int tick = 0;
     public static int mspt;
     
@@ -55,10 +54,12 @@ public class WorldGen implements Runnable {
     private GraphicsWorld w;
     private Landscape lndscp;
     private MgStruct mgStruct;
+    private StructLog structlogger = new StructLog(1);
     
     // counter
     private int linesInStructure = 0;
     
+    // wg activity indicator
     public static int currStep;
     public static final int STEP_IDLE = 0;
     public static final int STEP_ADD = 1;
@@ -257,6 +258,7 @@ public class WorldGen implements Runnable {
         prevStructRandomId = 1;
         nextStructRandomId = 2;
         lastX = -2900;
+        nextPointsCounterTargetX = lastX + POINTS_DIVIDER;
         lastY = 0;
         try {
             Main.log("wg:cleaning world");
@@ -388,7 +390,7 @@ public class WorldGen implements Runnable {
         moveLandscape(dx);
         moveBodies(dx);
         structlogger.moveXAllElements(dx);
-        zeroPoint += dx;
+        bgZeroPoint += dx;
         
         nextPointsCounterTargetX += dx;
 
