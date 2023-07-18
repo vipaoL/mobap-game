@@ -141,7 +141,11 @@ public class GraphicsWorld extends World {
             }
             Body[] bodies = getBodies();
             Body body = bodies[i];
-            if ((GraphicsWorld.carX - body.positionFX().xAsInt()) > GraphicsWorld.viewField * 2) {
+            int maxDistToRemove = WorldGen.MAX_DIST_TO_RM_STRUCT;
+            if (DebugMenu.simulationMode) {
+                maxDistToRemove = WorldGen.MAX_DIST_TO_RM_STRUCT_SIMUL;
+            }
+            if ((GraphicsWorld.carX - body.positionFX().xAsInt()) > maxDistToRemove) {
                 if (body == carbody || body == leftwheel || body == rightwheel) {
                     continue;
                 }

@@ -21,6 +21,9 @@ import java.util.Random;
  */
 public class WorldGen implements Runnable {
     
+    public static final int MAX_DIST_TO_RM_STRUCT = 4000;
+    public static final int MAX_DIST_TO_RM_STRUCT_SIMUL = 300;
+    
     int stdStructsNumber = 6;
     int floorWeightInRandom = 4;
     
@@ -465,9 +468,9 @@ public class WorldGen implements Runnable {
         }
     
         public boolean shouldRmFirstStruct() {
-            int maxDistToRemove = 4000;
+            int maxDistToRemove = MAX_DIST_TO_RM_STRUCT;
             if (DebugMenu.simulationMode) {
-                maxDistToRemove = 300;
+                maxDistToRemove = MAX_DIST_TO_RM_STRUCT_SIMUL;
             }
             try {
                 if (getNumberOfLogged() > 0) {
