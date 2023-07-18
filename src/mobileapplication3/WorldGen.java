@@ -113,7 +113,7 @@ public class WorldGen implements Runnable {
                     gameTrLockedByAdding = false;
                     unlockGameThread("addSt");
                 }
-                if (!shouldRmFirstStruct()) {
+                if (!structlogger.shouldRmFirstStruct()) {
                     needSpeed = false;
                 }
             }
@@ -135,7 +135,7 @@ public class WorldGen implements Runnable {
             }
 
             currStep = STEP_CLEAN_SGS;
-            rmFarStructures();
+            structlogger.rmFarStructures();
         }
         currStep = STEP_IDLE;
         tick++;
@@ -260,50 +260,6 @@ public class WorldGen implements Runnable {
         }
     }
     
-    private void rmFarStructures() {
-        if (shouldRmFirstStruct()) {
-            int deletedSegs = 0;
-            for (int i = 0; i < Math.min(structlogger.getElementAt(0)[1], 3); i++) {
-                lndscp.removeSegment(0);
-                deletedSegs++;
-            }
-            int id = structlogger.getElementID(0);
-            structlogger.structLog[id][1] = (short) (structlogger.structLog[id][1] - ((short) deletedSegs));
-            
-            // if 0 segments left, then the structure was deleted completely.
-            // Deleting it from log
-            if (structlogger.getElementAt(0)[1] == 0) {
-                int barrierX = structlogger.structLog[id][0];
-                
-                structlogger.rmFirstElement();
-                
-                // add a barrier to the left world border
-                Main.log("adding a barrier at " + barrierX);
-                lndscp.addSegment(FXVector.newVector(barrierX, -10000), FXVector.newVector(barrierX, 10000), (short) 0);
-                structlogger.structLog[structlogger.getElementID(0)][1] += 1;
-            }
-        }
-    }
-    
-    private boolean shouldRmFirstStruct() {
-        int maxDistToRemove = 4000;
-        if (DebugMenu.simulationMode) {
-            maxDistToRemove = 300;
-        }
-        try {
-            if (structlogger.getNumberOfLogged() > 0) {
-                return GraphicsWorld.carX - structlogger.getElementAt(0)[0] > maxDistToRemove;
-            } else
-                return false;
-        } catch(NullPointerException ex) {
-            Main.enableLog(Main.sHeight);
-            Main.log(ex.toString());
-            Main.log("structLog:critical err");
-            ex.printStackTrace();
-            return false;
-        }
-    }
-    
     public void lockGameThread(String where) {
         String msg = "locking by " + where;
         Main.log(msg);
@@ -405,6 +361,7 @@ public class WorldGen implements Runnable {
         private short[][] structLog;
         private int numberOfLoggedStructs = 0;
         private int ringLogStart = 0;
+        private boolean isLeftBarrierAdded = false;
         
         public StructLog(int structLogSize) {
             structLog = new short[structLogSize][];
@@ -476,6 +433,53 @@ public class WorldGen implements Runnable {
             for (int i = 0; i < getSize(); i++) {
                 if (structLog[i] == null) return;
                 structLog[i][0] = (short) (structLog[i][0] + ((short) dx));
+            }
+        }
+        public void rmFarStructures() {
+            if (shouldRmFirstStruct()) {
+                
+                // add a barrier to the left world border
+                if (!isLeftBarrierAdded) {
+                    int barrierX = structLog[getElementID(0)][0];
+                    Main.log("adding a barrier at " + barrierX);
+                    lndscp.addSegment(FXVector.newVector(barrierX, -10000), FXVector.newVector(barrierX, 10000), (short) 0);
+                    structLog[getElementID(1)][1] += 1;
+                    isLeftBarrierAdded = true;
+                }
+                
+                int deletedSegs = 0;
+                for (int i = 0; i < Math.min(getElementAt(0)[1], 3); i++) {
+                    lndscp.removeSegment(0);
+                    deletedSegs++;
+                }
+                int id = getElementID(0);
+                structLog[id][1] = (short) (structLog[id][1] - ((short) deletedSegs));
+
+                // if 0 segments left, then the structure was deleted completely.
+                // Deleting it from log
+                if (getElementAt(0)[1] == 0) {
+                    isLeftBarrierAdded = false;
+                    rmFirstElement();
+                }
+            }
+        }
+    
+        public boolean shouldRmFirstStruct() {
+            int maxDistToRemove = 4000;
+            if (DebugMenu.simulationMode) {
+                maxDistToRemove = 300;
+            }
+            try {
+                if (getNumberOfLogged() > 0) {
+                    return GraphicsWorld.carX - getElementAt(0)[0] > maxDistToRemove;
+                } else
+                    return false;
+            } catch(NullPointerException ex) {
+                Main.enableLog(Main.sHeight);
+                Main.log(ex.toString());
+                Main.log("structLog:critical err");
+                ex.printStackTrace();
+                return false;
             }
         }
     }
