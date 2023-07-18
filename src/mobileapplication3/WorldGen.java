@@ -14,7 +14,6 @@ import at.emini.physics2D.UserData;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import java.util.Random;
-import java.util.Vector;
 
 /**
  *
@@ -28,9 +27,6 @@ public class WorldGen implements Runnable {
     private int prevStructRandomId;
     private int nextStructRandomId;
     public boolean isResettingPosition = false;
-    // list of all bodies car touched (for falling platforms)
-    Vector waitingForDynamic = new Vector();
-    Vector waitingTime = new Vector();
     
     private int lastX;
     private int lastY;
@@ -48,13 +44,14 @@ public class WorldGen implements Runnable {
     
     private boolean paused = false;
     private boolean needSpeed = true;
-    private boolean isReady = true;
+    private int lock = 0;
+    private boolean gameTrLockedByAdding = false;
     
     private Random rand;
     private GraphicsWorld w;
     private Landscape lndscp;
     private MgStruct mgStruct;
-    private StructLog structlogger = new StructLog(1);
+    private StructLog structlogger;
     
     // counter
     private int linesInStructure = 0;
@@ -65,14 +62,21 @@ public class WorldGen implements Runnable {
     public static final int STEP_ADD = 1;
     public static final int STEP_RES_POS = 2;
     public static final int STEP_CLEAN_SGS = 3;
-    public static final int STEP_DYN_BDS = 4;
-    public static final int STEP_CLEAN_BDS = 5;
     
     
     public WorldGen(GraphicsWorld w) {
-        Main.log("wg:constructor");
+        lock = 0;
+        Main.log("wg:starting");
+        lockGameThread("init");
         this.w = w;
         lndscp = w.getLandscape();
+        Main.log("wg:start()");
+        rand = new Random();
+        Main.log("wg:loading mgstruct");
+        mgStruct = new MgStruct();
+        reset();
+        unlockGameThread("init");
+        (new Thread(this, "world generator")).start();
     }
     
     public void run() {
@@ -92,18 +96,23 @@ public class WorldGen implements Runnable {
     public void tick() {
         if (!paused || needSpeed) {
             w.refreshPos();
+            
             if ((GraphicsWorld.carX + GraphicsWorld.viewField*2 > lastX)) {
                 if ((GraphicsWorld.carX + GraphicsWorld.viewField > lastX)) {
                     needSpeed = true;
-                    lockGameThread();
-                    Main.log("worldgen can't keep up, waiting;");
-                } else if (!isResettingPosition && !shouldRmFirstStruct()) {
-                    unlockGameThread();
+                    if (!gameTrLockedByAdding) {
+                        lockGameThread("addSt");
+                    }
+                    gameTrLockedByAdding = true;
+                    Main.log("wg can't keep up, waiting;");
                 }
                 currStep = STEP_ADD;
                 placeNext();
             } else {
-                unlockGameThread();
+                if (gameTrLockedByAdding) {
+                    gameTrLockedByAdding = false;
+                    unlockGameThread("addSt");
+                }
                 if (!shouldRmFirstStruct()) {
                     needSpeed = false;
                 }
@@ -127,35 +136,6 @@ public class WorldGen implements Runnable {
 
             currStep = STEP_CLEAN_SGS;
             rmFarStructures();
-            
-            if (tick == 0) {
-                currStep = STEP_DYN_BDS;
-                // ticking timers on each body car touched and set it as dynamic
-                // for falling platforms
-                for (int i = 0; i < waitingForDynamic.size(); i++) {
-                    try {
-                        if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) > 0) {
-                            waitingTime.setElementAt(new Integer(((Integer) waitingTime.elementAt(i)).intValue() - 10), i);
-                        } else {
-                            ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
-                            waitingForDynamic.removeElementAt(i);
-                            waitingTime.removeElementAt(i);
-                        }
-                    } catch (ArrayIndexOutOfBoundsException ex) {
-
-                    }
-                }
-                // removing all that fell out the world or got too left
-                for (int i = 0; i < w.getBodyCount(); i++) {
-                    Body[] bodies = w.getBodies();
-                    if ((GraphicsWorld.carX - bodies[i].positionFX().xAsInt()) > GraphicsWorld.viewField * 2) {
-                        currStep = STEP_CLEAN_BDS;
-                        lockGameThread();
-                        w.removeBody(bodies[i]);
-                    }
-                }
-                unlockGameThread();
-            }
         }
         currStep = STEP_IDLE;
         tick++;
@@ -231,28 +211,18 @@ public class WorldGen implements Runnable {
         lowestY = Math.max(lastY, lowestY);
     }
     
-    public void start() {
-        isReady = false;
-        Main.log("wg:start()");
-        rand = new Random();
-        Main.log("wg:loading mgstruct");
-        mgStruct = new MgStruct();
-        restart();
-        resume();
-        (new Thread(this, "world generator")).start();
-    }
     public void pause() {
         Main.log("wg pause");
         needSpeed = true;
         paused = true;
     }
+    
     public void resume() {
-        Main.log("wg resumed");
+        Main.log("wg resume");
         paused = false;
     }
     
-    private void restart() {
-        isReady = false;
+    private void reset() {
         needSpeed = true;
         Main.log("wg:restart()");
         prevStructRandomId = 1;
@@ -266,16 +236,15 @@ public class WorldGen implements Runnable {
         } catch (NullPointerException e) {
             
         }
-        Main.log("wg:adding start platform");
+        
+        structlogger = new StructLog(10);
+        
+        // start platform
         line(lastX - 600, lastY - 100, lastX, lastY);
         structlogger.add(lastX, linesInStructure);
-        Main.log("wg:adding car");
-        w.addCar();
-        Main.log("wg ready.");
-        isReady = true;
     }
     private void cleanWorld() {
-        GameplayCanvas.paused = true;
+        lockGameThread("clnW");
         Constraint[] constraints = w.getConstraints();
         while (w.getConstraintCount() > 0) {
             w.removeConstraint(constraints[0]);
@@ -283,7 +252,7 @@ public class WorldGen implements Runnable {
         rmAllBodies();
         rmSegs();
         constraints = null;
-        GameplayCanvas.paused = false;
+        unlockGameThread("clnW");
     }
     private void rmSegs() {
         while (lndscp.segmentCount() > 0) {
@@ -291,46 +260,44 @@ public class WorldGen implements Runnable {
         }
     }
     
-    int maxDist = 4000;
     private void rmFarStructures() {
-        if (DebugMenu.simulationMode) {
-            maxDist = 300;
-        }
         if (shouldRmFirstStruct()) {
             int c = 0;
-            //lockGameThread();
             for (int i = 0; i < Math.min(structlogger.getElementAt(0)[1], 3); i++) {
                 lndscp.removeSegment(0);
                 c++;
             }
-            //unlockGameThread();
             int id = structlogger.getElementID(0);
             structlogger.structLog[id][1] = (short) (structlogger.structLog[id][1] - ((short)c));
             if (structlogger.getElementAt(0)[1] == 0) {
                 structlogger.rmFirstElement();
             }
-        } else {
-            //System.out.println("nothing to remove");
         }
     }
     
     private boolean shouldRmFirstStruct() {
+        int maxDistToRemove = 4000;
+        if (DebugMenu.simulationMode) {
+            maxDistToRemove = 300;
+        }
         try {
             if (structlogger.getNumberOfLogged() > 0) {
-                return GraphicsWorld.carX - structlogger.getElementAt(0)[0] > maxDist;
+                return GraphicsWorld.carX - structlogger.getElementAt(0)[0] > maxDistToRemove;
             } else
                 return false;
         } catch(NullPointerException ex) {
             Main.enableLog(Main.sHeight);
             Main.log(ex.toString());
-            Main.log("ringBuffer:critical error");
+            Main.log("structLog:critical err");
             ex.printStackTrace();
             return false;
         }
     }
     
-    public void lockGameThread() {
-        //Main.log("locking game thread");
+    public void lockGameThread(String where) {
+        String msg = "locking by " + where;
+        Main.log(msg);
+        lock++;
         GameplayCanvas.shouldWait = true;
         if (GameplayCanvas.isBusy) {
             while (!GameplayCanvas.isWaiting && GameplayCanvas.isBusy) {
@@ -341,11 +308,17 @@ public class WorldGen implements Runnable {
                 }
             }
         }
-        //Main.log("locked game thread");
+        Main.logReplaceLast(msg, "locked by " + where);
     }
     
-    public void unlockGameThread() {
-        GameplayCanvas.shouldWait = false;
+    public void unlockGameThread(String where) {
+        Main.log("unlocking by " + where);
+        lock--;
+        if (lock <= 0) {
+            GameplayCanvas.shouldWait = false;
+        } else {
+            Main.log("not unlocking: " + lock);
+        }
     }
     
     /*private void rmBodies() {
@@ -364,9 +337,6 @@ public class WorldGen implements Runnable {
         }
         bodies = null;
     }
-    public boolean isReady() {
-        return isReady;
-    }
     public int getLowestY() {
         return lowestY;
     }
@@ -379,7 +349,7 @@ public class WorldGen implements Runnable {
     }
     
     private void resetPosition() { // world cycling
-        lockGameThread();
+        lockGameThread("rsPos");
         isResettingPosition = true;
         
         int dx = -3000 - w.carbody.positionFX().xAsInt();
@@ -395,7 +365,7 @@ public class WorldGen implements Runnable {
         nextPointsCounterTargetX += dx;
 
         isResettingPosition = false;
-        unlockGameThread();
+        unlockGameThread("rsPos");
     }
     
     private void moveLandscape(int dx) {

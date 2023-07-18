@@ -58,6 +58,14 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         (new Thread(this, "debug menu")).start();
     }
     
+    private void init() {
+        statemap[1] = -1; // set "-----" separator as inactive button
+        menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
+        fontSizeCache = menu.getFontSize();
+        menu.setSpecialOption(0);
+        refreshStates();
+    }
+    
     public boolean getIsPaused() {
         return isPaused;
     }
@@ -71,18 +79,14 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         menu.handleHideNotify();
     }
     
+    protected void sizeChanged(int w, int h) {
+        Main.sWidth = scW = w;
+        Main.sHeight = scH = h;
+        menu.reloadCanvasParameters(scW, scH);
+        paint();
+    }
+    
     protected void showNotify(){
-        scW = getWidth();
-        scH = getHeight();
-        if (!menu.isInited) {
-            statemap[1] = -1; // set "-----" separator as inactive button
-            menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
-            fontSizeCache = menu.getFontSize();
-            menu.setSpecialOption(0);
-        } else {
-            menu.reloadCanvasParameters(scW, scH);
-        }
-        refreshStates();
         isPaused = false;
         menu.handleShowNotify();
     }
@@ -90,6 +94,12 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public void run() {
         long sleep;
         long start;
+        
+        paint();
+        
+        if (!menu.isInited) {
+            init();
+        }
 
         while (!stopped) {
             if (!isPaused) {
@@ -99,7 +109,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
                     fontSizeCache = -1;
                     showNotify();
                 }
-                repaint();
+                paint();
 
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
@@ -114,7 +124,8 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         }
     }
     
-    public void paint(Graphics g) {
+    public void paint() {
+        Graphics g = getGraphics();
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));
         menu.paint(g);
@@ -123,6 +134,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             g.setColor(127, 127, 127);
             g.drawString("Unknown keyCode=" + menu.lastKeyCode, scW, scH, Graphics.BOTTOM | Graphics.RIGHT);
         }
+        flushGraphics();
     }
     void selectPressed() {
         int selected = menu.selected;

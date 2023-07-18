@@ -89,13 +89,14 @@ public class FileUtils {
         if (list == null) {
             list = getNextList();
         }
-        boolean constt = true;
-        while (constt) {
+        
+        while (true) {
             if (list == null) {
                 break;
             }
             if (!list.hasMoreElements()) {
                 list = getNextList();
+                continue;
             }
             String name = list.nextElement().toString();
             // don't load files with prefix (if set)
@@ -105,6 +106,7 @@ public class FileUtils {
                     continue;
                 }
             }
+            Main.log("loading " + name);
             return fileToDataInputStream(path + name);
         }
         return null;

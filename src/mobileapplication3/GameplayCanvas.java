@@ -33,7 +33,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     
     // state and mode
     static boolean isFirstStart = true; // for displaying hints only on first start
-    public static boolean isBusy = true;
+    public static boolean isBusy = false;
     public static boolean uninterestingDebug = false;
     boolean isWorldLoaded = false;
     
@@ -77,8 +77,6 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     // fonts
     Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     int sFontH = smallfont.getHeight();
-    //Font mediumfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-    //int mFontH = mediumfont.getHeight();
     Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     int lFontH = largefont.getHeight();
     Font currentFont = largefont;
@@ -95,44 +93,76 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
     public GameplayCanvas() {
         super(false);
-        Main.logMessageDelay = 50;
+        setLoadingProgress(5);
         log("gcanvas constructor");
-        setLoadingProgress(15);
         setFullScreenMode(true);
-        scW = getWidth();
-        scH = getHeight();
-        currentEffects = new short[1][];
-        paint();
-        log("gcanvas:starting thread");
         (new Thread(this, "game canvas")).start();
     }
-
-    public void setWorld(GraphicsWorld w) {
+    
+    public GameplayCanvas(GraphicsWorld w) {
+        super(false);
+        setLoadingProgress(5);
+        log("gcanvas constructor");
+        setFullScreenMode(true);
+        world = w;
+        (new Thread(this, "game canvas")).start();
+    }
+    
+    private void init() {
         stopped = false;
-        log("gamecanvas:setWorld()");
-        this.world = w;
-        this.world.setGravity(FXVector.newVector(0, 250 * gameSpeedMultiplier));
+        paused = false;
+        isBusy = false;
+        log("gcanvas init");
+        
+        if (world == null) {
+            // new world
+            setDefaultWorld();
+        } else {
+            // init an existing world
+            initWorld();
+        }
+        
+        Main.logMessageDelay = 50;
+        currentEffects = new short[1][];
+        log("gcanvas:starting thread");
+    }
+    
+    void reset() {
+        Main.log("reset");
+        points = 0;
+        gameoverCountdown = 0;
+        if (MenuCanvas.isWorldgenEnabled) {
+            worldgen = new WorldGen(world);
+            flipCounter = new FlipCounter();
+            Main.log("wg started");
+        }
+        setLoadingProgress(50);
+        world.addCar();
+        setLoadingProgress(60);
+    }
+    
+    private void initWorld() {
+        world.setGravity(FXVector.newVector(0, 250 * gameSpeedMultiplier));
+        setLoadingProgress(40);
+        world.refreshScreenParameters();
         reset();
         isWorldLoaded = true;
     }
     
-    public void setDefaultWorld() {
+    private void setDefaultWorld() {
         Main.log("gCanv:reading world");
         PhysicsFileReader reader = new PhysicsFileReader("/void.phy");
         setLoadingProgress(25);
         
         Main.log("gCanv:loading world");
         World w = World.loadWorld(reader);
-        setLoadingProgress(30);
 
         Main.log("gCanv:new grWorld");
         // there's siemens c65 stucks if obfucsation is enabled
-        GraphicsWorld grWorld = new GraphicsWorld(w);
-        setLoadingProgress(50);
+        world = new GraphicsWorld(w);
 
         Main.log("gCanv:setting world");
-        setWorld(grWorld);
-        setLoadingProgress(75);
+        initWorld();
 
         Main.log("gCanv:closing reader");
         reader.close();
@@ -140,36 +170,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
     // game thread with main cycle and preparing
     public void run() {
-        try {
-        log("gcanvas:thread started");
-        
-        long sleep = 0;
-        long start = 0;
-        int tick = 0;
-        Contact[][] contacts = new Contact[3][];
-        
-        // while world is loading, wait and draw loading screen
-        while (!isWorldLoaded) {
-            paint();
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }
-        log("thread:world loaded");
-        
-        // tell screen size to world when it loaded
-        world.refreshScreenParameters();
-        // init music player if enabled
-        if (DebugMenu.isDebugEnabled & DebugMenu.music) {
-            log("Starting sound");
-            Sound sound = new Sound();
-            sound.startBgMusic();
-        }
         
         // wait for stopping previous game instance if it still running
-        setLoadingProgress(80);
         while (lock) {            
             stopped = true;
             try {
@@ -178,19 +180,31 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 ex.printStackTrace();
             }
         }
-        lock = true;
         
-        setLoadingProgress(85);
-        // continue updating loading screen until worldgen is loaded
-        log("thread:waiting for wg");
-        while(!worldgen.isReady()) {
-            paint();
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
+        stopped = false;
+        lock = true;
+        isWaiting = false;
+        
+        init();
+        
+        setLoadingProgress(80);
+        
+        try {
+        log("gcanvas:thread started");
+        
+        long sleep = 0;
+        long start = 0;
+        int tick = 0;
+        
+        Contact[][] contacts = new Contact[3][];
+        
+        // init music player if enabled
+        if (DebugMenu.isDebugEnabled & DebugMenu.music) {
+            log("Starting sound");
+            Sound sound = new Sound();
+            sound.startBgMusic();
         }
+        
         setLoadingProgress(100);
         
         log("thread:starting game cycle");
@@ -205,9 +219,17 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 world.refreshScreenParameters();
             }
             
-            if (!paused && worldgen.isReady()) {
+            if (!paused) {
                 fps = 1000 / ((int) (System.currentTimeMillis() - start));
                 start = System.currentTimeMillis();
+                
+                isBusy = true;
+                world.tick();
+                if (!DebugMenu.oneFrameTwoTicks || tick%2 == 0) {
+                    paint();
+                }
+                isBusy = false;
+                
                 // chech if car contacts with the ground or sth else
                 contacts[0] = world.getContactsForBody(world.leftwheel);
                 contacts[1] = world.getContactsForBody(world.rightwheel);
@@ -316,11 +338,12 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                             switch (bodyType) {
                                 // add fall countdown timer on falling platform
                                 case MUserData.TYPE_FALLING_PLATFORM:
-                                    if (!worldgen.waitingForDynamic.contains(body) & body != world.carbody & body != world.leftwheel & body != world.rightwheel) {
-                                        worldgen.waitingForDynamic.addElement(body);
-                                        worldgen.waitingTime.addElement(new Integer(20));
+                                    if (!world.waitingForDynamic.contains(body) & body != world.carbody & body != world.leftwheel & body != world.rightwheel) {
+                                        world.waitingForDynamic.addElement(body);
+                                        world.waitingTime.addElement(new Integer(600));
                                         if (uninterestingDebug) world.removeBody(body);
-                                    }   break;
+                                    }
+                                    break;
                                 // apply effect if touched an effect plate
                                 case MUserData.TYPE_ACCELERATOR:
                                     giveEffect(bodyUserData.data);
@@ -358,7 +381,9 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 if (pauseDelay > 0)
                     pauseDelay--;
                 
-                flipCounter.tick();
+                if (MenuCanvas.isWorldgenEnabled) {
+                    flipCounter.tick();
+                }
 
                 if (tick < 3) {
                     tick++;
@@ -366,7 +391,11 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     tick = 0;
                     // start the final countdown and open main menu if the car
                     // lies upside down or fell out of the world
-                    if (GraphicsWorld.carY > 2000 + worldgen.getLowestY() || (carAngle > 140 && carAngle < 220 && world.carbody.getContacts()[0] != null)) {
+                    int lowestY = 5000;
+                    if (worldgen != null) {
+                        lowestY = worldgen.getLowestY();
+                    }
+                    if (GraphicsWorld.carY > 2000 + lowestY || (carAngle > 140 && carAngle < 220 && world.carbody.getContacts()[0] != null)) {
                         if (gameoverCountdown < 8) {
                             gameoverCountdown++;
                         } else {
@@ -383,15 +412,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                             gameoverCountdown = 0;
                         }
                     }
+                    
+                    world.tickBodies();
                 }
                 
-                isBusy = true;
-                world.tick();
-                if (!DebugMenu.oneFrameTwoTicks || tick%2 == 0) {
-                    paint();
-                }
-                
-                isBusy = false;
                 while (shouldWait) {
                     isWaiting = true;
                     try {
@@ -402,7 +426,6 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 }
                 if (isWaiting && paused){
                     paint();
-                    System.out.println("done");
                 }
                 
                 isWaiting = false;
@@ -436,10 +459,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         Graphics g = getGraphics();
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, maxScSide, maxScSide);
-        if (isWorldLoaded) {
-            world.drawWorld(g);
-        } else {
+        if (loadingProgress < 100) {
             drawLoading(g);
+        } else {
+            world.drawWorld(g);
         }
         drawHUD(g);
         flushGraphics();
@@ -586,13 +609,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             }
         }
         
-        if (!isWorldLoaded) {
-            return; // stop drawing GUI, if
-        } // world and woldgen are not loaded yet, else
-        // we'll get errors executing code below
-        
         // score counter
-        if (MenuCanvas.isWorldgenEnabled) {
+        if (MenuCanvas.isWorldgenEnabled && world != null) {
             g.setColor(flipIndicator, flipIndicator, 255);
             setFont(largefont, g);
             g.drawString(String.valueOf(points), world.halfScWidth, world.scHeight - currentFontH * 3 / 2,
@@ -643,9 +661,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     }
     public void setLoadingProgress(int percents) {
         loadingProgress = percents;
+        log(percents + "%");
+        paint();
     }
     
-    // does it need any comments?
     private void setFont(Font font, Graphics g) {
         g.setFont(font);
         currentFont = font;
@@ -673,22 +692,6 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         uninterestingDebug = false;
         MenuCanvas.isWorldgenEnabled = false;
         Main.set(new MenuCanvas());
-    }
-
-    // reset some parameters, init worldgen
-    public void reset() {
-        Main.log("reset");
-        points = 0;
-        gameoverCountdown = 0;
-        worldgen = new WorldGen(world);
-        flipCounter = new FlipCounter();
-        Main.log("wg inited, starting");
-        if (MenuCanvas.isWorldgenEnabled) {
-            worldgen.start();
-            Main.log("wg started");
-        } else {
-            world.addCar();
-        }
     }
     
     void resume() {
@@ -734,7 +737,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         maxScSide = Math.max(scW, scH);
         Main.sWidth = scW;
         Main.sHeight = scH;
-        if (isWorldLoaded) {
+        if (world != null) {
             world.refreshScreenParameters();
         }
         paint();

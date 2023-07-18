@@ -8,6 +8,7 @@ import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import java.util.Random;
+import java.util.Vector;
 import javax.microedition.lcdui.Graphics;
 
 /**
@@ -47,6 +48,11 @@ public class GraphicsWorld extends World {
     public Body leftwheel;
     public Body rightwheel;
     Random random = new Random();
+    
+    // list of all bodies car touched (for falling platforms)
+    Vector waitingForDynamic = new Vector();
+    Vector waitingTime = new Vector();
+    long prevBodyTickTime = System.currentTimeMillis();
     
     public GraphicsWorld(World w) {
         super(w);
@@ -108,8 +114,37 @@ public class GraphicsWorld extends World {
         addConstraint(leftjoint);
         addConstraint(rightjoint);
         
-        WorldGen.zeroPoint = spawnX;
+        WorldGen.bgZeroPoint = spawnX;
         calculateZoomOut();
+    }
+    
+    public void tickBodies() {
+        int diffTime = (int) (System.currentTimeMillis() - prevBodyTickTime);
+        // ticking timers on each body car touched and set it as dynamic
+        // for falling platforms
+        for (int i = 0; i < waitingForDynamic.size(); i++) {
+            try {
+                waitingTime.setElementAt(new Integer(((Integer) waitingTime.elementAt(i)).intValue() - diffTime), i);
+                if (Integer.parseInt(String.valueOf(waitingTime.elementAt(i))) <= 0) {
+                    ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
+                    waitingForDynamic.removeElementAt(i);
+                    waitingTime.removeElementAt(i);
+                }
+            } catch (ArrayIndexOutOfBoundsException ex) {
+
+            }
+        }
+        // removing all that fell out the world or got too left
+        for (int i = 0; i < getBodyCount(); i++) {
+            if (GraphicsWorld.viewField < 1) {
+                break;
+            }
+            Body[] bodies = getBodies();
+            if ((GraphicsWorld.carX - bodies[i].positionFX().xAsInt()) > GraphicsWorld.viewField * 2) {
+                removeBody(bodies[i]);
+            }
+        }
+        prevBodyTickTime = System.currentTimeMillis();
     }
     
     public void drawWorld(Graphics g) {
@@ -137,7 +172,7 @@ public class GraphicsWorld extends World {
             if (bg) {
                 currColLandscape = 0x0000ff;
                 g.setColor(63, 0, 31);
-                int offset = (carX - WorldGen.zeroPoint) / 16;
+                int offset = (carX - WorldGen.bgZeroPoint) / 16;
                 int l = (scWidth * 16);
                 for (int i = 0; i < l; i+=bgLineStep) {
                     int x2 = -(i + (offset) % bgLineStep - l/2)/*  *64/8  */;
@@ -370,7 +405,7 @@ public class GraphicsWorld extends World {
         halfScHeight = scHeight / 2;
         scMinSide = Math.min(scWidth, scHeight);
         zoomBase = 6000 * 240 / scMinSide;
-        zoomOut = zoomBase;
+        calculateZoomOut();
     }
 
     void calculateZoomOut() {

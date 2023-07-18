@@ -43,9 +43,9 @@ public class GenericMenu {
     public boolean isInited = false;
     private Font font;
     private int[] stateMap = null;
-    public static final int OPTIONTYPE_UNREACHABLE = -1;
-    public static final int OPTIONTYPE_NORMAL = 0;
-    public static final int OPTIONTYPE_REACHABLE_ENABLED = 1;
+    public static final int STATE_INACTIVE = -1;
+    public static final int STATE_NORMAL = 0;
+    public static final int STATE_NORMAL_ENABLED = 1;
     
     
     // key codes
@@ -84,9 +84,9 @@ public class GenericMenu {
                 }
 
                 if (isStatemapEnabled) { // coloring other options depending on theirs state (if we have this info)
-                    if (stateMap[i] == OPTIONTYPE_REACHABLE_ENABLED) {
+                    if (stateMap[i] == STATE_NORMAL_ENABLED) {
                         g.setColor(colReachableEnabled);
-                    } else if (stateMap[i] == OPTIONTYPE_UNREACHABLE) {
+                    } else if (stateMap[i] == STATE_INACTIVE) {
                         g.setColor(colUnreachable);
                     }
                 }
@@ -223,7 +223,7 @@ public class GenericMenu {
                     }
                 }
                 if (isStatemapEnabled & !isSelectPressed) {
-                    needRepeat = stateMap[selected] == OPTIONTYPE_UNREACHABLE;
+                    needRepeat = stateMap[selected] == STATE_INACTIVE;
                 }
             }
         }

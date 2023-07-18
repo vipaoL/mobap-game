@@ -31,6 +31,7 @@ public class Main extends MIDlet {
     
     public static String[] onScreenLog = new String[1];
     public static int onScreenLogOffset = 0;
+    public static int lastWroteI = 0;
     public static boolean isScreenLogInited = false;
     public static int logMessageDelay = 50;
 
@@ -62,6 +63,7 @@ public class Main extends MIDlet {
     }
     
     public static void showAlert(Throwable ex) {
+        ex.printStackTrace();
         showAlert(ex.toString());
     }
     public static void showAlert(String text) {
@@ -119,6 +121,7 @@ public class Main extends MIDlet {
                 }
             }
             onScreenLog[onScreenLogOffset] = text;
+            lastWroteI = onScreenLogOffset;
             if (onScreenLogOffset < onScreenLog.length - 1) {
                 onScreenLogOffset++;
             }
@@ -129,6 +132,21 @@ public class Main extends MIDlet {
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
+        }
+    }
+    public static boolean logReplaceLast(String prevMsg, String newMsg) {
+        if (DebugMenu.isDebugEnabled) {
+            System.out.println(newMsg);
+        }
+        if (onScreenLog[lastWroteI] == null) {
+            return false;
+        }
+        
+        if (onScreenLog[lastWroteI].equals(prevMsg)) {
+            onScreenLog[lastWroteI] = newMsg;
+            return true;
+        } else {
+            return false;
         }
     }
     public static void enableLog(int screenHeight) {

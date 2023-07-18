@@ -74,7 +74,7 @@ public class MgStruct {
         loadCancelled = false;
         FileUtils files = new FileUtils("MGStructs");
         files.setPrefixToDisable("-");
-        int loaded = 0;
+        int loadedFromFiles = 0;
         loadedStructsNumber = loadedFromResNumber;
         while (true) {
             DataInputStream dis = null;
@@ -84,7 +84,6 @@ public class MgStruct {
                 Main.log("mgs:load cancelled");
                 sex.printStackTrace();
                 loadCancelled = true;
-                loadedStructsNumber = loadedFromResNumber;
             } catch (NullPointerException ex) {
                 ex.printStackTrace();
             } catch (NoClassDefFoundError err) {
@@ -94,7 +93,8 @@ public class MgStruct {
             if (dis != null) {
                 try {
                     if (readFromDataInputStream(dis)) {
-                        loaded += 1;
+                        loadedFromFiles += 1;
+                        System.out.println("LOADED!!!");
                     }
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -103,10 +103,14 @@ public class MgStruct {
                 break;
             }
         }
-        if (loaded > 0) {
+        if (loadedFromFiles > 0) {
             loadCancelled = false;
+            loadedStructsNumber = loadedFromResNumber + loadedFromFiles;
+        } else {
+            loadedStructsNumber = loadedFromResNumber;
         }
-        return loaded > 0;
+        Main.log("mg:loaded: " + loadedFromFiles);
+        return loadedFromFiles > 0;
     }
 
     public boolean readFromDataInputStream(DataInputStream dis) throws IOException {
@@ -133,8 +137,8 @@ public class MgStruct {
                     short[] data = new short[argsNumber[id] + 1]; // {2, 0, 0, 100, 0} // - e.g.: line
                     // first cell is ID of primitive, next cells are arguments
                     data[0] = id;
-                    for (int i = 0; i < argsNumber[id]; i++) {
-                        data[i + 1] = dis.readShort();
+                    for (int i = 1; i < data.length; i++) {
+                        data[i] = dis.readShort();
                     }
                     structure[c] = data;
                 }
@@ -147,6 +151,8 @@ public class MgStruct {
                 return false;
             }
         } catch(ArrayIndexOutOfBoundsException ex) {
+            Main.log("error parsing file");
+            ex.printStackTrace();
             dis.close();
             return false;
         }

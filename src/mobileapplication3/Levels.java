@@ -33,25 +33,26 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     
     FileUtils files = new FileUtils("Levels");
 
-    Levels() {
+    public Levels() {
         super(false);
         Main.log("Levels:constructor");
         setFullScreenMode(true);
-        repaint();
+        paint();
         (new Thread(this, "level picker")).start();
     }
 
-    public void start() {
+    public void init() {
         stopped = false;
         levelNames = new Vector();
         Main.log("Levels:start()");
-        repaint();
+        paint();
         try {
             levelNames.addElement("---levels---");
             getLevels();
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SecurityException e) {
+            e.printStackTrace();
             levelNames.setElementAt("no read permission", 0);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
@@ -80,10 +81,14 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
         }
     }
     
-    public void startLevel(String path) {
-        GameplayCanvas gameCanvas = new GameplayCanvas();
-        gameCanvas.setWorld(readWorldFile(path));
-        Main.set(gameCanvas);
+    public void startLevel(final String path) {
+        (new Thread(new Runnable() {
+            public void run() {
+                GameplayCanvas gameCanvas = new GameplayCanvas(readWorldFile(path));
+                Main.set(gameCanvas);
+                stopped = true;
+            }
+        })).start();
     }
     
     public GraphicsWorld readWorldFile(String path) {
@@ -103,23 +108,22 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     }
     
     public void selectPressed() {
-        stopped = true;
         if (menu.selected == levelNames.size() - 1) {
             Main.set(new MenuCanvas());
         } else {
             try {
                 startLevel((String) levelNames.elementAt(menu.selected));
             } catch (NullPointerException ex) {
-                Main.showAlert(ex.toString());
+                Main.showAlert(ex);
             } catch (SecurityException ex) {
-                
+                Main.showAlert(ex);
             }
         }
     }
     
 
     public void run() {
-        start();
+        init();
         Main.log("Levels:started");
         long sleep = 0;
         long start = 0;
@@ -135,7 +139,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
             if (!paused) {
                 start = System.currentTimeMillis();
                 input();
-                repaint();
+                paint();
 
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
@@ -150,20 +154,26 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
         }
     }
     
-    public void paint(Graphics g) {
-        g.setColor(0, 0, 0);
+    public void paint() {
+        Graphics g = getGraphics();
+        g.setColor(0);
         g.fillRect(0, 0, scW, scH);
         menu.paint(g);
         menu.tick();
+        flushGraphics();
     }
     
     protected void showNotify() {
         paused = false;
-        scW = getWidth();
-        scH = getHeight();
-        getGraphics().fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));
-        menu.reloadCanvasParameters(scW, scH);
+        sizeChanged(getWidth(), getHeight());
         menu.handleShowNotify();
+    }
+    
+    protected void sizeChanged(int w, int h) {
+        scW = w;
+        scH = h;
+        menu.reloadCanvasParameters(scW, scH);
+        paint();
     }
 
     protected void hideNotify() {
