@@ -262,15 +262,25 @@ public class WorldGen implements Runnable {
     
     private void rmFarStructures() {
         if (shouldRmFirstStruct()) {
-            int c = 0;
+            int deletedSegs = 0;
             for (int i = 0; i < Math.min(structlogger.getElementAt(0)[1], 3); i++) {
                 lndscp.removeSegment(0);
-                c++;
+                deletedSegs++;
             }
             int id = structlogger.getElementID(0);
-            structlogger.structLog[id][1] = (short) (structlogger.structLog[id][1] - ((short)c));
+            structlogger.structLog[id][1] = (short) (structlogger.structLog[id][1] - ((short) deletedSegs));
+            
+            // if 0 segments left, then the structure was deleted completely.
+            // Deleting it from log
             if (structlogger.getElementAt(0)[1] == 0) {
+                int barrierX = structlogger.structLog[id][0];
+                
                 structlogger.rmFirstElement();
+                
+                // add a barrier to the left world border
+                Main.log("adding a barrier at " + barrierX);
+                lndscp.addSegment(FXVector.newVector(barrierX, -10000), FXVector.newVector(barrierX, 10000), (short) 0);
+                structlogger.structLog[structlogger.getElementID(0)][1] += 1;
             }
         }
     }
