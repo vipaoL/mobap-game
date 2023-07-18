@@ -140,8 +140,12 @@ public class GraphicsWorld extends World {
                 break;
             }
             Body[] bodies = getBodies();
-            if ((GraphicsWorld.carX - bodies[i].positionFX().xAsInt()) > GraphicsWorld.viewField * 2) {
-                removeBody(bodies[i]);
+            Body body = bodies[i];
+            if ((GraphicsWorld.carX - body.positionFX().xAsInt()) > GraphicsWorld.viewField * 2) {
+                if (body == carbody || body == leftwheel || body == rightwheel) {
+                    continue;
+                }
+                removeBody(body);
             }
         }
         prevBodyTickTime = System.currentTimeMillis();
