@@ -297,8 +297,12 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         int motorForceX = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(carAngle - 15 + directionOffset) * speedMultipiler), TEN_FX * 5);
                         int motorForceY = FXUtil.divideFX(FXUtil.toFX(Mathh.sin(carAngle - 15 + directionOffset) * speedMultipiler), TEN_FX * 5);
                         world.carbody.applyMomentum(new FXVector(motorForceX, -motorForceY));
-                        if ((!leftWheelContacts & world.getContactsForBody(world.carbody)[0] != null) | rightWheelContacts) {
-                            world.carbody.applyTorque(FXUtil.toFX(-6000*forceMultiplier));
+                        if ((!leftWheelContacts && world.getContactsForBody(world.carbody)[0] != null) || rightWheelContacts) {
+                            int force = -6000;
+                            if (rightWheelContacts) {
+                                force *= 2;
+                            }
+                            world.carbody.applyTorque(FXUtil.toFX(force*forceMultiplier));
                         }
                     }
                 } else {
