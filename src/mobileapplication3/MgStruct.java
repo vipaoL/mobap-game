@@ -48,7 +48,7 @@ public class MgStruct {
                 Main.log(i + ".mgstruct");
             }
 
-            Main.log("MGStruct:read completed. loaded " + loadedStructsNumber);
+            Main.log("MGStruct:loaded " + loadedStructsNumber);
             loadedFromResNumber = loadedStructsNumber;
         }
         Main.log("inited");
