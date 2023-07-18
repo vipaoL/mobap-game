@@ -413,29 +413,27 @@ public class GraphicsWorld extends World {
     }
 
     void calculateZoomOut() {
-        
         if (DebugMenu.simulationMode) {
             zoomOut = 50000;
-            return;
-        }
-        
-        zoomOut = (1000 * carY / scMinSide - 1000);
-        int zoomBase = this.zoomBase;
-        if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] != null) {
-            if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][0] > 0) {
-                zoomOut = zoomOut * GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
-                zoomBase = zoomBase * GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
+        } else {
+            zoomOut = (1000 * carY / scMinSide - 1000);
+            int zoomBase = this.zoomBase;
+            if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] != null) {
+                if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][0] > 0) {
+                    zoomOut = zoomOut * GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
+                    zoomBase = zoomBase * GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
+                }
             }
+            if (zoomOut < 1) {
+                zoomOut = -zoomOut;
+                zoomOut += 1;
+            }
+            zoomOut += zoomBase;
         }
-        if (zoomOut < 1) {
-            zoomOut = -zoomOut;
-            zoomOut += 1;
-        }
-        zoomOut += zoomBase;
         
         // for timely track generation and deleting waste objects
         viewField = scWidth * zoomOut / 1000;
-        if (DebugMenu.isDebugEnabled && DebugMenu.closerWorldgen) {
+        if (DebugMenu.isDebugEnabled && DebugMenu.closerWorldgen || DebugMenu.simulationMode) {
             viewField /= 4;
         }
     }
