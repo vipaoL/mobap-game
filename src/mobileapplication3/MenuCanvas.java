@@ -47,8 +47,8 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     private void init() {
         Main.log("menu:constructor");
         menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
-        if (scW == 0 && scH == 0) {
-            sizeChanged(scW, scH);
+        if (scW == 0 || scH == 0) {
+            sizeChanged(getWidth(), getHeight());
         }
         paint();
         

@@ -42,8 +42,8 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     }
 
     public void init() {
-        if (scW == 0 && scH == 0) {
-            sizeChanged(scW, scH);
+        if (scW == 0 || scH == 0) {
+            sizeChanged(getWidth(), getHeight());
         }
         stopped = false;
         levelNames = new Vector();

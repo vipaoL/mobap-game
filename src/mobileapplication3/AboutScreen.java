@@ -27,8 +27,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         "Version: " + Main.thiss.getAppProperty("MIDlet-Version"),
         "Back"};
     int counter = 17;
-    int scW = getWidth();
-    int scH = getHeight();
+    int scW, scH;
     int offset = 0;
     int qrOffsetH = 0;
     int extraVerticalMargin = 0;
@@ -58,8 +57,8 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     }
     
     private void init() {
-        if (scW == 0 && scH == 0) {
-            sizeChanged(scW, scH);
+        if (scW == 0 || scH == 0) {
+            sizeChanged(getWidth(), getHeight());
         }
         drawHeaderAndQR(getGraphics());
         menuBtnsOffsetH = offset;

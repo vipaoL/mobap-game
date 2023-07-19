@@ -59,8 +59,8 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     }
     
     private void init() {
-        if (scW == 0 && scH == 0) {
-            sizeChanged(scW, scH);
+        if (scW == 0 || scH == 0) {
+            sizeChanged(getWidth(), getHeight());
         }
         statemap[1] = -1; // set "-----" separator as inactive button
         menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
@@ -85,6 +85,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     protected void sizeChanged(int w, int h) {
         Main.sWidth = scW = w;
         Main.sHeight = scH = h;
+        fontSizeCache = -1;
         menu.reloadCanvasParameters(scW, scH);
         paint();
     }
@@ -108,10 +109,6 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             if (!isPaused) {
                 start = System.currentTimeMillis();
                 input();
-                if (scW != getWidth()) {
-                    fontSizeCache = -1;
-                    showNotify();
-                }
                 paint();
 
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
