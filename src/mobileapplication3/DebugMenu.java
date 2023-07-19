@@ -59,6 +59,9 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     }
     
     private void init() {
+        if (scW == 0 && scH == 0) {
+            sizeChanged(scW, scH);
+        }
         statemap[1] = -1; // set "-----" separator as inactive button
         menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
         fontSizeCache = menu.getFontSize();

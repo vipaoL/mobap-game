@@ -58,6 +58,9 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     }
     
     private void init() {
+        if (scW == 0 && scH == 0) {
+            sizeChanged(scW, scH);
+        }
         drawHeaderAndQR(getGraphics());
         menuBtnsOffsetH = offset;
         menu.loadParams(0,
@@ -101,6 +104,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
             try {
                 qr = scale(Image.createImage("resource://qr.png"), qrSide, qrSide);
             } catch (IOException e) {
+                ex.printStackTrace();
                 e.printStackTrace();
             }
         }
@@ -111,6 +115,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
             try {
                 qrBig = scale(Image.createImage("resource://qr.png"), Math.min(scW, scH), Math.min(scW, scH));
             } catch (IOException e) {
+                ex.printStackTrace();
                 e.printStackTrace();
             }
         }
