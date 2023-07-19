@@ -15,7 +15,7 @@ jobs:
       - name: Build
         run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt-get install gcc-multilib libxt6:i386 && cd ${{ github.workspace }}/bin && ./build.sh
       - name: Upload jar
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: mobapp-game-j2me
           path: ${{ github.workspace }}/bin/MobileApplication3.jar
