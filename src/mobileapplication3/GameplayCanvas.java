@@ -112,6 +112,9 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         stopped = false;
         paused = false;
         isBusy = false;
+        shouldWait = false;
+        isWaiting = false;
+        
         log("gcanvas init");
         
         if (world == null) {
