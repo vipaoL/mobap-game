@@ -21,9 +21,6 @@ import java.util.Random;
  */
 public class WorldGen implements Runnable {
     
-    public static final int MAX_DIST_TO_RM_STRUCT = 4000;
-    public static final int MAX_DIST_TO_RM_STRUCT_SIMUL = 300;
-    
     int stdStructsNumber = 6;
     int floorWeightInRandom = 4;
     
@@ -35,6 +32,7 @@ public class WorldGen implements Runnable {
     private int lastY;
     private int lowestY;
     
+    public static int barrierX = Short.MIN_VALUE;
     public static int bgZeroPoint = 0;
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX;
@@ -329,6 +327,7 @@ public class WorldGen implements Runnable {
         moveLandscape(dx);
         moveBodies(dx);
         structlogger.moveXAllElements(dx);
+        barrierX += dx;
         bgZeroPoint += dx;
         
         nextPointsCounterTargetX += dx;
@@ -361,6 +360,8 @@ public class WorldGen implements Runnable {
     }
     
     private class StructLog {
+        public static final int MAX_DIST_TO_RM_STRUCT = 4000;
+        public static final int MAX_DIST_TO_RM_STRUCT_SIMUL = 300;
         private short[][] structLog;
         private int numberOfLoggedStructs = 0;
         private int ringLogStart = 0;
@@ -443,7 +444,7 @@ public class WorldGen implements Runnable {
                 
                 // add a barrier to the left world border
                 if (!isLeftBarrierAdded) {
-                    int barrierX = structLog[getElementID(0)][0];
+                    barrierX = structLog[getElementID(0)][0];
                     Main.log("adding a barrier at " + barrierX);
                     lndscp.addSegment(FXVector.newVector(barrierX, -10000), FXVector.newVector(barrierX, 10000), (short) 0);
                     structLog[getElementID(1)][1] += 1;
