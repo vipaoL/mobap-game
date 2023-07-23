@@ -166,6 +166,8 @@ public class GenericMenu {
     }
     
     public boolean handlePointer(int x, int y) {
+        x -= x0;
+        y -= y0;
         feedback.setIsPaused(false);
         int selected = firstDrawable + y / k;
         if (selected < firstReachable & firstReachable < firstDrawable) {
@@ -447,17 +449,15 @@ public class GenericMenu {
     }
     public void loadParams(int x0, int y0, int w, int h, String[] options, int firstReachable, int lastReachable, int defaultSelected, int[] optionStateMap, int fontSize) {
         this.options = options;
-        
-        if (optionStateMap != null) {
-            loadStatemap(optionStateMap);
-        }
-        
         this.firstReachable = firstReachable;
         this.lastReachable = lastReachable;
         loadCanvasParams(x0, y0, w, h, fontSize);
         if (firstload) {
             selected = defaultSelected;
             firstload = false;
+        }
+        if (optionStateMap != null) {
+            loadStatemap(optionStateMap);
         }
         isInited = true;
     }

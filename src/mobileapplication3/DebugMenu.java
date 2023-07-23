@@ -34,7 +34,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     private final int[] statemap = new int[menuOpts.length]; 
     boolean stopped = false;
     boolean isPaused = false;
-    private int scW = 0, scH;
+    private int scW = Main.sWidth, scH = Main.sHeight;
     private static int fontSizeCache = -1;
     public static boolean isDebugEnabled = false;
     public static boolean closerWorldgen = false;
@@ -55,13 +55,12 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public DebugMenu() {
         super(false);
         setFullScreenMode(true);
+        paint();
         (new Thread(this, "debug menu")).start();
     }
     
     private void init() {
-        if (scW == 0 || scH == 0) {
-            sizeChanged(getWidth(), getHeight());
-        }
+        sizeChanged(getWidth(), getHeight());
         statemap[1] = -1; // set "-----" separator as inactive button
         menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
         fontSizeCache = menu.getFontSize();
@@ -128,8 +127,12 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         Graphics g = getGraphics();
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));
-        menu.paint(g);
-        menu.tick();
+        
+        if (menu.isInited) {
+            menu.paint(g);
+            menu.tick();
+        }
+        
         if (!menu.isKnownButton) {
             g.setColor(127, 127, 127);
             g.drawString("Unknown keyCode=" + menu.lastKeyCode, scW, scH, Graphics.BOTTOM | Graphics.RIGHT);

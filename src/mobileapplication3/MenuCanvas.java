@@ -19,7 +19,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     
     private final int[] statemap = new int[menuOptions.length]; // array with states of all buttons (active/inactive/enabled)
     static int selected = 1; // currently selected option in menu
-    int scW, scH; // screeen width and height
+    private int scW = Main.sWidth, scH = Main.sHeight; // screeen width and height
     private static int fontSizeCache = -1; // reduce some operations on next menu showing
     
     // states
@@ -29,7 +29,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     boolean waitingToStartGame = false;
     boolean isGameStarted = false;
     
-    private GenericMenu menu; // some generic code for drawing menus
+    private GenericMenu menu = new GenericMenu(this); // some generic code for drawing menus
     private MgStruct mgStruct; // for loading external structures
     
     // TODO: move to GameplayCanvas
@@ -40,17 +40,15 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     public MenuCanvas() {
         super(false);
         setFullScreenMode(true);
-        menu = new GenericMenu(this);
+        paint();
         (new Thread(this, "menu canvas")).start();
     }
     
     private void init() {
         Main.log("menu:constructor");
         menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
-        if (scW == 0 || scH == 0) {
-            sizeChanged(getWidth(), getHeight());
-        }
-        paint();
+        
+        sizeChanged(getWidth(), getHeight());
         
         if (Main.isScreenLogEnabled) {
             Main.enableLog(scH);
@@ -146,10 +144,12 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
 
     public void paint() {
         Graphics g = getGraphics();
-        g.setColor(0, 0, 0);
+        g.setColor(0);
         g.fillRect(0, 0, scW, scH);
-        menu.paint(g);
-        menu.tick();
+        if (isInited) {
+            menu.paint(g);
+            menu.tick();
+        }
         flushGraphics();
     }
 

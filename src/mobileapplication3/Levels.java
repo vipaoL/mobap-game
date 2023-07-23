@@ -22,8 +22,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
 
     Vector levelNames = new Vector();
 
-    int scW = 0;
-    int scH = 0;
+    private int scW = Main.sWidth, scH = Main.sHeight;
     
     boolean paused = false;
     boolean stopped = false;
@@ -42,13 +41,9 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     }
 
     public void init() {
-        if (scW == 0 || scH == 0) {
-            sizeChanged(getWidth(), getHeight());
-        }
         stopped = false;
         levelNames = new Vector();
         Main.log("Levels:start()");
-        paint();
         try {
             levelNames.addElement("---levels---");
             getLevels();
@@ -71,9 +66,8 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
         Main.log("Levels:getLevels()");
         Enumeration list;
         while (true) {            
-            list =  files.getNextList();
-            
-            // if no more files, break the cycle
+            list = files.getNextList();
+            // if no more directories to look into, break the cycle
             if (list == null) {
                 break;
             } else {
@@ -126,12 +120,11 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     
 
     public void run() {
+        sizeChanged(getWidth(), getHeight());
         init();
-        Main.log("Levels:started");
+        Main.log("Levels:run()");
         long sleep = 0;
         long start = 0;
-
-        showNotify();
         
         paused = false;
         while (!stopped) {
@@ -173,8 +166,8 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     }
     
     protected void sizeChanged(int w, int h) {
-        scW = w;
-        scH = h;
+        Main.sWidth = scW = w;
+        Main.sHeight = scH = h;
         menu.reloadCanvasParameters(scW, scH);
         paint();
     }

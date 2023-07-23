@@ -76,7 +76,7 @@ public class GraphicsWorld extends World {
         Shape wheelShape;
 
         carbodyShape = Shape.createRectangle(carbodyLength, carbodyHeight);
-        carbodyShape.setMass(1*GameplayCanvas.gameSpeedMultiplier);
+        carbodyShape.setMass(1*GameplayCanvas.GAME_SPEED_MULTIPLIER);
         carbodyShape.setFriction(0);
         carbodyShape.setElasticity(0);
         carbodyShape.correctCentroid();
@@ -89,7 +89,7 @@ public class GraphicsWorld extends World {
         wheelShape = Shape.createCircle(wheelRadius);
         wheelShape.setElasticity(0);
         wheelShape.setFriction(0);
-        wheelShape.setMass(2*GameplayCanvas.gameSpeedMultiplier);
+        wheelShape.setMass(2*GameplayCanvas.GAME_SPEED_MULTIPLIER);
         wheelShape.correctCentroid();
         int lwX = spawnX - (carbodyLength / 2 - wheelRadius - 2) * Mathh.cos(ang) / 1000;
         int lwY = spawnY + wheelRadius / 2 - (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
