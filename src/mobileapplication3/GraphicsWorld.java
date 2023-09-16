@@ -76,7 +76,7 @@ public class GraphicsWorld extends World {
         Shape wheelShape;
 
         carbodyShape = Shape.createRectangle(carbodyLength, carbodyHeight);
-        carbodyShape.setMass(1*GameplayCanvas.GAME_SPEED_MULTIPLIER);
+        carbodyShape.setMass(1);
         carbodyShape.setFriction(0);
         carbodyShape.setElasticity(0);
         carbodyShape.correctCentroid();
@@ -87,9 +87,9 @@ public class GraphicsWorld extends World {
         int ang = (int) (longAng2FX * 360 / FXUtil.TWO_PI_2FX) + 1;
 
         wheelShape = Shape.createCircle(wheelRadius);
-        wheelShape.setElasticity(0);
+        wheelShape.setElasticity(100);
         wheelShape.setFriction(0);
-        wheelShape.setMass(2*GameplayCanvas.GAME_SPEED_MULTIPLIER);
+        wheelShape.setMass(2);
         wheelShape.correctCentroid();
         int lwX = spawnX - (carbodyLength / 2 - wheelRadius - 2) * Mathh.cos(ang) / 1000;
         int lwY = spawnY + wheelRadius / 2 - (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
@@ -136,16 +136,15 @@ public class GraphicsWorld extends World {
         }
         // removing all that fell out the world or got too left
         for (int i = 0; i < getBodyCount(); i++) {
-            if (GraphicsWorld.viewField < 1) {
+            if (GraphicsWorld.viewField < 100) {
                 break;
             }
             Body[] bodies = getBodies();
             Body body = bodies[i];
-            if (body.positionFX().xAsInt() < WorldGen.barrierX) {
-                if (body == carbody || body == leftwheel || body == rightwheel) {
-                    continue;
+            if (body.positionFX().xAsInt() < WorldGen.barrierX || body.positionFX().yAsInt() > 20000) {
+                if (body != carbody && body != leftwheel && body != rightwheel) {
+                    removeBody(body);
                 }
-                removeBody(body);
             }
         }
         prevBodyTickTime = System.currentTimeMillis();
@@ -161,8 +160,11 @@ public class GraphicsWorld extends World {
 
             // zooming and moving virtual camera
             calculateZoomOut();
+            //zoomOut = 500;
             offsetX = -carX * 1000 / zoomOut + scWidth / 3;
             offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
+            //offsetX-=200;
+            //offsetY-=200;
 
             // some very boring code
             if (GameplayCanvas.points > 291 && GameplayCanvas.points < 293) {
@@ -197,11 +199,6 @@ public class GraphicsWorld extends World {
             }
             
             // draw landscape
-            if (!DebugMenu.isDebugEnabled) {
-                g.setColor(currColLandscape);
-            } else {
-                g.setColor(255, 255, 255);
-            }
             drawLandscape(g);
             
             drawBodies(g); // draw all bodies, excluding car wheels
@@ -280,13 +277,17 @@ public class GraphicsWorld extends World {
 
     private void drawLandscape(Graphics g) {
         Landscape landscape = getLandscape();
-        //g.setColor(0x00ff00);
         for (int i = 0; i < landscape.segmentCount(); i++) {
             int stPointX = xToPX(landscape.startPoint(i).xAsInt());
             int stPointY = yToPX(landscape.startPoint(i).yAsInt());
             int endPointX = xToPX(landscape.endPoint(i).xAsInt());
             int endPointY = yToPX(landscape.endPoint(i).yAsInt());
             if (stPointX < scWidth | endPointX > 0) {
+                if (!DebugMenu.isDebugEnabled) {
+                    g.setColor(currColLandscape);
+                } else {
+                    g.setColor(255, 255, 255);
+                }
                 drawLine(
                         g,
                         stPointX,
@@ -294,9 +295,10 @@ public class GraphicsWorld extends World {
                         endPointX,
                         endPointY,
                         24);
+                g.setColor(0xff0000);
                 if (DebugMenu.showLinePoints) {
-                    g.fillArc(stPointX - 2, stPointY - 2, 4, 4, 0, 360);
-                    g.fillArc(endPointX - 2, endPointY - 2, 4, 4, 0, 360);
+                    g.fillArc(stPointX-1, stPointY-1, 2, 2, 0, 360);
+                    g.fillArc(endPointX-1, endPointY-1, 2, 2, 0, 360);
                 }
             }
         }

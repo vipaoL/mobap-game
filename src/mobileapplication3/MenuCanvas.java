@@ -16,7 +16,6 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     
     String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Debug", "Exit", "-"};
     
-    
     private final int[] statemap = new int[menuOptions.length]; // array with states of all buttons (active/inactive/enabled)
     static int selected = 1; // currently selected option in menu
     private int scW = Main.sWidth, scH = Main.sHeight; // screeen width and height
@@ -38,6 +37,13 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     static boolean areExtStructsLoaded = false;
 
     public MenuCanvas() {
+        super(false);
+        setFullScreenMode(true);
+        paint();
+        (new Thread(this, "menu canvas")).start();
+    }
+    
+    public MenuCanvas(int counterX, int counterY) {
         super(false);
         setFullScreenMode(true);
         paint();

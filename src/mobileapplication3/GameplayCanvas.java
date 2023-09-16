@@ -22,7 +22,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     String[] pausehint = {"PAUSE:", "here(touch), *,", "B, right soft"};
     int hintTime = 120; // in ticks
     public static final int GAME_SPEED_MULTIPLIER = 2;
-    int forceMultiplier = GAME_SPEED_MULTIPLIER*GAME_SPEED_MULTIPLIER;
+    public static final int FORCE_MULTIPLIER = GAME_SPEED_MULTIPLIER;
     
     public static final short EFFECT_SPEED = 0;
     
@@ -144,6 +144,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     
     private void initWorld() {
         world.setGravity(FXVector.newVector(0, 250 * GAME_SPEED_MULTIPLIER));
+        world.getLandscape().getBody().shape().setElasticity(5);
         setLoadingProgress(40);
         world.refreshScreenParameters();
         reset();
@@ -255,7 +256,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         speedMultipiler = 30;
                     }
 
-                    speedMultipiler *= forceMultiplier;
+                    speedMultipiler *= FORCE_MULTIPLIER;
 
                     // getting car angle
                     carAngle = 360 - FXUtil.angleInDegrees2FX(world.carbody.rotation2FX());
@@ -266,9 +267,9 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         if (timeFlying > 2) {
                             // apply rotational force
                             if (world.carbody.rotationVelocity2FX() > 50000000) {
-                                world.carbody.applyTorque(FXUtil.toFX(-world.carbody.rotationVelocity2FX()*forceMultiplier/16000));
+                                world.carbody.applyTorque(FXUtil.toFX(-world.carbody.rotationVelocity2FX()*FORCE_MULTIPLIER/16000));
                             } else {
-                                world.carbody.applyTorque(FXUtil.toFX(-10000*forceMultiplier));
+                                world.carbody.applyTorque(FXUtil.toFX(-10000*FORCE_MULTIPLIER));
                             }
                         } else {
                             // apply motor force when on the ground
@@ -288,7 +289,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                                 if (rightWheelContacts) {
                                     force *= 2;
                                 }
-                                world.carbody.applyTorque(FXUtil.toFX(force*forceMultiplier));
+                                world.carbody.applyTorque(FXUtil.toFX(force*FORCE_MULTIPLIER));
                             }
                         }
                     } else {
@@ -386,6 +387,9 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                             lowestY = worldgen.getLowestY();
                         }
                         if (GraphicsWorld.carY > 2000 + lowestY || (carAngle > 140 && carAngle < 220 && world.carbody.getContacts()[0] != null)) {
+                            if (uninterestingDebug) {
+                                gameoverCountdown = 0;
+                            }
                             if (gameoverCountdown < 8) {
                                 gameoverCountdown++;
                             } else {
@@ -462,7 +466,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     // debug info, on-screen log, game over screen
     private void drawHUD(Graphics g) {
         // show hint on first start
-        if (isFirstStart & hintTime > 0) {
+        if (isFirstStart && hintTime > 0) {
             int color = 255 * hintTime / 120;
             g.setColor(color/4, color/2, color/4);
             if (Main.isScreenLogEnabled) {
@@ -563,7 +567,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     default:
                         break;
                 }
-                g.drawString("wg: mspt" + WorldGen.mspt + " sgs" + worldgen.getSegmentCount() + " step:" + WorldGen.currStep, 0, debugTextOffset, 0);
+                g.drawString("wg: mspt" + WorldGen.mspt + " step:" + WorldGen.currStep, 0, debugTextOffset, 0);
+                debugTextOffset += currentFontH;
+                
+                g.drawString("sgs" + worldgen.getSegmentCount() + " bds" + world.getBodyCount(), 0, debugTextOffset, 0);
                 debugTextOffset += currentFontH;
             }
         } catch(NullPointerException ex) {
@@ -769,6 +776,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 int carY = pos.yAsInt();
                 worldgen.line(carX - 200, carY + 200, carX + 2000, carY + 0);
             }*/
+        } else
+        if (keyCode == KEY_NUM6) {
         } else {
             // if not one of action buttons, turn on motor
             accel = true;

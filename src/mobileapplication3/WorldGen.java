@@ -124,7 +124,7 @@ public class WorldGen implements Runnable {
                 // World cycling
                 //(the physics engine is working weird when the coordinate reaches around 10000
                 //  then we need to move all structures and bodies to the left when the car is to the right of 3000)
-                if (GraphicsWorld.carX > 3000 && (GameplayCanvas.timeFlying > 1 || GameplayCanvas.uninterestingDebug)) {
+                if (GraphicsWorld.carX > 3000 && (GameplayCanvas.timeFlying > -1 || GameplayCanvas.uninterestingDebug)) {
                     resetPosition();
                 }
 
@@ -159,19 +159,20 @@ public class WorldGen implements Runnable {
         } else {
             idsCount = stdStructsNumber + floorWeightInRandom + mgStruct.loadedStructsNumber;
         }
-        while (nextStructRandomId == prevStructRandomId) {
+        while (nextStructRandomId == prevStructRandomId) {// || nextStructRandomId < 6 || nextStructRandomId > 9) {
             nextStructRandomId = rand.nextInt(idsCount); // 10: 0-9
         }
+        //nextStructRandomId = 1;
         prevStructRandomId = nextStructRandomId;
         if (DebugMenu.mgstructOnly) {
             nextStructRandomId+=stdStructsNumber + floorWeightInRandom;
         }
         
-        Main.log("placing: id=", nextStructRandomId);
         if (lastY > 1000 | lastY < -1000) { // will correct height if it is too high or too low
             Main.log("correcting height because lastY=", lastY);
             floor(lastX, lastY, 1000 + rand.nextInt(4) * 100, (rand.nextInt(7) - 3) * 100);
         } else {
+            Main.log("placing: id=", nextStructRandomId);
             /*
             * 0 - circ1, 1 - sin, 2 - floorStat, 3 - circ2, 4 - abyss,
             * 5 - dotline, 6..9 - floor, 10 - mgstruct0, 11 - mgstruct1,
@@ -183,7 +184,7 @@ public class WorldGen implements Runnable {
                     break;
                 case 1:
                     int l = 720 + rand.nextInt(8) * 180;
-                    int amp = 15 + rand.nextInt(15);
+                    int amp = 15;
                     sin(lastX, lastY, l, l / 180, 0, amp);
                     break;
                 case 2:
@@ -404,11 +405,6 @@ public class WorldGen implements Runnable {
 
         public short[] getElementAt(int i) {
             int id = getElementID(i);
-            if (structLog[id] == null) {
-                for (int j = 0; j < 10; j++) {
-                    System.out.println(id + "null!!!!!!!!!!");
-                }
-            }
             return structLog[id];
         }
         
@@ -446,7 +442,7 @@ public class WorldGen implements Runnable {
                 if (!isLeftBarrierAdded) {
                     barrierX = structLog[getElementID(0)][0];
                     Main.log("adding a barrier at " + barrierX);
-                    lndscp.addSegment(FXVector.newVector(barrierX, -10000), FXVector.newVector(barrierX, 10000), (short) 0);
+                    lndscp.addSegment(FXVector.newVector(barrierX, -10000), FXVector.newVector(barrierX, 10000), (short) 1);
                     structLog[getElementID(1)][1] += 1;
                     isLeftBarrierAdded = true;
                 }
@@ -464,6 +460,13 @@ public class WorldGen implements Runnable {
                 if (getElementAt(0)[1] == 0) {
                     isLeftBarrierAdded = false;
                     rmFirstElement();
+                    
+                    /* broken code, unused
+                    // check if there are a concatenated line partially behind the barrier
+                    FXVector prevLineStartPoint = lndscp.elementStartPoints()[0];
+                    if (prevLineStartPoint.xAsInt() < barrierX) {
+                        lndscp.elementStartPoints()[0] = FXVector.newVector(barrierX, prevLineStartPoint.yAsInt());
+                    }*/
                 }
             }
         }
@@ -532,8 +535,8 @@ public class WorldGen implements Runnable {
             
             Shape rect = Shape.createRectangle(platfL, platfH);
             rect.setMass(1);
-            rect.setFriction(0);
-            rect.setElasticity(50);
+            rect.setFriction(10);
+            rect.setElasticity(0);
             dx/=(l/platfL);
             int spX = spacing * dx / l;
             dy/=(l/platfL);
@@ -665,8 +668,8 @@ public class WorldGen implements Runnable {
             }
             rect = Shape.createRectangle(l2, platfHeight);
             rect.setMass(1);
-            rect.setFriction(0);
-            rect.setElasticity(50);
+            rect.setFriction(10);
+            rect.setElasticity(0);
             for (int i = 0; i < 2; i++) {
                 Body fallinPlatf = new Body(x+r-r2+i*l2+l2/2, y+platfHeight/2, rect, true);
                 fallinPlatf.setUserData(new MUserData(MUserData.TYPE_FALLING_PLATFORM, new short[] {20}));
@@ -718,52 +721,97 @@ public class WorldGen implements Runnable {
         if (amp == 0) {
             line(x, y, x + l, y);
         } else {
-            int sn = l/20;
-            int sl = l/sn;
-            for(int i = sl; i <= l; i+=sl) {
-                line1(x + (i-sl), y + amp * Mathh.sin(180*(i-sl)/l*halfperiods+offset) / 1000, x + i, y + amp*Mathh.sin(180*i/l*halfperiods+offset)/1000);
+            int sl = 90;
+            int prevPointX = x;
+            int nextPointX;
+            int prevPointY = y + amp * Mathh.sin(offset) / 1000;
+            int nextPointY;
+            for(int i = sl; i < l - sl/2; i+=sl) {
+                nextPointX = x + i;
+                nextPointY = y + amp*Mathh.sin(180*i*halfperiods/l+offset)/1000;
+                line1(prevPointX, prevPointY, nextPointX, nextPointY);
+                prevPointX = nextPointX;
+                prevPointY = nextPointY;
             }
-            lastY = y + Mathh.sin(offset+180*halfperiods) * amp / 1000;
+            
+            nextPointX = x + l;
+            nextPointY = y + amp*Mathh.sin(180*halfperiods+offset)/1000;
+            line1(prevPointX, prevPointY, nextPointX, nextPointY);
+            
+            lastY = nextPointY;
         }
         lastX += l;
         structlogger.add(lastX, linesInStructure);
     }
     private void arc(int x, int y, int r, int ang, int of) {
-        while (of < 0) {
-            of += 360;
-        }
-        
-        int lastAng = 0;
-        for(int i = 0; i <= ang - CIRCLE_SEGMENT_LEN; i+=CIRCLE_SEGMENT_LEN) {
-            line(x+Mathh.cos(i+of)*r/1000, y+Mathh.sin(i+of)*r/1000, x+Mathh.cos(i+CIRCLE_SEGMENT_LEN+of)*r/1000,y+Mathh.sin(i+CIRCLE_SEGMENT_LEN+of)*r/1000);
-            lastAng = i + CIRCLE_SEGMENT_LEN;
-        }
-        
-        if (ang % CIRCLE_SEGMENT_LEN != 0) {
-            line(x+Mathh.cos(lastAng+of)*r/1000, y+Mathh.sin(lastAng+of)*r/1000, x+Mathh.cos(ang+of)*r/1000,y+Mathh.sin(ang+of)*r/1000);
-        }
+        arc(x, y, r, ang, of, 10, 10);
     }
     private void arc(int x, int y, int r, int ang, int of, int kx, int ky) { //k: 10 = 1.0
+        // calculated formula. r=20: sn=5,sl=72; r=1000: sn=36,sl=10
+        int sl=10000/(140+r);
+        sl = Math.min(72, Math.max(10, sl));
+        
         while (of < 0) {
             of += 360;
         }
         
-        int lastAng = 0;
-        for(int i = 0; i <= ang - CIRCLE_SEGMENT_LEN; i+=CIRCLE_SEGMENT_LEN) {
-            line(x+Mathh.cos(i+of)*kx*r/10000, y+Mathh.sin(i+of)*ky*r/10000, x+Mathh.cos(i+CIRCLE_SEGMENT_LEN+of)*kx*r/10000,y+Mathh.sin(i+CIRCLE_SEGMENT_LEN+of)*ky*r/10000);
-            lastAng = i + CIRCLE_SEGMENT_LEN;
+        int linesFacing = 0;
+        if (ang == 360) {
+            linesFacing = 1;
         }
         
-        if (ang % CIRCLE_SEGMENT_LEN != 0) {
-            line(x+Mathh.cos(lastAng+of)*kx*r/10000, y+Mathh.sin(lastAng+of)*ky*r/10000, x+Mathh.cos(ang+of)*kx*r/10000,y+Mathh.sin(ang+of)*ky*r/10000);
+        int lastAng = 0;
+        for(int i = 0; i <= ang - sl; i+=sl) {
+            line(x+Mathh.cos(i+of)*kx*r/10000, y+Mathh.sin(i+of)*ky*r/10000, x+Mathh.cos(i+sl+of)*kx*r/10000,y+Mathh.sin(i+sl+of)*ky*r/10000, linesFacing);
+            lastAng = i + sl;
+        }
+        
+        if (ang % sl != 0) {
+            line(x+Mathh.cos(lastAng+of)*kx*r/10000, y+Mathh.sin(lastAng+of)*ky*r/10000, x+Mathh.cos(ang+of)*kx*r/10000,y+Mathh.sin(ang+of)*ky*r/10000, linesFacing);
         }
     }
-    /*int*/void line(int x1, int y1, int x2, int y2) {
-        lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), (short) 0);
-        linesInStructure++;
+    private /*int*/void line(int x1, int y1, int x2, int y2) {
+        line(x1, y1, x2, y2, 0);
     }
     private void line1(int x1, int y1, int x2, int y2) {
-        lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), (short) 0);
+        line(x1, y1, x2, y2, 1);
+    }
+    //int prevLineK = Integer.MIN_VALUE;
+    private void line(int x1, int y1, int x2, int y2, int facing) {
+        //x1 += 1;
+        //System.out.println(x1 + " " + x2);
+        int dx = x2-x1;
+        int dy = y2-y1;
+        if (dx == 0 && dy == 0) {
+            return;
+        }
+        
+        /*
+        * experimental optimization. instead of adding a new line with same
+        * tilt angle, move end point of previous line.
+        * It is buggy when it concatenates a line with line from
+        * another (previous) structure. That's why I disabled it
+        *
+        int lineK;
+        if (dx != 0) {
+            lineK = 1000*dy/dx; // TODO: experiment with "1000"
+        } else {
+            lineK = Integer.MIN_VALUE;
+        }
+        if (lineK == prevLineK) {
+            int prevLineEndPointID = lndscp.segmentCount()-1;
+            int prevLineEndPointX = lndscp.elementEndPoints()[prevLineEndPointID].xAsInt();
+            int prevLineEndPointY = lndscp.elementEndPoints()[prevLineEndPointID].yAsInt();
+            if (x1 == prevLineEndPointX && y1 == prevLineEndPointY) {
+                lndscp.elementEndPoints()[prevLineEndPointID] = FXVector.newVector(x2, y2);
+                int prevStructID = structlogger.getElementID(structlogger.getNumberOfLogged() - 1);
+                structlogger.structLog[prevStructID][1] -= 1;
+            }
+        } else {*/
+            lndscp.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), (short) facing);
+            /*prevLineK = lineK;
+        }*/
         linesInStructure++;
     }
+    
 }
