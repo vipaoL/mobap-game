@@ -288,13 +288,23 @@ public class GraphicsWorld extends World {
                 } else {
                     g.setColor(255, 255, 255);
                 }
-                drawLine(
-                        g,
-                        stPointX,
-                        stPointY,
-                        endPointX,
-                        endPointY,
-                        24);
+                if (DebugMenu.whatTheGame) {
+                    drawGroundLine(
+                            g,
+                            stPointX,
+                            stPointY,
+                            endPointX,
+                            endPointY,
+                            24);
+                } else {
+                    drawLine(
+                            g,
+                            stPointX,
+                            stPointY,
+                            endPointX,
+                            endPointY,
+                            24);
+                }
                 g.setColor(0xff0000);
                 if (DebugMenu.showLinePoints) {
                     g.fillArc(stPointX-1, stPointY-1, 2, 2, 0, 360);
@@ -384,6 +394,54 @@ public class GraphicsWorld extends World {
             g.drawLine(x1, y1, x2, y2);
         }
     }
+    
+    void drawGroundLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
+        g.setColor(0x333300);
+        if (DebugMenu.discoMode) {
+            g.setColor(random.nextInt(16777216));
+        }
+        int y3 = Math.max(y1, y2);
+        int x3 = x1;
+        if (y3 == y1) {
+            x3 = x2;
+        }
+        g.fillTriangle(x1, y1, x2, y2, x3, y3);
+        g.fillRect(x1, y3, x2 - x1, scHeight - y3);
+        
+        g.setColor(0x00ff00);
+        
+        if (thickness > 2 && Settings.bigScreen == Settings.TRUE) {
+            int t2 = thickness/2;
+            int dx = x2 - x1;
+            int dy = y2 - y1;
+            int l = (int) Math.sqrt(dx*dx+dy*dy);
+            
+            if (l == 0) {
+                g.drawLine(x1, y1, x2, y2);
+                return;
+            }
+            
+            // normal vector
+            int nx = dy*t2 * 1000 / zoomOut / l;
+            int ny = dx*t2 * 1000 / zoomOut / l;
+            
+            if (nx == 0 && ny == 0) {
+                g.drawLine(x1, y1, x2, y2);
+                return;
+            }
+            
+            // draw bold line with two triangles (splitting by diagonal)
+            g.fillTriangle(x1-nx, y1+ny, x2-nx, y2+ny, x1+nx, y1-ny);
+            g.fillTriangle(x2-nx, y2+ny, x2+nx, y2-ny, x1+nx, y1-ny);
+            int r = t2 * 1000 / zoomOut;
+            int d = r * 2;
+            g.fillArc(x1-r, y1-r, d, d, 0, 360);
+            g.fillArc(x2-r, y2-r, d, d, 0, 360);
+        } else {
+            g.drawLine(x1, y1, x2, y2);
+        }
+    }
+
 
     public int xToPX(int c) {
         return c * 1000 / zoomOut + offsetX;

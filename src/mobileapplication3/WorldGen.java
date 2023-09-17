@@ -159,7 +159,8 @@ public class WorldGen implements Runnable {
         } else {
             idsCount = stdStructsNumber + floorWeightInRandom + mgStruct.loadedStructsNumber;
         }
-        while (nextStructRandomId == prevStructRandomId) {// || nextStructRandomId < 6 || nextStructRandomId > 9) {
+        while (nextStructRandomId == prevStructRandomId
+                || (DebugMenu.whatTheGame && (nextStructRandomId < 6 || nextStructRandomId > 9))) {
             nextStructRandomId = rand.nextInt(idsCount); // 10: 0-9
         }
         //nextStructRandomId = 1;

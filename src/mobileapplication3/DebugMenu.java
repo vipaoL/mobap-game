@@ -20,7 +20,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         "-----",
         "show coordinates",
         "GAMING MODE",
-        "show speedometer",
+        "???",
         "show log",
         "music",
         "show font size",
@@ -51,6 +51,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public static boolean simulationMode = false;
     public static boolean showFPS = false;
     public static boolean oneFrameTwoTicks = false;
+    public static boolean whatTheGame = false;
     
     public DebugMenu() {
         super(false);
@@ -154,7 +155,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             GraphicsWorld.bg = discoMode;
         }
         if (selected == 4) {
-            speedo = !speedo;
+            whatTheGame = !whatTheGame;
         }
         if (selected == 5) {
             Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
@@ -199,7 +200,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         if (DebugMenu.isDebugEnabled) {
             menu.setEnabledFor(coordinates, 2);
             menu.setEnabledFor(discoMode, 3);
-            menu.setEnabledFor(speedo, 4);
+            menu.setEnabledFor(whatTheGame, 4);
             menu.setEnabledFor(Main.isScreenLogEnabled, 5);
             menu.setEnabledFor(music, 6);
             menu.setStateFor(-1, 6); // set "music" as inactive button. it's buggy
