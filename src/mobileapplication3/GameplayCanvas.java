@@ -338,7 +338,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                                     // apply effect if touched an effect plate
                                     case MUserData.TYPE_ACCELERATOR:
                                         giveEffect(bodyUserData.data);
-                                        GraphicsWorld.currColWheel = bodyUserData.color;
+                                        world.setWheelColor(bodyUserData.color);
                                         break;
                                     default:
                                         log("unknown bodyType:" + bodyType);

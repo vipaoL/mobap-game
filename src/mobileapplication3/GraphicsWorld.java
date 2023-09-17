@@ -21,10 +21,11 @@ public class GraphicsWorld extends World {
     int colLandscape = 0x4444ff;
     int colBodies = 0xffffff;
     int colFunctionalObjects = 0xff5500;
-    int currColBg = colBg;
-    public static int currColWheel = 0;
+    int currColBg;
+    int colWheel ;
+    int currColWheel;
     int currColLandscape = colLandscape;
-    int currColBodies = colBodies;
+    int currColBodies;
     
     static boolean bg = false;
     public static int bgLineStep = Main.sWidth / 3;
@@ -56,6 +57,14 @@ public class GraphicsWorld extends World {
     
     public GraphicsWorld(World w) {
         super(w);
+        if (DebugMenu.whatTheGame) {
+            colWheel = 0x888888;
+            colBg = 0x00aaff;
+            colBodies = 0x555555;
+        }
+        currColWheel = colWheel;
+        currColBg = colBg;
+        currColBodies = colBodies;
     }
 
     public void addCar() {
@@ -148,6 +157,10 @@ public class GraphicsWorld extends World {
             }
         }
         prevBodyTickTime = System.currentTimeMillis();
+    }
+    
+    public void setWheelColor(int color) {
+        currColWheel = color;
     }
     
     public void drawWorld(Graphics g) {
@@ -248,6 +261,22 @@ public class GraphicsWorld extends World {
     public void drawBody(Graphics g, Body b) {
         FXVector[] positions = b.getVertices();
         
+        if (b == carbody && DebugMenu.whatTheGame) {
+            g.setColor(0xff0000);
+            g.fillTriangle(xToPX(positions[0].xAsInt()),
+                    yToPX(positions[0].yAsInt()),
+                    xToPX(positions[1].xAsInt()),
+                    yToPX(positions[1].yAsInt()),
+                    xToPX(positions[2].xAsInt()),
+                    yToPX(positions[2].yAsInt()));
+            g.fillTriangle(xToPX(positions[0].xAsInt()),
+                    yToPX(positions[0].yAsInt()),
+                    xToPX(positions[3].xAsInt()),
+                    yToPX(positions[3].yAsInt()),
+                    xToPX(positions[2].xAsInt()),
+                    yToPX(positions[2].yAsInt()));
+        }
+        
         if (positions.length == 1) { // if shape of the body is circle
             int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
             g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
@@ -335,7 +364,7 @@ public class GraphicsWorld extends World {
     void drawWheel(Graphics g, Body b) {
         int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
         if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] == null) {
-            currColWheel = currColBg;
+            currColWheel = colWheel;
             if (DebugMenu.discoMode) {
                 currColWheel = random.nextInt(16777216);
                 currColBodies = random.nextInt(16777216);
