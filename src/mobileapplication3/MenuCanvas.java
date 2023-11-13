@@ -38,20 +38,22 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
 
     public MenuCanvas() {
         super(false);
+        Main.log("menu:constr");
         setFullScreenMode(true);
-        paint();
+        //repaint();
         (new Thread(this, "menu canvas")).start();
     }
     
     public MenuCanvas(int counterX, int counterY) {
         super(false);
+        Main.log("menu:constructor");
         setFullScreenMode(true);
-        paint();
+        //repaint();
         (new Thread(this, "menu canvas")).start();
     }
     
     private void init() {
-        Main.log("menu:constructor");
+        Main.log("menu:init");
         menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         
         sizeChanged(getWidth(), getHeight());
@@ -95,7 +97,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
                 Settings.bigScreen = Settings.FALSE;
             }
         }
-        paint();
+        repaint();
     }
 
     protected void hideNotify() {
@@ -133,7 +135,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
                     fontSizeCache = -1;
                     showNotify();
                 }
-                paint(); // refresh picture on screen
+                repaint(); // refresh picture on screen
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
             } else {
@@ -148,15 +150,13 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         }
     }
 
-    public void paint() {
-        Graphics g = getGraphics();
+    public void paint(Graphics g) {
         g.setColor(0);
         g.fillRect(0, 0, scW, scH);
         if (isInited) {
             menu.paint(g);
             menu.tick();
         }
-        flushGraphics();
     }
 
     public void startGame() {
@@ -223,7 +223,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         if (selected == 1) { // Play
             Main.log("menu:selected == 1 -> gen = true");
             isWorldgenEnabled = true;
-            paint();
+            repaint();
             waitingToStartGame = true;
         }
         if (selected == 2) { // Ext Structs / Reload

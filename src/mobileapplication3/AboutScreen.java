@@ -303,6 +303,8 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         if (selected == menuOpts.length - 2) {
             counter+=1;
             if (counter == 20) {
+                stopped = true;
+                
                 MenuCanvas.isWorldgenEnabled = true;
                 
                 World test3 = new World();

@@ -59,7 +59,7 @@ public class GraphicsWorld extends World {
         super(w);
         if (DebugMenu.whatTheGame) {
             colWheel = 0x888888;
-            colBg = 0x00aaff;
+            colBg = 0x001155;
             colBodies = 0x555555;
         }
         currColWheel = colWheel;
@@ -237,11 +237,13 @@ public class GraphicsWorld extends World {
                 MUserData bodyUserData = null;
                 try {
                     bodyUserData = (MUserData) bodies[i].getUserData();
-                    bodyType = bodyUserData.bodyType;
+                    if (bodyUserData != null) {
+                        bodyType = bodyUserData.bodyType;
+                    }
                 } catch (ClassCastException ex) {
 
                 } catch (NullPointerException ex) {
-
+                    
                 }
                 
                 g.setColor(currColBodies);
@@ -481,10 +483,11 @@ public class GraphicsWorld extends World {
     }
 
     void refreshPos() {
-        try {
-            carX = carbody.positionFX().xAsInt();
-            carY = carbody.positionFX().yAsInt();
-        } catch (NullPointerException ex) {
+        if (carbody != null) {
+            FXVector posFX = carbody.positionFX();
+            carX = posFX.xAsInt();
+            carY = posFX.yAsInt();
+        } else {
             carX = -8000;
             carY = 0;
         }

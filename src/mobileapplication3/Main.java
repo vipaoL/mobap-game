@@ -20,7 +20,7 @@ public class Main extends MIDlet {
     
     // for numbering snapshots. e.g.: '1', '2', '3', ... .
     // '-1' if release
-    public static int PRE_VERSION = 2;
+    public static int PRE_VERSION = 0;
     
     // enable or disable on-screen log on start
     public static boolean isScreenLogEnabled = false;
@@ -37,6 +37,7 @@ public class Main extends MIDlet {
 
     public Main() {
         thiss = this;
+        Main.log("Main:constr");
         MenuCanvas menuCanvas = new MenuCanvas();
         set(menuCanvas);
     }
@@ -110,7 +111,7 @@ public class Main extends MIDlet {
             log(String.valueOf(i));
         }
     }
-    public static void log(String text) {
+     public static void log(String text) {
         if (DebugMenu.isDebugEnabled) {
             System.out.println(text);
         }

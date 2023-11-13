@@ -106,6 +106,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     
     public void selectPressed() {
         if (menu.selected == levelNames.size() - 1) {
+            stopped = true;
             Main.set(new MenuCanvas());
         } else {
             try {
