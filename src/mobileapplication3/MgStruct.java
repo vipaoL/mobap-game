@@ -27,7 +27,7 @@ public class MgStruct {
      * 6 - sinus (not implemented yet)
      * 7 - accellerator
      */
-    static int[] argsNumber = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10, /*6*/5, /*7*/8};
+    static int[] argsNumber = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10, /*6*/6, /*7*/8};
     static final int STRUCTURE_STORAGE_SIZE = 32;
 
     static short[][][] structStorage = new short[STRUCTURE_STORAGE_SIZE][][];

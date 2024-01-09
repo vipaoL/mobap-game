@@ -186,7 +186,7 @@ public class WorldGen implements Runnable {
                 case 1:
                     int l = 720 + rand.nextInt(8) * 180;
                     int amp = 15;
-                    sin(lastX, lastY, l, l / 180, 0, amp);
+                    sinStruct(lastX, lastY, l, l / 180, 0, amp);
                     break;
                 case 2:
                     floorStat(lastX, lastY, 400 + rand.nextInt(10) * 100);
@@ -686,7 +686,15 @@ public class WorldGen implements Runnable {
     
     private void floor(int x, int y, int l, int y2) {
         int amp = (y2 - y) / 2;
-        sin(x, y + amp, l, 1, 270, amp);
+        sinStruct(x, y + amp, l, 1, 270, amp);
+    }
+    private void sinStruct(int x, int y, int l, int halfperiods, int offset, int amp) {    //3
+        sin(x, y, l, halfperiods, offset, amp);
+        lastX += l;
+        if (amp != 0) {
+            lastY = y + amp*Mathh.sin(180*halfperiods+offset)/1000;
+        }
+        structlogger.add(lastX, linesInStructure);
     }
     private void floorStat(int x, int y, int l) {      // 1
         line1(x, y, x + l, y);
@@ -715,9 +723,6 @@ public class WorldGen implements Runnable {
         structlogger.add(lastX, linesInStructure);
     }
     
-    
-    
-    
     private void sin(int x, int y, int l, int halfperiods, int offset, int amp) {    //3
         if (amp == 0) {
             line(x, y, x + l, y);
@@ -738,11 +743,7 @@ public class WorldGen implements Runnable {
             nextPointX = x + l;
             nextPointY = y + amp*Mathh.sin(180*halfperiods+offset)/1000;
             line1(prevPointX, prevPointY, nextPointX, nextPointY);
-            
-            lastY = nextPointY;
         }
-        lastX += l;
-        structlogger.add(lastX, linesInStructure);
     }
     private void arc(int x, int y, int r, int ang, int of) {
         arc(x, y, r, ang, of, 10, 10);
