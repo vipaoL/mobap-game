@@ -20,7 +20,7 @@ public class Main extends MIDlet {
     
     // for numbering snapshots. e.g.: '1', '2', '3', ... .
     // '-1' if release
-    public static int PRE_VERSION = 0;
+    public static int PRE_VERSION = -1;
     
     // enable or disable on-screen log on start
     public static boolean isScreenLogEnabled = false;
