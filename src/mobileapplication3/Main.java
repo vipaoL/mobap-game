@@ -35,14 +35,11 @@ public class Main extends MIDlet {
     public static boolean isScreenLogInited = false;
     public static int logMessageDelay = 50;
 
-    public Main() {
+    public void startApp() {
         thiss = this;
         Main.log("Main:constr");
         MenuCanvas menuCanvas = new MenuCanvas();
         set(menuCanvas);
-    }
-
-    public void startApp() {
     }
 
     public void pauseApp() {
