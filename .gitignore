@@ -2,4 +2,4 @@
 *classes
 /bin/*
 !/bin/build.sh
-!/bin/manifest.mf
+!/bin/MANIFEST.MF
