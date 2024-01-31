@@ -684,6 +684,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     }
     
     public void openMenu() {
+        log("opening menu");
         stopped = true;
         isFirstStart = false;
         uninterestingDebug = false;

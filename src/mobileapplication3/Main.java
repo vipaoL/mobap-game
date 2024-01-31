@@ -34,8 +34,17 @@ public class Main extends MIDlet {
     public static int lastWroteI = 0;
     public static boolean isScreenLogInited = false;
     public static int logMessageDelay = 50;
+    
+    private boolean isStartedAlready = false;
 
     public void startApp() {
+        if (isStartedAlready) {
+            log("Main:startApp:already started");
+            return;
+        }
+        
+        isStartedAlready = true;
+        
         thiss = this;
         Main.log("Main:constr");
         MenuCanvas menuCanvas = new MenuCanvas();
