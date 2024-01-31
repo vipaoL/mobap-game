@@ -748,7 +748,7 @@ public class WorldGen implements Runnable {
     private void arc(int x, int y, int r, int ang, int of) {
         arc(x, y, r, ang, of, 10, 10);
     }
-    private void arc(int x, int y, int r, int ang, int of, int kx, int ky) { //k: 10 = 1.0
+    private void arc(int x, int y, int r, int ang, int of, int kx, int ky) { //k: 100 = 1.0
         // calculated formula. r=20: sn=5,sl=72; r=1000: sn=36,sl=10
         int sl=10000/(140+r);
         sl = Math.min(72, Math.max(10, sl));
