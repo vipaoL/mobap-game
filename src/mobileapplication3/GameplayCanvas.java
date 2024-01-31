@@ -594,7 +594,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         // draw on-screen log if enabled
         if (Main.isScreenLogEnabled) {
             g.setColor(150, 255, 150);
-            setFont(Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL), g);
+            setFont(Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_PLAIN, Font.SIZE_SMALL), g);
             for (int i = 0; i < Main.onScreenLog.length; i++) {
                 try {
                     g.drawString(Main.onScreenLog[i], 0, currentFontH * i, Graphics.TOP | Graphics.LEFT);

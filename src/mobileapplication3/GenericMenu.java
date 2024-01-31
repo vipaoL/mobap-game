@@ -110,7 +110,7 @@ public class GenericMenu {
         }
         if (Main.isScreenLogEnabled) {
             g.setColor(150, 255, 150);
-            Font font = Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_BOLD, Font.SIZE_SMALL);
+            Font font = Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_PLAIN, Font.SIZE_SMALL);
             g.setFont(font);
             for (int j = 0; j <= Main.onScreenLogOffset; j++) {
                 try {
