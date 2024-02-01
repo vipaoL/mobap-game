@@ -727,22 +727,29 @@ public class WorldGen implements Runnable {
         if (amp == 0) {
             line(x, y, x + l, y);
         } else {
-            int sl = 90;
+            int step = 30;
+            int startA = offset;
+            int endA = offset + halfperiods * 180;
+            int a = endA - startA;
+            
             int prevPointX = x;
-            int nextPointX;
             int prevPointY = y + amp * Mathh.sin(offset) / 1000;
+            int nextPointX;
             int nextPointY;
-            for(int i = sl; i < l - sl/2; i+=sl) {
-                nextPointX = x + i;
-                nextPointY = y + amp*Mathh.sin(180*i*halfperiods/l+offset)/1000;
+            
+            for (int i = startA; i <= endA; i+=30) {
+                nextPointX = x + (i - startA)*l/a;
+                nextPointY = y + amp*Mathh.sin(i)/1000;
                 line1(prevPointX, prevPointY, nextPointX, nextPointY);
                 prevPointX = nextPointX;
                 prevPointY = nextPointY;
             }
             
-            nextPointX = x + l;
-            nextPointY = y + amp*Mathh.sin(180*halfperiods+offset)/1000;
-            line1(prevPointX, prevPointY, nextPointX, nextPointY);
+            if (a % step != 0) {
+                nextPointX = x + l;
+                nextPointY = y + amp*Mathh.sin(endA)/1000;
+                line1(prevPointX, prevPointY, nextPointX, nextPointY);
+            }
         }
     }
     private void arc(int x, int y, int r, int ang, int of) {
