@@ -23,7 +23,6 @@ public class GenericMenu {
             keyPressDelayAfterShowing = 5, firstReachable, lastReachable,
             firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY;
     public int lastKeyCode = 0;
-    private int lastGameAction = 0;
     
     int selected;
     
@@ -37,7 +36,6 @@ public class GenericMenu {
             isSpecialOptionActivated = false, isSelectPressed = false,
             isSelectAlreadyPressed = false, isStatemapEnabled = false,
             fontFound = false;
-    private boolean isKeyPressedNow = false;
     
     public boolean isKnownButton = true;
     public boolean isInited = false;
@@ -92,7 +90,7 @@ public class GenericMenu {
                 }
 
 
-                if (i == specialOption & isSpecialOptionActivated) { // painting special option in a different color
+                if (i == specialOption && isSpecialOptionActivated) { // painting special option in a different color
                     g.setColor(specialOptionActivatedColor);
                 }
 
@@ -100,7 +98,7 @@ public class GenericMenu {
                 int y = y0 + k * (i + 1 - firstDrawable) - fontH / 2 - h / (options.length + 1 - firstDrawable) / 2 + offset*Font.getDefaultFont().getHeight() / 8000;
                 g.drawString(options[i], x, y, Graphics.HCENTER | Graphics.TOP); // draw option on (x, y) //
 
-                if (DebugMenu.isDebugEnabled & DebugMenu.fontSize) {
+                if (DebugMenu.isDebugEnabled && DebugMenu.showFontSize) {
                     g.drawString(String.valueOf(font.getSize()), x0, y0, 0); // display text size (for debug)
                 }
             }
@@ -161,7 +159,7 @@ public class GenericMenu {
                 return false;
             }
         }
-        if (n < firstReachable | n > lastReachable) {
+        if (n < firstReachable || n > lastReachable) {
             return false;
         }
         return true;
@@ -172,7 +170,7 @@ public class GenericMenu {
         y -= y0;
         feedback.setIsPaused(false);
         int selected = firstDrawable + y / k;
-        if (selected < firstReachable & firstReachable < firstDrawable) {
+        if (selected < firstReachable && firstReachable < firstDrawable) {
             selected = firstReachable;
         }
         if (!isOptionAvailable(selected)) {
@@ -183,27 +181,21 @@ public class GenericMenu {
         isPressedByPointerNow = true;
         return true;
     }
-
-    public boolean handleKeyStates(int keyStates) {
-        if (keyStates == 0) {
-            isKeyPressedNow = false;
-        }
-        return false;
-    }
     
-    public boolean handlePressingButton(int keyStates) {
+    private boolean handleKeyStates(int keyStates) {
         if (keyStates != 0) {
             //Main.log("states", keyStates);
-            if (keyStates == GameCanvas.RIGHT | keyStates == GameCanvas.FIRE |
-                    keyStates == GameCanvas.UP | keyStates == GameCanvas.DOWN)
+            if (keyStates == GameCanvas.RIGHT || keyStates == GameCanvas.FIRE ||
+                    keyStates == GameCanvas.UP || keyStates == GameCanvas.DOWN) {
                 isKnownButton = true;
+            }
         }
         feedback.setIsPaused(false);
         isSelectAlreadyPressed = isSelectPressed;
         
         if (keyPressDelay < 1) {
             keyPressDelay = KEY_PRESS_DELAY;
-            isSelectPressed = (keyStates == GameCanvas.RIGHT | keyStates == GameCanvas.FIRE);
+            isSelectPressed = (keyStates == GameCanvas.RIGHT || keyStates == GameCanvas.FIRE);
             boolean needRepeat = true;
             while (needRepeat) {
                 needRepeat = false;
@@ -226,28 +218,17 @@ public class GenericMenu {
                         selected = firstReachable;
                     }
                 }
-                if (isStatemapEnabled & !isSelectPressed) {
+                if (isStatemapEnabled && !isSelectPressed) {
                     needRepeat = stateMap[selected] == STATE_INACTIVE;
                 }
             }
         }
-        /*if (keyStates == 0) {
-            keyPressDelay = 0;
-            isSelectPressed = false;
-            isSelectAlreadyPressed = false;
-        } else {
-            currKeyStates = keyStates;
-        }*/
-        return isSelectPressed & !isSelectAlreadyPressed;
+        return isSelectPressed && !isSelectAlreadyPressed;
     }
     
     public boolean handleKeyPressed(int keyCode) {
         lastKeyCode = keyCode;
         isKnownButton = false;
-        isKeyPressedNow = true;
-        if (feedback.getIsPaused()) {
-            feedback.recheckInput();
-        }
         feedback.setIsPaused(false);
         Main.log("pressed:", keyCode);
         boolean pressed = false;
@@ -311,11 +292,11 @@ public class GenericMenu {
                 }
             case SIEMENS_KEY_UP:
                 isKnownButton = true;
-                handlePressingButton(GameCanvas.UP);
+                handleKeyStates(GameCanvas.UP);
                 break;
             case SIEMENS_KEY_DOWN:
                 isKnownButton = true;
-                handlePressingButton(GameCanvas.DOWN);
+                handleKeyStates(GameCanvas.DOWN);
                 break;
             case SIEMENS_KEY_RIGHT:
                 isKnownButton = true;
@@ -326,34 +307,13 @@ public class GenericMenu {
                     return false;
                 }
             case SIEMENS_KEY_FIRE:
-                isKnownButton = true;
-                if (keyPressDelay < 1) {
-                    keyPressDelay = KEY_PRESS_DELAY;
-                    return true;
-                } else {
-                    return false;
-                }
             case -6: // left soft button
-                isKnownButton = true;
-                if (keyPressDelay < 1) {
-                    keyPressDelay = KEY_PRESS_DELAY;
-                    return true;
-                } else {
-                    return false;
-                }
+                handleKeyStates(GameCanvas.FIRE_PRESSED);
             default:
-                lastGameAction = util.getGameAction(keyCode);
-                /*if (action == GameCanvas.UP) {
-                    action = GameCanvas.UP_PRESSED;
-                } else if (action == GameCanvas.DOWN) {
-                    action = GameCanvas.DOWN_PRESSED;
-                } else if (action == GameCanvas.FIRE) {
-                    action = GameCanvas.FIRE_PRESSED;
-                }*/
-                return handlePressingButton(lastGameAction);
+                return handleKeyStates(util.getGameAction(keyCode));
         }
         selected += firstReachable;
-        if (keyCode == GameCanvas.KEY_NUM0 || keyCode == KEY_SOFT_RIGHT || keyCode == SIEMENS_KEY_LEFT /*|| keyCode == GameCanvas.LEFT_PRESSED*/ || keyCode == SE_KEY_BACK) {
+        if (keyCode == GameCanvas.KEY_NUM0 || keyCode == KEY_SOFT_RIGHT || keyCode == SIEMENS_KEY_LEFT || keyCode == SE_KEY_BACK) {
             isKnownButton = true;
             selected = lastReachable; // back
             if (keyPressDelay < 1) {
@@ -376,7 +336,6 @@ public class GenericMenu {
         keyPressDelay = 0;
         isSelectPressed = false;
         isSelectAlreadyPressed = false;
-        isKeyPressedNow = false;
     }
     
     private void loadCanvasParams(int x0, int y0, int w, int h, int fontSize) {
@@ -401,7 +360,7 @@ public class GenericMenu {
     }
     public void reloadCanvasParameters(int x0, int y0, int w, int h) {
         int fontSize = -1;
-        if (w - x0 == this.w - this.x0 & h - y0 == this.h - this.y0 & font != null) {
+        if (w - x0 == this.w - this.x0 && h - y0 == this.h - this.y0 && font != null) {
             fontSize = font.getSize();
         }
         loadCanvasParams(x0, y0, w, h, fontSize);
@@ -537,21 +496,10 @@ public class GenericMenu {
         if (keyPressDelay > 0) {
             keyPressDelay--;
         }
-        if (isKeyPressedNow) {
-            handlePressingButton(lastGameAction);
-        }
     }
     
-    interface Feedback {
+    public interface Feedback {
         boolean getIsPaused();
         void setIsPaused(boolean isPaused);
-        /*
-        * if this method was called, then you need to re-check keyboard input
-        * <p> e.g.: <p>
-        * void recheckInput() { <p>
-        *   input(); <p>
-        * }
-        */
-        void recheckInput();
     }
 }

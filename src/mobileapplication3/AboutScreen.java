@@ -166,7 +166,6 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         while (!stopped) {
             if (!paused) {
                 start = System.currentTimeMillis();
-                input();
                 // catch screen rotation
                 if (scW != getWidth()) {
                     fontSizeCache = -1;
@@ -251,13 +250,6 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
             g.drawImage(qrBig, scW / 2, scH / 2, Graphics.HCENTER | Graphics.VCENTER);
         } catch (NullPointerException ex) {
             bigQRIsDrawn = true;
-        }
-    }
-
-    private void input() {
-        int keyStates = getKeyStates();
-        if (menu.handleKeyStates(keyStates)) {
-            selectPressed();
         }
     }
 
@@ -361,9 +353,5 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     }
     public boolean getIsPaused() {
         return paused;
-    }
-
-    public void recheckInput() {
-        input();
     }
 }

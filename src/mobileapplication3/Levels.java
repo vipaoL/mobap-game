@@ -135,7 +135,6 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
             }
             if (!paused) {
                 start = System.currentTimeMillis();
-                input();
                 paint();
 
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
@@ -182,14 +181,6 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
         this.paused = isPaused;
     }
     
-    
-    private void input() {
-        int keyStates = getKeyStates();
-        if (menu.handleKeyStates(keyStates)) {
-            selectPressed();
-        }
-    }
-    
     public void keyPressed(int keyCode) {
         if(menu.handleKeyPressed(keyCode)) {
             selectPressed();
@@ -215,9 +206,5 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
 
     public boolean getIsPaused() {
         return paused;
-    }
-
-    public void recheckInput() {
-        input();
     }
 }

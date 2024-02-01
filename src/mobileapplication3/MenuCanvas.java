@@ -130,7 +130,6 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             }
             if (!isPaused) {
                 start = System.currentTimeMillis();
-                input(); // listen keyboard
                 if (scW != getWidth()) { // refreshing some parameters when screen rotated
                     fontSizeCache = -1;
                     showNotify();
@@ -182,13 +181,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         }
     }
     
-    private void input() {                        // Keyboard
-        int keyStates = getKeyStates();
-        if (menu.handleKeyStates(keyStates)) {
-            selectPressed();
-        }
-    }
-    public void keyPressed(int keyCode) {
+    public void keyPressed(int keyCode) {         // Keyboard
         if (keyCode == GameCanvas.KEY_STAR | keyCode == -10) {
             Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
             if (Main.isScreenLogEnabled) {
@@ -250,10 +243,6 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
 
     public boolean getIsPaused() {
         return isPaused;
-    }
-
-    public void recheckInput() {
-        input();
     }
     
     void log(String s) {

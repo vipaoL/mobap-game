@@ -18,15 +18,12 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     private String[] menuOpts = {
         "Enable debug options",
         "-----",
-        "show coordinates",
-        "GAMING MODE",
-        "???",
         "show log",
-        "music",
-        "show font size",
-        ".mgstruct only",
-        "10 FPS screen",
         "simulation mode",
+        "GAMING MODE",
+        "what?",
+        "music",
+        "10 FPS screen",
         "back"
     };
     
@@ -36,14 +33,14 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     boolean isPaused = false;
     private int scW = Main.sWidth, scH = Main.sHeight;
     private static int fontSizeCache = -1;
-    public static boolean isDebugEnabled = false;
+    public static boolean isDebugEnabled = true;
     public static boolean closerWorldgen = false;
     public static boolean coordinates = false;
     public static boolean discoMode = false;
     public static boolean speedo = false;
     public static boolean cheat = false;
     public static boolean music = false;
-    public static boolean fontSize = false;
+    public static boolean showFontSize = false;
     public static boolean mgstructOnly = false;
     public static boolean dontCountFlips = false;
     public static boolean showAngle = false;
@@ -108,7 +105,6 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         while (!stopped) {
             if (!isPaused) {
                 start = System.currentTimeMillis();
-                input();
                 paint();
 
                 sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
@@ -142,51 +138,41 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     }
     void selectPressed() {
         int selected = menu.selected;
-        if (selected == 0) {
-            isDebugEnabled = !isDebugEnabled;
-            showFPS = isDebugEnabled;
-            menu.setIsSpecialOptnActivated(isDebugEnabled);
-        }
-        if (selected == 2) {
-            coordinates = !coordinates;
-        }
-        if (selected == 3) {
-            discoMode = !discoMode;
-            GraphicsWorld.bg = discoMode;
-        }
-        if (selected == 4) {
-            whatTheGame = !whatTheGame;
-        }
-        if (selected == 5) {
-            Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
-            if (Main.isScreenLogEnabled) { // TODO: move to Main.java to make common toggleLog()
-                Main.enableLog(scH); // in MenuCanvas also used this code
-            } else {
-                Main.disableLog();
-            }
-        }
-        if (selected == 6) {
-            music = !music;
-            if (music) {
-                Sound sound = new Sound();
-                sound.startBgMusic();
-            }
-        }
-        if (selected == 7) {
-            fontSize = !fontSize;
-        }
-        if (selected == 8) {
-            if (MgStruct.loadedStructsNumber > 0) {
-                mgstructOnly = !mgstructOnly;
-            } else {
-                mgstructOnly = false;
-            }
-        }
-        if (selected == 9) {
-            oneFrameTwoTicks = !oneFrameTwoTicks;
-        }
-        if (selected == 10) {
-            simulationMode = !simulationMode;
+        switch (selected) {
+            case 0:
+                isDebugEnabled = !isDebugEnabled;
+                showFPS = isDebugEnabled;
+                showFontSize = isDebugEnabled;
+                menu.setIsSpecialOptnActivated(isDebugEnabled);
+                break;
+            case 2:
+                Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
+                if (Main.isScreenLogEnabled) { // TODO: <s>move to Main.java to make common toggleLog()</s> create Logger.java
+                    Main.enableLog(scH); // in MenuCanvas also uses this code
+                } else {
+                    Main.disableLog();
+                }   break;
+            case 3:
+                simulationMode = !simulationMode;
+                break;
+            case 4:
+                discoMode = !discoMode;
+                GraphicsWorld.bg = discoMode;
+                break;
+            case 5:
+                whatTheGame = !whatTheGame;
+                break;
+            case 6:
+                music = !music;
+                if (music) {
+                    Sound sound = new Sound();
+                    sound.startBgMusic();
+                }   break;
+            case 7:
+                oneFrameTwoTicks = !oneFrameTwoTicks;
+                break;
+            default:
+                break;
         }
         if (selected == menuOpts.length - 1) {
             stopped = true;
@@ -198,27 +184,16 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     void refreshStates() {
         menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         if (DebugMenu.isDebugEnabled) {
-            menu.setEnabledFor(coordinates, 2);
-            menu.setEnabledFor(discoMode, 3);
-            menu.setEnabledFor(whatTheGame, 4);
-            menu.setEnabledFor(Main.isScreenLogEnabled, 5);
-            menu.setEnabledFor(music, 6);
-            menu.setStateFor(-1, 6); // set "music" as inactive button. it's buggy
-            menu.setEnabledFor(fontSize, 7);
-            //menu.setEnabledFor(mgstructOnly, 8);
-            menu.setStateFor(-1, 8); // set ".mgstruct only" as inactive button. it's buggy
-            menu.setEnabledFor(oneFrameTwoTicks, 9);
-            menu.setEnabledFor(simulationMode, 10);
+            menu.setEnabledFor(Main.isScreenLogEnabled, 2);
+            menu.setEnabledFor(simulationMode, 3);
+            menu.setEnabledFor(discoMode, 4);
+            menu.setEnabledFor(whatTheGame, 5);
+            menu.setStateFor(/*music*/-1, 6); // set "music" as inactive button. it's buggy
+            menu.setEnabledFor(oneFrameTwoTicks, 7);
         } else {
             for (int i = 2; i < menuOpts.length - 1; i++) {
                 menu.setStateFor(-1, i);
             }
-        }
-    }
-    private void input() {
-        int keyStates = getKeyStates();
-        if (menu.handleKeyStates(keyStates)) {
-            selectPressed();
         }
     }
     protected void pointerPressed(int x, int y) {
@@ -241,9 +216,5 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     }
     public void keyReleased(int keyCode) {
         menu.handleKeyReleased(keyCode);
-    }
-
-    public void recheckInput() {
-        input();
     }
 }
