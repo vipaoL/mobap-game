@@ -12,32 +12,24 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feedback {
+public class MenuCanvas extends GenericMenu implements Runnable {
     
-    String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Debug", "Exit", "-"};
+    private String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Debug", "Exit", "-"};
     
     private final int[] statemap = new int[menuOptions.length]; // array with states of all buttons (active/inactive/enabled)
-    static int selected = 1; // currently selected option in menu
-    private int scW = Main.sWidth, scH = Main.sHeight; // screeen width and height
+    private static int defaultSelected = 1; // currently selected option in menu
     private static int fontSizeCache = -1; // reduce some operations on next menu showing
     
     // states
-    boolean isPaused = false;
-    boolean isStopped = false;
-    boolean isInited = false;
-    boolean waitingToStartGame = false;
-    boolean isGameStarted = false;
+    private boolean isInited = false;
+    private boolean waitingToStartGame = false;
+    private boolean isGameStarted = false;
     
-    private GenericMenu menu = new GenericMenu(this); // some generic code for drawing menus
     private MgStruct mgStruct; // for loading external structures
     
-    // TODO: move to GameplayCanvas
-    public static boolean isWorldgenEnabled = false;
-    
-    static boolean areExtStructsLoaded = false;
+    private static boolean areExtStructsLoaded = false;
 
     public MenuCanvas() {
-        super(false);
         Logger.log("menu:constr");
         setFullScreenMode(true);
         //repaint();
@@ -45,7 +37,6 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     }
     
     public MenuCanvas(int counterX, int counterY) {
-        super(false);
         Logger.log("menu:constructor");
         setFullScreenMode(true);
         //repaint();
@@ -54,63 +45,35 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     
     private void init() {
         Logger.log("menu:init");
-        menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
+        setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         
         sizeChanged(getWidth(), getHeight());
         
         if (Logger.isOnScreenLogEnabled()) {
-            Logger.enableOnScreenLog(scH);
+            Logger.enableOnScreenLog(Main.sHeight);
         }
         
         // menu initialization
-        menu.loadParams(scW, scH, menuOptions, 1, menuOptions.length - 2, selected, fontSizeCache);
-        fontSizeCache = menu.getFontSize();
-        menu.loadStatemap(statemap);
+        loadParams(Main.sWidth, Main.sHeight, menuOptions, 1, menuOptions.length - 2, defaultSelected, fontSizeCache);
+        fontSizeCache = getFontSize();
+        loadStatemap(statemap);
         if (areExtStructsLoaded) { // highlight and change label of "Ext Structs" btn if it already loaded
-            menu.setStateFor(1, 2);
+            setStateFor(1, 2);
             menuOptions[2] = "Reload";
         }
-        menu.setSpecialOption(menuOptions.length - 3); // to be able to highlight "Debug" option
+        setSpecialOption(menuOptions.length - 3); // to be able to highlight "Debug" option
         isInited = true;
     }
     
-    // init and refreshing screen parameters
-    protected void showNotify() {
-        Logger.log("menu:showNotify");
-        sizeChanged(getWidth(), getHeight());
-        
-        // enable screen refreshing
-        isPaused = false;
-        menu.handleShowNotify();
-    }
-    
     protected void sizeChanged(int w, int h) {
-        Main.sWidth = scW = w;
-        Main.sHeight = scH = h;
-        menu.reloadCanvasParameters(scW, scH);
         if (Settings.bigScreen == Settings.UNDEF) {
-            if (Math.max(scW, scH) >= GraphicsWorld.BIGSCREEN_SIDE) {
+            if (Math.max(w, h) >= GraphicsWorld.BIGSCREEN_SIDE) {
                 Settings.bigScreen = Settings.TRUE;
             } else {
                 Settings.bigScreen = Settings.FALSE;
             }
         }
-        repaint();
-    }
-
-    protected void hideNotify() {
-        Logger.log("menu:hideNotify");
-        isPaused = true;
-        menu.handleHideNotify();
-    }
-
-    public void destroyApp(boolean unconditional) {
-        isStopped = true;
-        Main.exit();
-    }
-    
-    public void setIsPaused(boolean isPaused) {
-        this.isPaused = isPaused;
+        super.sizeChanged(w, h);
     }
     
     public void run() {
@@ -128,7 +91,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             }
             if (!isPaused) {
                 start = System.currentTimeMillis();
-                if (scW != getWidth()) { // refreshing some parameters when screen rotated
+                if (w != getWidth()) { // refreshing some parameters when screen rotated
                     fontSizeCache = -1;
                     showNotify();
                 }
@@ -149,10 +112,10 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
 
     public void paint(Graphics g) {
         g.setColor(0);
-        g.fillRect(0, 0, scW, scH);
+        g.fillRect(0, 0, w, h);
         if (isInited) {
-            menu.paint(g);
-            menu.tick();
+            super.paint(g);
+            tick();
         }
     }
 
@@ -172,7 +135,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             Main.set(gameCanvas);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Logger.enableOnScreenLog(scH);
+            Logger.enableOnScreenLog(h);
             Logger.log("ex in startGame():");
             Logger.log(ex.toString());
             repaint();
@@ -182,37 +145,20 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     public void keyPressed(int keyCode) {         // Keyboard
         if (keyCode == GameCanvas.KEY_STAR | keyCode == -10) {
             if (!Logger.isOnScreenLogEnabled()) {
-                Logger.enableOnScreenLog(scH);
+                Logger.enableOnScreenLog(h);
             } else {
                 Logger.disableOnScreenLog();
             }
         }
-        if(menu.handleKeyPressed(keyCode)) {
-            selectPressed();
-        }
-    }
-    public void keyReleased(int keyCode) {
-        menu.handleKeyReleased(keyCode);
-    }
-    
-    protected void pointerPressed(int x, int y) { // Touch screen
-        menu.handlePointer(x, y);
-    }
-    protected void pointerDragged(int x, int y) {
-        menu.handlePointer(x, y);
-    }
-    protected void pointerReleased(int x, int y) {
-        if (menu.handlePointer(x, y)) {
-            selectPressed();
-        }
+        super.keyPressed(keyCode);
     }
     
     
     void selectPressed() { // Do something when pressed an option in the menu
-        selected = menu.selected;
+        defaultSelected = selected;
         if (selected == 1) { // Play
             Logger.log("menu:selected == 1 -> gen = true");
-            isWorldgenEnabled = true;
+            WorldGen.isEnabled = true;
             repaint();
             waitingToStartGame = true;
         }
@@ -221,7 +167,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         }
         if (selected == 3) { // Levels
             isStopped = true;
-            isWorldgenEnabled = false;
+            WorldGen.isEnabled = false;
             Main.set(new Levels());
         }
         if (selected == 4) { // About
@@ -237,10 +183,6 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             Main.exit();
         }
     }
-
-    public boolean getIsPaused() {
-        return isPaused;
-    }
     
     void log(String s) {
         Logger.log(s);
@@ -251,12 +193,12 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         (new Thread(new Runnable() {
             public void run() {
                 menuOptions[2] = "Loading...";
-                menu.setStateFor(1, 2);
+                setStateFor(1, 2);
                 mgStruct = new MgStruct();
                 if (mgStruct.loadFromFiles()) {
                     areExtStructsLoaded = true;
                     menuOptions[2] = (MgStruct.loadedStructsNumber - MgStruct.loadedFromResNumber) + " loaded";
-                    menu.setColorEnabledOption(0x0099ff00);
+                    setColorEnabledOption(0x0099ff00);
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException ex) {
@@ -270,7 +212,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
                     } else {
                         menuOptions[2] = "Cancelled";
                     }
-                    menu.setColorEnabledOption(0x00880000);
+                    setColorEnabledOption(0x00880000);
                 }
             }
         })).start();

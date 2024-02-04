@@ -132,7 +132,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         log("reset");
         points = 0;
         gameoverCountdown = 0;
-        if (MenuCanvas.isWorldgenEnabled) {
+        if (WorldGen.isEnabled) {
             worldgen = new WorldGen(world);
             flipCounter = new FlipCounter();
             log("wg started");
@@ -372,7 +372,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     if (pauseDelay > 0)
                         pauseDelay--;
 
-                    if (MenuCanvas.isWorldgenEnabled) {
+                    if (WorldGen.isEnabled) {
                         flipCounter.tick();
                     }
 
@@ -595,7 +595,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         Logger.paint(g);
         
         // score counter
-        if (MenuCanvas.isWorldgenEnabled && world != null) {
+        if (WorldGen.isEnabled && world != null) {
             g.setColor(flipIndicator, flipIndicator, 255);
             setFont(largefont, g);
             g.drawString(String.valueOf(points), world.halfScWidth, world.scHeight - currentFontH * 3 / 2,
@@ -676,7 +676,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         stopped = true;
         isFirstStart = false;
         uninterestingDebug = false;
-        MenuCanvas.isWorldgenEnabled = false;
+        WorldGen.isEnabled = false;
         Main.set(new MenuCanvas());
     }
     

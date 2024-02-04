@@ -12,28 +12,20 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.lcdui.Graphics;
-import javax.microedition.lcdui.game.GameCanvas;
 
 /**
  *
  * @author vipaol
  */
-public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback {
+public class Levels extends GenericMenu implements Runnable {
 
-    Vector levelNames = new Vector();
-
-    private int scW = Main.sWidth, scH = Main.sHeight;
-    
-    boolean paused = false;
-    boolean stopped = false;
+    private Vector levelNames = new Vector();
     
     private static int fontSizeCache = -1;
-    private GenericMenu menu = new GenericMenu(this);
     
-    FileUtils files = new FileUtils("Levels");
+    private FileUtils files = new FileUtils("Levels");
 
     public Levels() {
-        super(false);
         Logger.log("Levels:constructor");
         setFullScreenMode(true);
         paint();
@@ -41,7 +33,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     }
 
     public void init() {
-        stopped = false;
+        isStopped = false;
         levelNames = new Vector();
         Logger.log("Levels:start()");
         try {
@@ -57,8 +49,8 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
         }
         // TODO: separate with pages -----------------------!
         levelNames.addElement("--Back--");
-        menu.loadParams(scW, scH, levelNames, 1, levelNames.size() - 1, levelNames.size() - 1, fontSizeCache);
-        fontSizeCache = menu.getFontSize();
+        loadParams(Main.sWidth, Main.sHeight, levelNames, 1, levelNames.size() - 1, levelNames.size() - 1, fontSizeCache);
+        fontSizeCache = getFontSize();
         showNotify();
     }
     
@@ -83,7 +75,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
             public void run() {
                 GameplayCanvas gameCanvas = new GameplayCanvas(readWorldFile(path));
                 Main.set(gameCanvas);
-                stopped = true;
+                isStopped = true;
             }
         })).start();
     }
@@ -105,12 +97,12 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     }
     
     public void selectPressed() {
-        if (menu.selected == levelNames.size() - 1) {
-            stopped = true;
+        if (selected == levelNames.size() - 1) {
+            isStopped = true;
             Main.set(new MenuCanvas());
         } else {
             try {
-                startLevel((String) levelNames.elementAt(menu.selected));
+                startLevel((String) levelNames.elementAt(selected));
             } catch (NullPointerException ex) {
                 Main.showAlert(ex);
             } catch (SecurityException ex) {
@@ -127,13 +119,13 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
         long sleep = 0;
         long start = 0;
         
-        paused = false;
-        while (!stopped) {
-            if (scH != getHeight()) {
+        isPaused = false;
+        while (!isStopped) {
+            if (h != getHeight()) {
                 fontSizeCache = -1;
                 showNotify();
             }
-            if (!paused) {
+            if (!isPaused) {
                 start = System.currentTimeMillis();
                 paint();
 
@@ -153,58 +145,9 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     public void paint() {
         Graphics g = getGraphics();
         g.setColor(0);
-        g.fillRect(0, 0, scW, scH);
-        menu.paint(g);
-        menu.tick();
+        g.fillRect(0, 0, w, h);
+        super.paint(g);
+        tick();
         flushGraphics();
-    }
-    
-    protected void showNotify() {
-        paused = false;
-        sizeChanged(getWidth(), getHeight());
-        menu.handleShowNotify();
-    }
-    
-    protected void sizeChanged(int w, int h) {
-        Main.sWidth = scW = w;
-        Main.sHeight = scH = h;
-        menu.reloadCanvasParameters(scW, scH);
-        paint();
-    }
-
-    protected void hideNotify() {
-        paused = true;
-        menu.handleHideNotify();
-    }
-    
-    public void setIsPaused(boolean isPaused) {
-        this.paused = isPaused;
-    }
-    
-    public void keyPressed(int keyCode) {
-        if(menu.handleKeyPressed(keyCode)) {
-            selectPressed();
-        }
-    }
-    public void keyReleased(int keyCode) {
-        menu.handleKeyReleased(keyCode);
-    }
-
-    protected void pointerPressed(int x, int y) {
-        menu.handlePointer(x, y);
-    }
-
-    protected void pointerDragged(int x, int y) {
-        menu.handlePointer(x, y);
-    }
-
-    protected void pointerReleased(int x, int y) {
-        if (menu.handlePointer(x, y)) {
-            selectPressed();
-        }
-    }
-
-    public boolean getIsPaused() {
-        return paused;
     }
 }

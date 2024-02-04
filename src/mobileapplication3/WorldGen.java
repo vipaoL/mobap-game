@@ -21,6 +21,8 @@ import java.util.Random;
  */
 public class WorldGen implements Runnable {
     
+    public static boolean isEnabled = false;
+    
     int stdStructsNumber = 6;
     int floorWeightInRandom = 4;
     
@@ -82,7 +84,7 @@ public class WorldGen implements Runnable {
     
     public void run() {
         Logger.log("wg:run()");
-        while(MenuCanvas.isWorldgenEnabled) {
+        while(isEnabled) {
             try {
                 long startTime = System.currentTimeMillis();
                 tick();

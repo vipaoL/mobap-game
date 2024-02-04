@@ -12,44 +12,33 @@ import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
-import javax.microedition.lcdui.game.GameCanvas;
 
 /**
  *
  * @author vipaol
  */
-public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Feedback {
-    String url = "https://github.com/vipaoL/mobap-game";
-    String urlPreview = "github: vipaoL/mobap-game";
-    String[] strings = {"J2ME game on emini", "physics engine"};
-    String[] menuOpts = {""/*there is qr code*/,
-        urlPreview,
+public class AboutScreen extends GenericMenu implements Runnable {
+    private static final String URL = "https://github.com/vipaoL/mobap-game";
+    private static final String URL_PREVIEW = "github: vipaoL/mobap-game";
+    private static final String[] STRINGS = {"J2ME game on emini", "physics engine"};
+    private static final String[] MENU_OPTS = {""/*there is qr code*/,
+        URL_PREVIEW,
         "Version: " + Main.thiss.getAppProperty("MIDlet-Version"),
         "Back"};
-    int counter = 17;
+    private int counter = 17;
     private int scW = Main.sWidth, scH = Main.sHeight;
-    int qrOffsetH = 0;
-    int extraVerticalMargin = 0;
-    int qrSide = 0;
-    int margin = 0;
+    private int extraVerticalMargin = 0;
+    private int qrSide = 0;
+    private int margin = 0;
     private static int fontSizeCache = -1;
-    Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-    int fontH = font.getHeight();
-    Font font2 = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-    int font2H = font2.getHeight();
-    Font font3 = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    int font3H = font3.getHeight();
-
-    boolean paused = false;
-    boolean stopped = false;
-    boolean bigQRIsDrawn = false;
+    private Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL),
+            font3 = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    private int fontH = font.getHeight();
+    private boolean bigQRIsDrawn = false;
     
-    Image qr, qrBig;
-    
-    private GenericMenu menu = new GenericMenu(this);
+    private Image qr, qrBig;
 
     public AboutScreen() {
-        super(false);
         setFullScreenMode(true);
         getGraphics().fillRect(0, 0, scW, scH);
         flushGraphics();
@@ -58,22 +47,17 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     
     private void init() {
         int menuBtnsOffsetH = drawHeaderAndQR(null);
-        menu.loadParams(0,
+        loadParams(0,
                 menuBtnsOffsetH,
                 scW,
                 scH - menuBtnsOffsetH - margin - extraVerticalMargin,
-                menuOpts, 0,
-                menuOpts.length - 1,
-                menuOpts.length - 1,
+                MENU_OPTS, 0,
+                MENU_OPTS.length - 1,
+                MENU_OPTS.length - 1,
                 fontSizeCache);
 
-        fontSizeCache = menu.getFontSize();
-        menu.setFirstDrawable(1);
-    }
-
-    protected void showNotify() {
-        paused = false;
-        menu.handleShowNotify();
+        fontSizeCache = getFontSize();
+        setFirstDrawable(1);
     }
     
     protected void sizeChanged(int w, int h) {
@@ -82,15 +66,15 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         }
         Main.sWidth = scW = w;
         Main.sHeight = scH = h;
-        qrSide = scH/* - font2H*/ - fontH * (strings.length + menuOpts.length + 1);
+        qrSide = scH/* - font2H*/ - fontH * (STRINGS.length + MENU_OPTS.length + 1);
         margin = fontH/2;
         if (qrSide > scW - margin*2) {
             qrSide = scW - margin*2;
         }
         
-        int headerAndQrH = fontH * (strings.length) + 3*margin + qrSide;
-        int buttonsFontH = menu.findOptimalFont(scW, scH - headerAndQrH - margin, menuOpts);
-        extraVerticalMargin = (scH - (headerAndQrH + (3*menuOpts.length/2)*buttonsFontH + margin)) / 4;
+        int headerAndQrH = fontH * (STRINGS.length) + 3*margin + qrSide;
+        int buttonsFontH = findOptimalFont(scW, scH - headerAndQrH - margin, MENU_OPTS);
+        extraVerticalMargin = (scH - (headerAndQrH + (3*MENU_OPTS.length/2)*buttonsFontH + margin)) / 4;
         if (extraVerticalMargin < 0) {
             extraVerticalMargin = 0;
         }
@@ -118,21 +102,16 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         }
         
         int menuBtnsOffsetH = drawHeaderAndQR(null);
-        menu.reloadCanvasParameters(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH);
-    }
-
-    protected void hideNotify() {
-        paused = true;
-        menu.handleHideNotify();
+        reloadCanvasParameters(0, menuBtnsOffsetH, scW, scH - menuBtnsOffsetH);
     }
 
     public void destroyApp(boolean unconditional) {
-        stopped = true;
+        isStopped = true;
         Main.exit();
     }
     
     public void setIsPaused(boolean isPaused) {
-        this.paused = isPaused;
+        this.isPaused = isPaused;
     }
 
     public void run() {
@@ -140,18 +119,18 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         long start;
         
         if (Main.PRE_VERSION >= 0) {
-            for (int i = 0; i < menuOpts.length; i++) {
-                if (menuOpts[i].startsWith("Version: ")) {
-                    menuOpts[i] += "-pre" + Main.PRE_VERSION;
+            for (int i = 0; i < MENU_OPTS.length; i++) {
+                if (MENU_OPTS[i].startsWith("Version: ")) {
+                    MENU_OPTS[i] += "-pre" + Main.PRE_VERSION;
                     break;
                 }
             }
         }
         String commitHash = Main.thiss.getAppProperty("Commit");
         if (commitHash != null) {
-            for (int i = 0; i < menuOpts.length; i++) {
-                if (menuOpts[i].startsWith("Version: ")) {
-                    menuOpts[i] += "-" + commitHash;
+            for (int i = 0; i < MENU_OPTS.length; i++) {
+                if (MENU_OPTS[i].startsWith("Version: ")) {
+                    MENU_OPTS[i] += "-" + commitHash;
                     break;
                 }
             }
@@ -159,12 +138,12 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         
         sizeChanged(getWidth(), getHeight());
         
-        if (!menu.isInited) {
+        if (!isMenuInited()) {
             init();
         }
 
-        while (!stopped) {
-            if (!paused) {
+        while (!isStopped) {
+            if (!isPaused) {
                 start = System.currentTimeMillis();
                 // catch screen rotation
                 if (scW != getWidth()) {
@@ -176,7 +155,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
                 //
                 //   if big qr is open, draw it oncely,
                 // and then we don't need to refresh screen
-                if (menu.selected != 0 || !bigQRIsDrawn) {
+                if (selected != 0 || !bigQRIsDrawn) {
                     paint();
                 }
 
@@ -198,10 +177,10 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, scW, scH);
         drawHeaderAndQR(g);
-        menu.paint(g);
-        menu.tick();
+        super.paint(g);
+        tick();
         
-        if (menu.selected == 0) {
+        if (selected == 0) {
             drawBigQR(g);
         } else {
             bigQRIsDrawn = false;
@@ -215,10 +194,10 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         }
         
         int offset = margin + extraVerticalMargin;
-        for (int i = 0; i < strings.length; i++) {
+        for (int i = 0; i < STRINGS.length; i++) {
             if (g != null) {
                 g.setFont(font);
-                g.drawString(strings[i], scW/2, offset, Graphics.HCENTER | Graphics.TOP);
+                g.drawString(STRINGS[i], scW/2, offset, Graphics.HCENTER | Graphics.TOP);
             }
             offset += fontH;
         }
@@ -253,33 +232,10 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         }
     }
 
-    public void keyReleased(int keyCode) {
-        menu.handleKeyReleased(keyCode);
-    }
-
-    public void keyPressed(int keyCode) {
-        if(menu.handleKeyPressed(keyCode)) {
-            selectPressed();
-        }
-    }
-
-    protected void pointerPressed(int x, int y) {
-        menu.handlePointer(x, y);
-    }
-
-    protected void pointerDragged(int x, int y) {
-        menu.handlePointer(x, y);
-    }
-
-    protected void pointerReleased(int x, int y) {
-        if (menu.handlePointer(x, y)) {
-            selectPressed();
-        }
-    }
     void openLink() {
-        Logger.log(url);
+        Logger.log(URL);
         try {
-            if (Main.thiss.platformRequest(url)) {
+            if (Main.thiss.platformRequest(URL)) {
                 Main.exit();
             }
         } catch (ConnectionNotFoundException ex) {
@@ -288,28 +244,28 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
     }
 
     void selectPressed() {
-        int selected = menu.selected;
-        if (selected == menuOpts.length - 3) {
+        int selected = this.selected;
+        if (selected == MENU_OPTS.length - 3) {
             openLink();
         }
-        if (selected == menuOpts.length - 2) {
+        if (selected == MENU_OPTS.length - 2) {
             counter+=1;
             if (counter == 20) {
-                stopped = true;
+                isStopped = true;
                 
-                MenuCanvas.isWorldgenEnabled = true;
+                WorldGen.isEnabled = true;
                 
                 World test3 = new World();
                 test3.setGravity(FXVector.newVector(10, 100));
                 GraphicsWorld test2 = new GraphicsWorld(test3);
                 GraphicsWorld.bg = true;
                 GameplayCanvas test = new GameplayCanvas(test2);
-                test.uninterestingDebug = true;
+                GameplayCanvas.uninterestingDebug = true;
                 Main.set(test);
             }
         }
-        if (selected == menuOpts.length - 1) {
-            stopped = true;
+        if (selected == MENU_OPTS.length - 1) {
+            isStopped = true;
             Main.set(new MenuCanvas());
         }
     }
@@ -350,8 +306,5 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         rawInput = null;
         return Image.createRGBImage(rawOutput, newWidth, newHeight, true);
 
-    }
-    public boolean getIsPaused() {
-        return paused;
     }
 }

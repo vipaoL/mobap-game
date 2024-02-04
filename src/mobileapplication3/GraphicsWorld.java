@@ -69,7 +69,7 @@ public class GraphicsWorld extends World {
 
     public void addCar() {
         int x = 0;
-        if (MenuCanvas.isWorldgenEnabled) {
+        if (WorldGen.isEnabled) {
             x = -3000;
         }
         addCar(x, -400, FXUtil.TWO_PI_2FX / 360 * 30);

@@ -9,7 +9,6 @@ import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Image;
 import javax.microedition.midlet.*;
 
@@ -20,6 +19,7 @@ public class Main extends MIDlet {
     
     // for numbering snapshots. e.g.: '1', '2', '3', ... .
     // '-1' if release
+    // TODO: move to manifest
     public static int PRE_VERSION = -1;
     
     // time for one frame. 1000ms / 50ms = 20fps

@@ -6,7 +6,6 @@
 package mobileapplication3;
 
 import java.util.Vector;
-import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
@@ -15,30 +14,31 @@ import javax.microedition.lcdui.game.GameCanvas;
  *
  * @author vipaol
  */
-public class GenericMenu {
+public abstract class GenericMenu extends GameCanvas {
     private static final int PAUSE_DELAY = 5;
     private static final int KEY_PRESS_DELAY = 5;
     
-    private int x0, y0, w, h, fontH, tick = 0, k = 10, keyPressDelay = 0,
+    public int w, h;
+    private int x0, y0, fontH, tick = 0, k = 10, keyPressDelay = 0,
             keyPressDelayAfterShowing = 5, firstReachable, lastReachable,
-            firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY;
-    public int lastKeyCode = 0;
+            firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY, lastKeyCode = 0;
     
-    int selected;
+    public int selected;
     
     // colors
     private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040,
             pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00,
             colUnreachable = 0x00888888, colReachableEnabled = 0x00ccff00;
-    String[] options;
+    private String[] options;
     
     private boolean isPressedByPointerNow, firstload = true,
             isSpecialOptionActivated = false, isSelectPressed = false,
             isSelectAlreadyPressed = false, isStatemapEnabled = false,
             fontFound = false;
     
-    public boolean isKnownButton = true;
-    public boolean isInited = false;
+    private boolean isKnownButton = true, isInited = false;
+    public boolean isPaused = false;
+    public boolean isStopped = false;
     private Font font;
     private int[] stateMap = null;
     public static final int STATE_INACTIVE = -1;
@@ -57,11 +57,8 @@ public class GenericMenu {
     public static final int SE_KEY_BACK = -11;
     public static final int KEY_SOFT_RIGHT = -7;
     
-    Feedback feedback;
-    Canvas util = new Canvas() {protected void paint(Graphics g) {}};
-    
-    public GenericMenu(Feedback feedback) {
-        this.feedback = feedback;
+    public GenericMenu() {
+        super(false);
     }
     
     public void paint(Graphics g) {
@@ -101,6 +98,11 @@ public class GenericMenu {
                 if (DebugMenu.isDebugEnabled && DebugMenu.showFontSize) {
                     g.drawString(String.valueOf(font.getSize()), x0, y0, 0); // display text size (for debug)
                 }
+            }
+            
+            if (!isKnownButton) {
+                g.setColor(127, 127, 127);
+                g.drawString("Unknown keyCode=" + lastKeyCode, Main.sWidth, Main.sHeight, Graphics.BOTTOM | Graphics.RIGHT);
             }
         } else {
             g.setColor(128, 128, 128);
@@ -144,16 +146,36 @@ public class GenericMenu {
                 return false;
             }
         }
+        
         if (n < firstReachable || n > lastReachable) {
             return false;
         }
+        
         return true;
+    }
+    
+    public boolean isMenuInited() {
+        return isInited;
+    }
+    
+    protected void pointerPressed(int x, int y) {
+        handlePointer(x, y);
+    }
+
+    protected void pointerDragged(int x, int y) {
+        handlePointer(x, y);
+    }
+
+    protected void pointerReleased(int x, int y) {
+        if (handlePointer(x, y)) {
+            selectPressed();
+        }
     }
     
     public boolean handlePointer(int x, int y) {
         x -= x0;
         y -= y0;
-        feedback.setIsPaused(false);
+        isPaused = false;
         int selected = firstDrawable + y / k;
         if (selected < firstReachable && firstReachable < firstDrawable) {
             selected = firstReachable;
@@ -175,7 +197,7 @@ public class GenericMenu {
                 isKnownButton = true;
             }
         }
-        feedback.setIsPaused(false);
+        isPaused = false;
         isSelectAlreadyPressed = isSelectPressed;
         
         if (keyPressDelay < 1) {
@@ -186,7 +208,7 @@ public class GenericMenu {
                 needRepeat = false;
                 if (keyStates == GameCanvas.UP) {
                     isKnownButton = true;
-                    feedback.setIsPaused(false);
+                    isPaused = false;
                     if (selected > firstReachable) {
                         selected--;
                     } else {
@@ -196,7 +218,7 @@ public class GenericMenu {
                 } else if (keyStates == GameCanvas.DOWN) {
                     //Main.log("down");
                     isKnownButton = true;
-                    feedback.setIsPaused(false);
+                    isPaused = false;
                     if (selected < lastReachable) {
                         selected++;
                     } else {
@@ -211,10 +233,16 @@ public class GenericMenu {
         return isSelectPressed && !isSelectAlreadyPressed;
     }
     
+    public void keyPressed(int keyCode) {
+        if(handleKeyPressed(keyCode)) {
+            selectPressed();
+        }
+    }
+    
     public boolean handleKeyPressed(int keyCode) {
         lastKeyCode = keyCode;
         isKnownButton = false;
-        feedback.setIsPaused(false);
+        isPaused = false;
         Logger.log("pressed:", keyCode);
         boolean pressed = false;
         int selected = -1;
@@ -295,7 +323,7 @@ public class GenericMenu {
             case -6: // left soft button
                 handleKeyStates(GameCanvas.FIRE_PRESSED);
             default:
-                return handleKeyStates(util.getGameAction(keyCode));
+                return handleKeyStates(getGameAction(keyCode));
         }
         selected += firstReachable;
         if (keyCode == GameCanvas.KEY_NUM0 || keyCode == KEY_SOFT_RIGHT || keyCode == SIEMENS_KEY_LEFT || keyCode == SE_KEY_BACK) {
@@ -317,7 +345,7 @@ public class GenericMenu {
         return false;
     }
     
-    public void handleKeyReleased(int keyCode) {
+    public void keyReleased(int keyCode) {
         keyPressDelay = 0;
         isSelectPressed = false;
         isSelectAlreadyPressed = false;
@@ -358,21 +386,26 @@ public class GenericMenu {
      * It prevents siemens' bug that calls hideNotify right after
      * calling showNotify.
      */
-    public void handleShowNotify() {
+    public void showNotify() {
+        Logger.log("menu:showNotify");
+        sizeChanged(getWidth(), getHeight());
+        
+        isPaused = false;
         pauseDelay = PAUSE_DELAY;
     }
     
-    /**
-     * Should be places in the END of hideNotify() (after "isPaused = true").
-     * <p>handleShowNotify() in its right place is also needed.
-     * <p>
-     * It prevents siemens' bug that calls hideNotify right after
-     * calling showNotify.
-     */
-    public void handleHideNotify() {
-        if (pauseDelay > 0) {
-            feedback.setIsPaused(false);
+    public void hideNotify() {
+        Logger.log("menu:hideNotify");
+        // It prevents a bug on siemens that calls hideNotify right after calling showNotify.
+        if (pauseDelay <= 0) {
+            isPaused = true;
         }
+    }
+    
+    protected void sizeChanged(int w, int h) {
+        Main.sWidth = w;
+        Main.sHeight = h;
+        reloadCanvasParameters(w, h);
     }
     
     
@@ -433,6 +466,9 @@ public class GenericMenu {
     public void setColorEnabledOption(int color_hex) {
         colReachableEnabled = color_hex;
     }
+    public void setColorUnreachableOption(int color_hex) {
+        colUnreachable = color_hex;
+    }
     public void setSpecialOptnActColor(int colorActivated) {
         specialOptionActivatedColor = colorActivated;
     }
@@ -483,8 +519,5 @@ public class GenericMenu {
         }
     }
     
-    public interface Feedback {
-        boolean getIsPaused();
-        void setIsPaused(boolean isPaused);
-    }
+    abstract void selectPressed();
 }

@@ -6,16 +6,14 @@
 
 package mobileapplication3;
 
-import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.lcdui.Graphics;
 
 /**
  *
  * @author vipaol
  */
-public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedback {
-    private GenericMenu menu = new GenericMenu(this);
-    private String[] menuOpts = {
+public class DebugMenu extends GenericMenu implements Runnable {
+    private static final String[] MENU_OPTS = {
         "Enable debug options",
         "-----",
         "show log",
@@ -28,12 +26,9 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     };
     
     // array with states of all buttons (active/inactive/enabled)
-    private final int[] statemap = new int[menuOpts.length]; 
-    boolean stopped = false;
-    boolean isPaused = false;
-    private int scW = Main.sWidth, scH = Main.sHeight;
+    private final int[] statemap = new int[MENU_OPTS.length];
     private static int fontSizeCache = -1;
-    public static boolean isDebugEnabled = true;
+    public static boolean isDebugEnabled = false;
     public static boolean closerWorldgen = false;
     public static boolean coordinates = false;
     public static boolean discoMode = false;
@@ -51,45 +46,22 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public static boolean whatTheGame = false;
     
     public DebugMenu() {
-        super(false);
         setFullScreenMode(true);
-        paint();
         (new Thread(this, "debug menu")).start();
     }
     
     private void init() {
         sizeChanged(getWidth(), getHeight());
         statemap[1] = -1; // set "-----" separator as inactive button
-        menu.loadParams(scW, scH, menuOpts, statemap, fontSizeCache);
-        fontSizeCache = menu.getFontSize();
-        menu.setSpecialOption(0);
+        loadParams(Main.sWidth, Main.sHeight, MENU_OPTS, statemap, fontSizeCache);
+        fontSizeCache = getFontSize();
+        setSpecialOption(0);
         refreshStates();
     }
     
-    public boolean getIsPaused() {
-        return isPaused;
-    }
-    
-    public void setIsPaused(boolean isPaused) {
-        this.isPaused = isPaused;
-    }
-    
-    protected void hideNotify(){
-        isPaused = true;
-        menu.handleHideNotify();
-    }
-    
     protected void sizeChanged(int w, int h) {
-        Main.sWidth = scW = w;
-        Main.sHeight = scH = h;
         fontSizeCache = -1;
-        menu.reloadCanvasParameters(scW, scH);
-        paint();
-    }
-    
-    protected void showNotify(){
-        isPaused = false;
-        menu.handleShowNotify();
+        super.sizeChanged(w, h);
     }
 
     public void run() {
@@ -98,11 +70,11 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
         
         paint();
         
-        if (!menu.isInited) {
+        if (!isMenuInited()) {
             init();
         }
 
-        while (!stopped) {
+        while (!isStopped) {
             if (!isPaused) {
                 start = System.currentTimeMillis();
                 paint();
@@ -123,32 +95,28 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     public void paint() {
         Graphics g = getGraphics();
         g.setColor(0, 0, 0);
-        g.fillRect(0, 0, Math.max(scW, scH), Math.max(scW, scH));
+        g.fillRect(0, 0, Math.max(w, h), Math.max(w, h));
         
-        if (menu.isInited) {
-            menu.paint(g);
-            menu.tick();
+        if (isMenuInited()) {
+            super.paint(g);
+            tick();
         }
         
-        if (!menu.isKnownButton) {
-            g.setColor(127, 127, 127);
-            g.drawString("Unknown keyCode=" + menu.lastKeyCode, scW, scH, Graphics.BOTTOM | Graphics.RIGHT);
-        }
         flushGraphics();
     }
     void selectPressed() {
-        int selected = menu.selected;
+        int selected = this.selected;
         switch (selected) {
             case 0:
                 isDebugEnabled = !isDebugEnabled;
                 showFPS = isDebugEnabled;
                 showFontSize = isDebugEnabled;
-                menu.setIsSpecialOptnActivated(isDebugEnabled);
+                setIsSpecialOptnActivated(isDebugEnabled);
                 Logger.logToStdout(isDebugEnabled);
                 break;
             case 2:
                 if (!Logger.isOnScreenLogEnabled()) {
-                    Logger.enableOnScreenLog(scH);
+                    Logger.enableOnScreenLog(h);
                 } else {
                     Logger.disableOnScreenLog();
                 }
@@ -175,47 +143,26 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
             default:
                 break;
         }
-        if (selected == menuOpts.length - 1) {
-            stopped = true;
+        if (selected == MENU_OPTS.length - 1) {
+            isStopped = true;
             Main.set(new MenuCanvas());
         } else {
             refreshStates();
         }
     }
     void refreshStates() {
-        menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
+        setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         if (DebugMenu.isDebugEnabled) {
-            menu.setEnabledFor(Logger.isOnScreenLogEnabled(), 2);
-            menu.setEnabledFor(simulationMode, 3);
-            menu.setEnabledFor(discoMode, 4);
-            menu.setEnabledFor(whatTheGame, 5);
-            menu.setStateFor(/*music*/-1, 6); // set "music" as inactive button. it's buggy
-            menu.setEnabledFor(oneFrameTwoTicks, 7);
+            setEnabledFor(Logger.isOnScreenLogEnabled(), 2);
+            setEnabledFor(simulationMode, 3);
+            setEnabledFor(discoMode, 4);
+            setEnabledFor(whatTheGame, 5);
+            setStateFor(/*music*/-1, 6); // set "music" as inactive button. it's buggy
+            setEnabledFor(oneFrameTwoTicks, 7);
         } else {
-            for (int i = 2; i < menuOpts.length - 1; i++) {
-                menu.setStateFor(-1, i);
+            for (int i = 2; i < MENU_OPTS.length - 1; i++) {
+                setStateFor(-1, i);
             }
         }
-    }
-    protected void pointerPressed(int x, int y) {
-        menu.handlePointer(x, y);
-    }
-
-    protected void pointerDragged(int x, int y) {
-        menu.handlePointer(x, y);
-    }
-
-    protected void pointerReleased(int x, int y) {
-        if (menu.handlePointer(x, y)) {
-            selectPressed();
-        }
-    }
-    public void keyPressed(int keyCode) {
-        if(menu.handleKeyPressed(keyCode)) {
-            selectPressed();
-        }
-    }
-    public void keyReleased(int keyCode) {
-        menu.handleKeyReleased(keyCode);
     }
 }
