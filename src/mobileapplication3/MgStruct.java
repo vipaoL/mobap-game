@@ -41,17 +41,17 @@ public class MgStruct {
     String sep = "/";
     
     public MgStruct() {
-        Main.log("MGStruct constructor");
+        Logger.log("MGStruct constructor");
         if (!isInited) {
-            Main.log("mgs init");
+            Logger.log("mgs init");
             for (int i = 1; readRes("/" + i + ".mgstruct"); i++) {
-                Main.log(i + ".mgstruct");
+                Logger.log(i + ".mgstruct");
             }
 
-            Main.log("MGStruct:loaded " + loadedStructsNumber);
+            Logger.log("MGStruct:loaded " + loadedStructsNumber);
             loadedFromResNumber = loadedStructsNumber;
         }
-        Main.log("inited");
+        Logger.log("inited");
         isInited = true;
     }
     
@@ -70,7 +70,7 @@ public class MgStruct {
     }
     
     public boolean loadFromFiles() {
-        Main.log("mgs load()");
+        Logger.log("mgs load()");
         loadCancelled = false;
         FileUtils files = new FileUtils("MGStructs");
         files.setPrefixToDisable("-");
@@ -81,7 +81,7 @@ public class MgStruct {
             try {
                 dis = files.loadNext();
             } catch (SecurityException sex) {
-                Main.log("mgs:load cancelled");
+                Logger.log("mgs:load cancelled");
                 sex.printStackTrace();
                 loadCancelled = true;
             } catch (NullPointerException ex) {
@@ -109,7 +109,7 @@ public class MgStruct {
         } else {
             loadedStructsNumber = loadedFromResNumber;
         }
-        Main.log("mg:loaded: " + loadedFromFiles);
+        Logger.log("mg:loaded: " + loadedFromFiles);
         return loadedFromFiles > 0;
     }
 
@@ -122,7 +122,7 @@ public class MgStruct {
                 if (fileFormatVervion > 0) {
                     length = dis.readShort();
                 }
-                Main.log("read: ver=" + fileFormatVervion + " length=" + length);
+                Logger.log("read: ver=" + fileFormatVervion + " length=" + length);
                 
                 short[][] structure = new short[length][];
                 for (int c = 0; true; c++) {
@@ -146,12 +146,12 @@ public class MgStruct {
                 dis.close();
                 return true;
             } else {
-                Main.log("Unsupported file format version: " + fileFormatVervion);
+                Logger.log("Unsupported file format version: " + fileFormatVervion);
                 dis.close();
                 return false;
             }
         } catch(ArrayIndexOutOfBoundsException ex) {
-            Main.log("error parsing file");
+            Logger.log("error parsing file");
             ex.printStackTrace();
             dis.close();
             return false;
@@ -159,7 +159,7 @@ public class MgStruct {
     }
     
     void saveStructToStorage(short[][] data) {
-        Main.log("savivg new structure, id=" + loadedStructsNumber);
+        Logger.log("savivg new structure, id=" + loadedStructsNumber);
         structStorage[loadedStructsNumber] = data;
         loadedStructsNumber++;
     }

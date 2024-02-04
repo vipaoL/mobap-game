@@ -123,19 +123,19 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             initWorld();
         }
         
-        Main.logMessageDelay = 50;
+        Logger.setLogMessageDelay(50);
         currentEffects = new short[1][];
         log("gcanvas:starting thread");
     }
     
     void reset() {
-        Main.log("reset");
+        log("reset");
         points = 0;
         gameoverCountdown = 0;
         if (MenuCanvas.isWorldgenEnabled) {
             worldgen = new WorldGen(world);
             flipCounter = new FlipCounter();
-            Main.log("wg started");
+            log("wg started");
         }
         setLoadingProgress(50);
         world.addCar();
@@ -152,21 +152,21 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     }
     
     private void setDefaultWorld() {
-        Main.log("gCanv:reading world");
+        log("gCanv:reading world");
         PhysicsFileReader reader = new PhysicsFileReader("/void.phy");
         setLoadingProgress(25);
         
-        Main.log("gCanv:loading world");
+        log("gCanv:loading world");
         World w = World.loadWorld(reader);
 
-        Main.log("gCanv:new grWorld");
+        log("gCanv:new grWorld");
         // there's siemens c65 stucks if obfucsation is enabled
         world = new GraphicsWorld(w);
 
-        Main.log("gCanv:setting world");
+        log("gCanv:setting world");
         initWorld();
 
-        Main.log("gCanv:closing reader");
+        log("gCanv:closing reader");
         reader.close();
     }
 
@@ -196,7 +196,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
             log("thread:starting game cycle");
 
-            Main.logMessageDelay = 0;
+            Logger.setLogMessageDelay(0);
 
             // Main game cycle
             while (!stopped) {
@@ -278,7 +278,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                                 if (currentEffects[EFFECT_SPEED][0] > 0) {
                                     directionOffset = currentEffects[EFFECT_SPEED][1];
                                     speedMultipiler = speedMultipiler * currentEffects[EFFECT_SPEED][2] / 100;
-                                    Main.log(speedMultipiler);
+                                    Logger.log(speedMultipiler);
                                 }
                             }
                             int motorForceX = FXUtil.divideFX(FXUtil.toFX(Mathh.cos(carAngle - 15 + directionOffset) * speedMultipiler), TEN_FX * 5);
@@ -469,7 +469,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         if (isFirstStart && hintTime > 0) {
             int color = 255 * hintTime / 120;
             g.setColor(color/4, color/2, color/4);
-            if (Main.isScreenLogEnabled) {
+            if (Logger.isOnScreenLogEnabled()) {
                 //g.setColor(color/2, color/2, color/2);
             }
             g.fillRect(0, 0, scW/3, scH/6);
@@ -592,19 +592,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         }
         
         // draw on-screen log if enabled
-        if (Main.isScreenLogEnabled) {
-            g.setColor(150, 255, 150);
-            setFont(Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_PLAIN, Font.SIZE_SMALL), g);
-            for (int i = 0; i < Main.onScreenLog.length; i++) {
-                try {
-                    g.drawString(Main.onScreenLog[i], 0, currentFontH * i, Graphics.TOP | Graphics.LEFT);
-                } catch (NullPointerException ex) {
-                    
-                } catch (IllegalArgumentException ex) {
-                    
-                }
-            }
-        }
+        Logger.paint(g);
         
         // score counter
         if (MenuCanvas.isWorldgenEnabled && world != null) {
@@ -668,10 +656,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         currentFontH = currentFont.getHeight();
     }
     
-    // local method for autorefreshing screen after each logging
+    // log and repaint
     private void log(String text) {
-        Main.log(text);
-        if (Main.isScreenLogEnabled) paint();
+        Logger.log(text);
+        if (Logger.isOnScreenLogEnabled()) paint();
     }
     
     public void giveEffect(short[] data) {
@@ -801,8 +789,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     protected void pointerDragged(int x, int y) {
         if (pauseTouched | menuTouched) {
             if (x - pointerX > 3 | y - pointerY > 3) {
-                Main.log((x - pointerX) + "dx/dy" + (y - pointerY));
-                Main.log("btnPress cancelled:dragged");
+                log((x - pointerX) + "dx/dy" + (y - pointerY));
+                log("btnPress cancelled:dragged");
                 pauseTouched = false;
                 menuTouched = false;
             }

@@ -67,13 +67,13 @@ public class WorldGen implements Runnable {
     
     public WorldGen(GraphicsWorld w) {
         lock = 0;
-        Main.log("wg:starting");
+        Logger.log("wg:starting");
         lockGameThread("init");
         this.w = w;
         lndscp = w.getLandscape();
-        Main.log("wg:start()");
+        Logger.log("wg:start()");
         rand = new Random();
-        Main.log("wg:loading mgstruct");
+        Logger.log("wg:loading mgstruct");
         mgStruct = new MgStruct();
         reset();
         unlockGameThread("init");
@@ -81,7 +81,7 @@ public class WorldGen implements Runnable {
     }
     
     public void run() {
-        Main.log("wg:run()");
+        Logger.log("wg:run()");
         while(MenuCanvas.isWorldgenEnabled) {
             try {
                 long startTime = System.currentTimeMillis();
@@ -91,7 +91,7 @@ public class WorldGen implements Runnable {
                 ex.printStackTrace();
             }
         }
-        Main.log("wg stopped.");
+        Logger.log("wg stopped.");
     }
     
     public void tick() {
@@ -105,7 +105,7 @@ public class WorldGen implements Runnable {
                         lockGameThread("addSt");
                     }
                     gameTrLockedByAdding = true;
-                    Main.log("wg can't keep up, waiting;");
+                    Logger.log("wg can't keep up, waiting;");
                 }
                 currStep = STEP_ADD;
                 placeNext();
@@ -170,10 +170,10 @@ public class WorldGen implements Runnable {
         }
         
         if (lastY > 1000 | lastY < -1000) { // will correct height if it is too high or too low
-            Main.log("correcting height because lastY=", lastY);
+            Logger.log("correcting height because lastY=", lastY);
             floor(lastX, lastY, 1000 + rand.nextInt(4) * 100, (rand.nextInt(7) - 3) * 100);
         } else {
-            Main.log("placing: id=", nextStructRandomId);
+            Logger.log("placing: id=", nextStructRandomId);
             /*
             * 0 - circ1, 1 - sin, 2 - floorStat, 3 - circ2, 4 - abyss,
             * 5 - dotline, 6..9 - floor, 10 - mgstruct0, 11 - mgstruct1,
@@ -210,31 +210,31 @@ public class WorldGen implements Runnable {
                     break;
             }
         }
-        Main.log("lastX=", lastX);
+        Logger.log("lastX=", lastX);
         lowestY = Math.max(lastY, lowestY);
     }
     
     public void pause() {
-        Main.log("wg pause");
+        Logger.log("wg pause");
         needSpeed = true;
         paused = true;
     }
     
     public void resume() {
-        Main.log("wg resume");
+        Logger.log("wg resume");
         paused = false;
     }
     
     private void reset() {
         needSpeed = true;
-        Main.log("wg:restart()");
+        Logger.log("wg:restart()");
         prevStructRandomId = 1;
         nextStructRandomId = 2;
         lastX = -2900;
         nextPointsCounterTargetX = lastX + POINTS_DIVIDER;
         lastY = 0;
         try {
-            Main.log("wg:cleaning world");
+            Logger.log("wg:cleaning world");
             cleanWorld();
         } catch (NullPointerException e) {
             
@@ -265,7 +265,7 @@ public class WorldGen implements Runnable {
     
     public void lockGameThread(String where) {
         String msg = "locking by " + where;
-        Main.log(msg);
+        Logger.log(msg);
         lock++;
         GameplayCanvas.shouldWait = true;
         if (GameplayCanvas.isBusy) {
@@ -277,16 +277,16 @@ public class WorldGen implements Runnable {
                 }
             }
         }
-        Main.logReplaceLast(msg, "locked by " + where);
+        Logger.logReplaceLast(msg, "locked by " + where);
     }
     
     public void unlockGameThread(String where) {
-        Main.log("unlocking by " + where);
+        Logger.log("unlocking by " + where);
         lock--;
         if (lock <= 0) {
             GameplayCanvas.shouldWait = false;
         } else {
-            Main.log("not unlocking: " + lock);
+            Logger.log("not unlocking: " + lock);
         }
     }
     
@@ -324,7 +324,7 @@ public class WorldGen implements Runnable {
         int dx = -3000 - w.carbody.positionFX().xAsInt();
         lastX = lastX + dx;
         
-        Main.log("resetting pos");
+        Logger.log("resetting pos");
         
         moveLandscape(dx);
         moveBodies(dx);
@@ -379,13 +379,13 @@ public class WorldGen implements Runnable {
             
             if (numberOfLoggedStructs >= structLog.length) {
                 int ns = structLog.length+1;
-                Main.log("strcLog is too small. to " + ns);
+                Logger.log("strcLog is too small. to " + ns);
                 increase(ns);
             }
             
             short[] a = {(short) endX, (short) segsNumber};
             int nextID = (ringLogStart + numberOfLoggedStructs) % structLog.length;
-            Main.log("logging struct, to " + nextID);
+            Logger.log("logging struct, to " + nextID);
             structLog[nextID] = a;
             
             numberOfLoggedStructs++;
@@ -442,7 +442,7 @@ public class WorldGen implements Runnable {
                 // add a barrier to the left world border
                 if (!isLeftBarrierAdded) {
                     barrierX = structLog[getElementID(0)][0];
-                    Main.log("adding a barrier at " + barrierX);
+                    Logger.log("adding a barrier at " + barrierX);
                     lndscp.addSegment(FXVector.newVector(barrierX, -10000), FXVector.newVector(barrierX, 10000), (short) 1);
                     structLog[getElementID(1)][1] += 1;
                     isLeftBarrierAdded = true;
@@ -483,9 +483,9 @@ public class WorldGen implements Runnable {
                 } else
                     return false;
             } catch(NullPointerException ex) {
-                Main.enableLog(Main.sHeight);
-                Main.log(ex.toString());
-                Main.log("structLog:critical err");
+                Logger.enableOnScreenLog(Main.sHeight);
+                Logger.log(ex.toString());
+                Logger.log("structLog:critical err");
                 ex.printStackTrace();
                 return false;
             }
@@ -501,10 +501,10 @@ public class WorldGen implements Runnable {
     void placeMGStructByID(int id) {
         short[][] data = mgStruct.structStorage[id];
         if (data.length < 1) {
-            Main.log("placing mgstruct cancelled, length=", data.length);
+            Logger.log("placing mgstruct cancelled, length=", data.length);
             return;
         }
-        Main.log("placing mgstruct, id=", id);
+        Logger.log("placing mgstruct, id=", id);
         for (int i = 1; i < data.length; i++) {
             placePrimitive(data[i]);
         }

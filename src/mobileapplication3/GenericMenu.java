@@ -106,22 +106,7 @@ public class GenericMenu {
             g.setColor(128, 128, 128);
             g.drawString("Loading the menu...", Main.sWidth / 2, Main.sHeight, Graphics.BOTTOM | Graphics.HCENTER);
         }
-        if (Main.isScreenLogEnabled) {
-            g.setColor(150, 255, 150);
-            Font font = Font.getFont(Font.FACE_MONOSPACE, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-            g.setFont(font);
-            for (int j = 0; j <= Main.onScreenLogOffset; j++) {
-                try {
-                    if (Main.onScreenLog[j] != null) {
-                        g.drawString(Main.onScreenLog[j], 0, font.getHeight() * j, Graphics.TOP | Graphics.LEFT);
-                    }
-                } catch (NullPointerException ex) {
-                    g.drawString(j + "can't show log:NPE", 0, 0, Graphics.TOP | Graphics.LEFT);
-                } catch (IllegalArgumentException ex) {
-                    g.drawString(j + "can't show log:IAE", 0, 0, Graphics.TOP | Graphics.LEFT);
-                }
-            }
-        }
+        Logger.paint(g);
     }
     
     public int findOptimalFont(int canvW, int canvH, String[] options) {
@@ -230,7 +215,7 @@ public class GenericMenu {
         lastKeyCode = keyCode;
         isKnownButton = false;
         feedback.setIsPaused(false);
-        Main.log("pressed:", keyCode);
+        Logger.log("pressed:", keyCode);
         boolean pressed = false;
         int selected = -1;
         switch (keyCode) {
@@ -348,7 +333,7 @@ public class GenericMenu {
             if (fontSize == -1) {
                 fontH = findOptimalFont(w, h, options);
             } else {
-                Main.log("got fontSize:", fontSize);
+                Logger.log("got fontSize:", fontSize);
                 font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, fontSize);
                 fontH = font.getHeight();
             }
@@ -428,7 +413,7 @@ public class GenericMenu {
             if (stateMap.length == options.length) {
                 this.stateMap = stateMap;
                 isStatemapEnabled = true;
-                Main.log("stateMap loaded");
+                Logger.log("stateMap loaded");
             } else {
                 Main.showAlert("GenericMenu.loadStatemap:optionTypeMap.length must be == options.length");
             }

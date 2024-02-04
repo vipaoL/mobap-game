@@ -144,14 +144,15 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
                 showFPS = isDebugEnabled;
                 showFontSize = isDebugEnabled;
                 menu.setIsSpecialOptnActivated(isDebugEnabled);
+                Logger.logToStdout(isDebugEnabled);
                 break;
             case 2:
-                Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
-                if (Main.isScreenLogEnabled) { // TODO: <s>move to Main.java to make common toggleLog()</s> create Logger.java
-                    Main.enableLog(scH); // in MenuCanvas also uses this code
+                if (!Logger.isOnScreenLogEnabled()) {
+                    Logger.enableOnScreenLog(scH);
                 } else {
-                    Main.disableLog();
-                }   break;
+                    Logger.disableOnScreenLog();
+                }
+                break;
             case 3:
                 simulationMode = !simulationMode;
                 break;
@@ -184,7 +185,7 @@ public class DebugMenu extends GameCanvas implements Runnable, GenericMenu.Feedb
     void refreshStates() {
         menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         if (DebugMenu.isDebugEnabled) {
-            menu.setEnabledFor(Main.isScreenLogEnabled, 2);
+            menu.setEnabledFor(Logger.isOnScreenLogEnabled(), 2);
             menu.setEnabledFor(simulationMode, 3);
             menu.setEnabledFor(discoMode, 4);
             menu.setEnabledFor(whatTheGame, 5);

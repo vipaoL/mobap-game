@@ -254,7 +254,7 @@ public class GraphicsWorld extends World {
                     drawBody(g, bodies[i]);
                 } catch (NullPointerException ex) {
                     ex.printStackTrace();
-                    Main.log("can't draw" + bodyType);
+                    Logger.log("can't draw" + bodyType);
                 }
             }
         }
@@ -494,7 +494,7 @@ public class GraphicsWorld extends World {
     }
 
     void refreshScreenParameters() {
-        Main.log("world:refreshing screen params");
+        Logger.log("world:refreshing screen params");
         scWidth = Main.sWidth;
         halfScWidth = scWidth / 2;
         scHeight = Main.sHeight;

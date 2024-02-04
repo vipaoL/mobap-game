@@ -277,7 +277,7 @@ public class AboutScreen extends GameCanvas implements Runnable, GenericMenu.Fee
         }
     }
     void openLink() {
-        Main.log(url);
+        Logger.log(url);
         try {
             if (Main.thiss.platformRequest(url)) {
                 Main.exit();

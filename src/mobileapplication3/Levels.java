@@ -34,7 +34,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
 
     public Levels() {
         super(false);
-        Main.log("Levels:constructor");
+        Logger.log("Levels:constructor");
         setFullScreenMode(true);
         paint();
         (new Thread(this, "level picker")).start();
@@ -43,7 +43,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     public void init() {
         stopped = false;
         levelNames = new Vector();
-        Main.log("Levels:start()");
+        Logger.log("Levels:start()");
         try {
             levelNames.addElement("---levels---");
             getLevels();
@@ -63,7 +63,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     }
     
     public void getLevels() {
-        Main.log("Levels:getLevels()");
+        Logger.log("Levels:getLevels()");
         Enumeration list;
         while (true) {            
             list = files.getNextList();
@@ -123,7 +123,7 @@ public class Levels extends GameCanvas implements Runnable, GenericMenu.Feedback
     public void run() {
         sizeChanged(getWidth(), getHeight());
         init();
-        Main.log("Levels:run()");
+        Logger.log("Levels:run()");
         long sleep = 0;
         long start = 0;
         

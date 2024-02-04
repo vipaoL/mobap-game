@@ -38,7 +38,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
 
     public MenuCanvas() {
         super(false);
-        Main.log("menu:constr");
+        Logger.log("menu:constr");
         setFullScreenMode(true);
         //repaint();
         (new Thread(this, "menu canvas")).start();
@@ -46,22 +46,20 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     
     public MenuCanvas(int counterX, int counterY) {
         super(false);
-        Main.log("menu:constructor");
+        Logger.log("menu:constructor");
         setFullScreenMode(true);
         //repaint();
         (new Thread(this, "menu canvas")).start();
     }
     
     private void init() {
-        Main.log("menu:init");
+        Logger.log("menu:init");
         menu.setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         
         sizeChanged(getWidth(), getHeight());
         
-        if (Main.isScreenLogEnabled) {
-            Main.enableLog(scH);
-        } else {
-            Main.disableLog();
+        if (Logger.isOnScreenLogEnabled()) {
+            Logger.enableOnScreenLog(scH);
         }
         
         // menu initialization
@@ -78,7 +76,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     
     // init and refreshing screen parameters
     protected void showNotify() {
-        Main.log("menu:showNotify");
+        Logger.log("menu:showNotify");
         sizeChanged(getWidth(), getHeight());
         
         // enable screen refreshing
@@ -101,7 +99,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     }
 
     protected void hideNotify() {
-        Main.log("menu:hideNotify");
+        Logger.log("menu:hideNotify");
         isPaused = true;
         menu.handleHideNotify();
     }
@@ -164,7 +162,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
         }
         isGameStarted = true;
         waitingToStartGame = false;
-        Main.log("menu:startGame()");
+        Logger.log("menu:startGame()");
         repaint();
         try {
             isStopped = true;
@@ -174,20 +172,19 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
             Main.set(gameCanvas);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Main.enableLog(scH);
-            Main.log("ex in startGame():");
-            Main.log(ex.toString());
+            Logger.enableOnScreenLog(scH);
+            Logger.log("ex in startGame():");
+            Logger.log(ex.toString());
             repaint();
         }
     }
     
     public void keyPressed(int keyCode) {         // Keyboard
         if (keyCode == GameCanvas.KEY_STAR | keyCode == -10) {
-            Main.isScreenLogEnabled = !Main.isScreenLogEnabled;
-            if (Main.isScreenLogEnabled) {
-                Main.enableLog(scH);
+            if (!Logger.isOnScreenLogEnabled()) {
+                Logger.enableOnScreenLog(scH);
             } else {
-                Main.disableLog();
+                Logger.disableOnScreenLog();
             }
         }
         if(menu.handleKeyPressed(keyCode)) {
@@ -214,7 +211,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     void selectPressed() { // Do something when pressed an option in the menu
         selected = menu.selected;
         if (selected == 1) { // Play
-            Main.log("menu:selected == 1 -> gen = true");
+            Logger.log("menu:selected == 1 -> gen = true");
             isWorldgenEnabled = true;
             repaint();
             waitingToStartGame = true;
@@ -246,7 +243,7 @@ public class MenuCanvas extends GameCanvas implements Runnable, GenericMenu.Feed
     }
     
     void log(String s) {
-        Main.log(s);
+        Logger.log(s);
         repaint();
     }
 

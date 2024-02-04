@@ -42,7 +42,7 @@ public class FileUtils {
             roots = FileSystemRegistry.listRoots();
         } catch (SecurityException ex) {
             ex.printStackTrace();
-            Main.log("No permission to get roots");
+            Logger.log("No permission to get roots");
         }
     }
     
@@ -63,7 +63,7 @@ public class FileUtils {
     }
     
     public DataInputStream fileToDataInputStream(String path) {
-        Main.log(path);
+        Logger.log(path);
         try {
             FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
             return fc.openDataInputStream();
@@ -102,11 +102,11 @@ public class FileUtils {
             // don't load files with prefix (if set)
             if (prefixToDisable != null) {
                 if (name.startsWith(prefixToDisable) & !prefixToDisable.equals("")) {
-                    Main.log("file \"" + name + "\" was ignored due to name prefix \"-\"");
+                    Logger.log("file \"" + name + "\" was ignored due to name prefix \"-\"");
                     continue;
                 }
             }
-            Main.log("loading " + name);
+            Logger.log("loading " + name);
             return fileToDataInputStream(path + name);
         }
         return null;
@@ -142,10 +142,10 @@ public class FileUtils {
                     continue;
                 }
                 path += workingFolderName + sep;
-                Main.log(path);
+                Logger.log(path);
                 FileConnection fc = (FileConnection) Connector.open(path, Connector.READ);
                 canRead = true;
-                Main.log("reachable");
+                Logger.log("reachable");
                 if (fc.exists() & fc.isDirectory()) {
                     Enumeration list = fc.list();
                     if (list.hasMoreElements()) {
