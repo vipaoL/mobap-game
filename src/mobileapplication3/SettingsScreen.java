@@ -4,7 +4,7 @@ import javax.microedition.lcdui.Graphics;
 
 import utils.Settings;
 
-public class SettingsScreen  extends GenericMenu implements Runnable {
+public class SettingsScreen extends GenericMenu implements Runnable {
     private static final String[] MENU_OPTS = {
             "better graphics",
             "Debug settings",
