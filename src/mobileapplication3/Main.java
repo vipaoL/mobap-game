@@ -12,6 +12,8 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Image;
 import javax.microedition.midlet.*;
 
+import utils.Logger;
+
 /**
  * @author vipaol
  */

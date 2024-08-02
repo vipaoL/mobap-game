@@ -8,6 +8,7 @@ package mobileapplication3;
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.PhysicsFileReader;
 import utils.FileUtils;
+import utils.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -7,7 +7,9 @@ package mobileapplication3;
 import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
+import utils.Logger;
 import utils.Mathh;
+import utils.MobappGameSettings;
 import utils.Settings;
 
 import java.util.Random;
@@ -266,27 +268,38 @@ public class GraphicsWorld extends World {
     public void drawBody(Graphics g, Body b) {
         FXVector[] positions = b.getVertices();
         
-        if (b == carbody && DebugMenu.whatTheGame) {
-            g.setColor(0xff0000);
-            g.fillTriangle(xToPX(positions[0].xAsInt()),
-                    yToPX(positions[0].yAsInt()),
-                    xToPX(positions[1].xAsInt()),
-                    yToPX(positions[1].yAsInt()),
-                    xToPX(positions[2].xAsInt()),
-                    yToPX(positions[2].yAsInt()));
-            g.fillTriangle(xToPX(positions[0].xAsInt()),
-                    yToPX(positions[0].yAsInt()),
-                    xToPX(positions[3].xAsInt()),
-                    yToPX(positions[3].yAsInt()),
-                    xToPX(positions[2].xAsInt()),
-                    yToPX(positions[2].yAsInt()));
-        }
-        
         if (positions.length == 1) { // if shape of the body is circle
             int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
-            g.drawArc(xToPX(b.positionFX().xAsInt() - radius), yToPX(b.positionFX().yAsInt() - radius), radius * 2000 / zoomOut, radius * 2000 / zoomOut, 0, 360);
+            drawArc(g,
+            		xToPX(b.positionFX().xAsInt() - radius),
+            		yToPX(b.positionFX().yAsInt() - radius),
+            		radius * 2000 / zoomOut,
+            		radius * 2000 / zoomOut,
+            		0, 360, 10, currColBg);
         }
         else { // if not a circle, then a polygon
+        	if (b == carbody) {
+        		int prevColor = g.getColor();
+        		g.setColor(currColBg);
+        		if (DebugMenu.whatTheGame) {
+        			g.setColor(0xff0000);
+        		}
+                
+                g.fillTriangle(xToPX(positions[0].xAsInt()),
+                        yToPX(positions[0].yAsInt()),
+                        xToPX(positions[1].xAsInt()),
+                        yToPX(positions[1].yAsInt()),
+                        xToPX(positions[2].xAsInt()),
+                        yToPX(positions[2].yAsInt()));
+                g.fillTriangle(xToPX(positions[0].xAsInt()),
+                        yToPX(positions[0].yAsInt()),
+                        xToPX(positions[3].xAsInt()),
+                        yToPX(positions[3].yAsInt()),
+                        xToPX(positions[2].xAsInt()),
+                        yToPX(positions[2].yAsInt()));
+                g.setColor(prevColor);
+            }
+        	
             for (int i = 0; i < positions.length - 1; i++) {
                 drawLine(g,
                         xToPX(positions[i].xAsInt()),
@@ -385,19 +398,19 @@ public class GraphicsWorld extends World {
                 0, 360);
         
         g.setColor(currColBodies);
-        g.drawArc(
+        drawArc(g,
                 xToPX(b.positionFX().xAsInt() - radius),
                 yToPX(b.positionFX().yAsInt() - radius),
                 radius * 2000 / zoomOut,
                 radius * 2000 / zoomOut,
-                0, 360);
+                0, 360, 10, currColWheel);
     }
     
     void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
         if (DebugMenu.discoMode) {
             g.setColor(random.nextInt(16777216));
         }
-        if (thickness > 2 && Settings.isBetterGraphicsEnabled()) {
+        if (thickness > 1 && MobappGameSettings.isBetterGraphicsEnabled()) {
             int t2 = thickness/2;
             int dx = x2 - x1;
             int dy = y2 - y1;
@@ -444,7 +457,7 @@ public class GraphicsWorld extends World {
         
         g.setColor(0x00ff00);
         
-        if (thickness > 2 && Settings.isBetterGraphicsEnabled()) {
+        if (thickness > 1 && MobappGameSettings.isBetterGraphicsEnabled()) {
             int t2 = thickness/2;
             int dx = x2 - x1;
             int dy = y2 - y1;
@@ -474,6 +487,20 @@ public class GraphicsWorld extends World {
         } else {
             g.drawLine(x1, y1, x2, y2);
         }
+    }
+    
+    void drawArc(Graphics g, int x, int y, int w, int h, int startAngle, int arcAngle, int thickness, int bgColor) {
+    	int prevColor = g.getColor();
+    	thickness = thickness * 500 / zoomOut * 2;
+    	
+    	if (thickness > 1 && MobappGameSettings.isBetterGraphicsEnabled()) {
+	    	g.fillArc(x - thickness / 2, y - thickness / 2, w + thickness, h + thickness, startAngle, arcAngle);
+	    	g.setColor(bgColor);
+	    	g.fillArc(x + thickness / 2, y + thickness / 2, w - thickness, h - thickness, startAngle, arcAngle);
+	    	g.setColor(prevColor);
+    	} else {
+    		g.drawArc(x, y, w, h, startAngle, arcAngle);
+    	}
     }
 
 

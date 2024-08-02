@@ -13,8 +13,6 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 
-import mobileapplication3.Logger;
-
 /**
  *
  * @author vipaol

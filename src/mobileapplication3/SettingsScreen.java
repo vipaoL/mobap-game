@@ -2,6 +2,7 @@ package mobileapplication3;
 
 import javax.microedition.lcdui.Graphics;
 
+import utils.MobappGameSettings;
 import utils.Settings;
 
 public class SettingsScreen extends GenericMenu implements Runnable {
@@ -80,7 +81,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             int selected = this.selected;
             switch (selected) {
                 case 0:
-                    Settings.setBetterGraphicsEnabled(!Settings.isBetterGraphicsEnabled());
+                    MobappGameSettings.toggleBetterGraphics();
                     break;
                 default:
                     break;
@@ -96,6 +97,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             }
         }
         void refreshStates() {
-        	setEnabledFor(Settings.isBetterGraphicsEnabled(), 0);
+        	setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), 0);
         }
     }

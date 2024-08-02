@@ -13,6 +13,31 @@ import javax.microedition.lcdui.Font;
  * @author vipaol
  */
 public class Utils {
+	
+	public static String arrayToString(String[] arr) {
+        try {
+            if (arr == null) {
+                return "null";
+            }
+
+            if (arr.length == 0) {
+                return "[]";
+            }
+
+            StringBuffer sb = new StringBuffer(arr.length*6);
+            sb.append("[");
+            for (int i = 0; i < arr.length - 1; i++) {
+                sb.append(arr[i]);
+                sb.append(", ");
+            }
+            sb.append(arr[arr.length-1]);
+            sb.append("]");
+            return sb.toString();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            return ex.toString();
+        }
+    }
     
     public static String shortArrayToString(short [] arr) {
         try {

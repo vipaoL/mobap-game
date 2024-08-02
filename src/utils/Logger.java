@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mobileapplication3;
+package utils;
 
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
@@ -133,7 +133,7 @@ public class Logger {
         }
     }
 
-    static void setLogMessageDelay(int ms) {
+    public static void setLogMessageDelay(int ms) {
         logMessageDelay = ms;
     }
     

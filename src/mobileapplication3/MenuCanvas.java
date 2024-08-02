@@ -8,7 +8,9 @@ package mobileapplication3;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
 
+import utils.Logger;
 import utils.MgStruct;
+import utils.MobappGameSettings;
 import utils.Settings;
 
 /**
@@ -67,7 +69,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     }
     
     protected void sizeChanged(int w, int h) {
-    	Settings.isBetterGraphicsEnabled(Math.max(w, h) >= GraphicsWorld.BIGSCREEN_SIDE);
+    	MobappGameSettings.isBetterGraphicsEnabled(Math.max(w, h) >= GraphicsWorld.BIGSCREEN_SIDE);
         super.sizeChanged(w, h);
     }
     

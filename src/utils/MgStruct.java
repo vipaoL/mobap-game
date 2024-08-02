@@ -9,7 +9,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import mobileapplication3.Logger;
 import mobileapplication3.Main;
 
 /**

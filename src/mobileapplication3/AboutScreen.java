@@ -7,6 +7,8 @@ package mobileapplication3;
 
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
+import utils.Logger;
+
 import java.io.IOException;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.Font;

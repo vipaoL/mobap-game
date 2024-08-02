@@ -10,6 +10,7 @@ import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
 
+import utils.Logger;
 import utils.Mathh;
 
 /**

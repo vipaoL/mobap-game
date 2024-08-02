@@ -8,6 +8,8 @@ package mobileapplication3;
 
 import javax.microedition.lcdui.Graphics;
 
+import utils.Logger;
+
 /**
  *
  * @author vipaol
