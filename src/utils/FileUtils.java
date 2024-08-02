@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mobileapplication3;
+package utils;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -13,6 +13,8 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 
+import mobileapplication3.Logger;
+
 /**
  *
  * @author vipaol
@@ -20,7 +22,7 @@ import javax.microedition.io.file.FileSystemRegistry;
 public class FileUtils {
     String prefix = "file:///";
     String sep = "/";
-    String path;
+    public String path;
     String root;
     String prefixToDisable = null;
     String workingFolderName;

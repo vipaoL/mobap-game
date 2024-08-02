@@ -52,7 +52,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
     
     private void init() {
         sizeChanged(getWidth(), getHeight());
-        statemap[1] = -1; // set "-----" separator as inactive button
+        statemap[1] = GenericMenu.STATE_INACTIVE; // set "-----" separator as inactive button
         loadParams(Main.sWidth, Main.sHeight, MENU_OPTS, statemap, fontSizeCache);
         fontSizeCache = getFontSize();
         setSpecialOption(0);
@@ -145,7 +145,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
         }
         if (selected == MENU_OPTS.length - 1) {
             isStopped = true;
-            Main.set(new MenuCanvas());
+            Main.set(new SettingsScreen());
         } else {
             refreshStates();
         }
@@ -157,7 +157,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
             setEnabledFor(simulationMode, 3);
             setEnabledFor(discoMode, 4);
             setEnabledFor(whatTheGame, 5);
-            setStateFor(/*music*/-1, 6); // set "music" as inactive button. it's buggy
+            setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 6); // set "music" as inactive button. it's buggy
             setEnabledFor(oneFrameTwoTicks, 7);
         } else {
             for (int i = 2; i < MENU_OPTS.length - 1; i++) {

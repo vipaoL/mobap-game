@@ -62,6 +62,13 @@ public class Main extends MIDlet {
         sHeight = d.getHeight();
     }
     
+    public static void set(Alert a) {
+        Display.getDisplay(thiss).setCurrent(a, Display.getDisplay(thiss).getCurrent());
+        System.gc();
+        sWidth = a.getWidth();
+        sHeight = a.getHeight();
+    }
+    
     public static void showAlert(Throwable ex) {
         ex.printStackTrace();
         showAlert(ex.toString());

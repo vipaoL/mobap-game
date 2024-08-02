@@ -3,11 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mobileapplication3;
+package utils;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import mobileapplication3.Logger;
+import mobileapplication3.Main;
 
 /**
  *
@@ -30,11 +33,11 @@ public class MgStruct {
     static int[] argsNumber = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10, /*6*/6, /*7*/8};
     static final int STRUCTURE_STORAGE_SIZE = 32;
 
-    static short[][][] structStorage = new short[STRUCTURE_STORAGE_SIZE][][];
-    static int loadedStructsNumber = 0;
+    public static short[][][] structStorage = new short[STRUCTURE_STORAGE_SIZE][][];
+    public static int loadedStructsNumber = 0;
     static boolean isInited = false;
-    static int loadedFromResNumber = 0;
-    boolean loadCancelled = false;
+    public static int loadedFromResNumber = 0;
+    public boolean loadCancelled = false;
     
     String prefix = "file:///";
     String root = "C:/";

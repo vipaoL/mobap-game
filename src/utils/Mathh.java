@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mobileapplication3;
+package utils;
 
 /**
  *
@@ -69,12 +69,12 @@ public class Mathh {
         //*binary search in tg_t*
     }*/
     
-    static int distance(int x1, int y1, int x2, int y2) {
+    public static int distance(int x1, int y1, int x2, int y2) {
         int dx = x1 - x2;
         int dy = y1 - y2;
         return (int) Math.sqrt(dx * dx + dy * dy);
     }
-    static boolean strictIneq(int leftBound, int a, int rightBound) {
+    public static boolean strictIneq(int leftBound, int a, int rightBound) {
         return ((leftBound < a) & (a < rightBound));
     }
 }

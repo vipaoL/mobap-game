@@ -7,6 +7,9 @@ package mobileapplication3;
 import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
+import utils.Mathh;
+import utils.Settings;
+
 import java.util.Random;
 import java.util.Vector;
 import javax.microedition.lcdui.Graphics;
@@ -394,7 +397,7 @@ public class GraphicsWorld extends World {
         if (DebugMenu.discoMode) {
             g.setColor(random.nextInt(16777216));
         }
-        if (thickness > 2 && Settings.bigScreen == Settings.TRUE) {
+        if (thickness > 2 && Settings.isBetterGraphicsEnabled()) {
             int t2 = thickness/2;
             int dx = x2 - x1;
             int dy = y2 - y1;
@@ -441,7 +444,7 @@ public class GraphicsWorld extends World {
         
         g.setColor(0x00ff00);
         
-        if (thickness > 2 && Settings.bigScreen == Settings.TRUE) {
+        if (thickness > 2 && Settings.isBetterGraphicsEnabled()) {
             int t2 = thickness/2;
             int dx = x2 - x1;
             int dy = y2 - y1;

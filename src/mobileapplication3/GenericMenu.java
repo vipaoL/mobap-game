@@ -10,6 +10,8 @@ import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
 
+import utils.Mathh;
+
 /**
  *
  * @author vipaol
@@ -101,11 +103,11 @@ public abstract class GenericMenu extends GameCanvas {
             }
             
             if (!isKnownButton) {
-                g.setColor(127, 127, 127);
-                g.drawString("Unknown keyCode=" + lastKeyCode, Main.sWidth, Main.sHeight, Graphics.BOTTOM | Graphics.RIGHT);
+                g.setColor(0x808080);
+                g.drawString(lastKeyCode + " - unknown keyCode", Main.sWidth, Main.sHeight, Graphics.BOTTOM | Graphics.RIGHT);
             }
         } else {
-            g.setColor(128, 128, 128);
+            g.setColor(0x808080);
             g.drawString("Loading the menu...", Main.sWidth / 2, Main.sHeight, Graphics.BOTTOM | Graphics.HCENTER);
         }
         Logger.paint(g);
@@ -142,7 +144,7 @@ public abstract class GenericMenu extends GameCanvas {
             if (n >= stateMap.length) {
                 return false;
             }
-            if (stateMap[n] == -1) {
+            if (stateMap[n] == STATE_INACTIVE) {
                 return false;
             }
         }
@@ -190,45 +192,57 @@ public abstract class GenericMenu extends GameCanvas {
     }
     
     private boolean handleKeyStates(int keyStates) {
-        if (keyStates != 0) {
-            //Main.log("states", keyStates);
-            if (keyStates == GameCanvas.RIGHT || keyStates == GameCanvas.FIRE ||
-                    keyStates == GameCanvas.UP || keyStates == GameCanvas.DOWN) {
-                isKnownButton = true;
-            }
+        if (keyStates == 0) {
+        	return false;
         }
+        
         isPaused = false;
         isSelectAlreadyPressed = isSelectPressed;
         
         if (keyPressDelay < 1) {
             keyPressDelay = KEY_PRESS_DELAY;
-            isSelectPressed = (keyStates == GameCanvas.RIGHT || keyStates == GameCanvas.FIRE);
-            boolean needRepeat = true;
-            while (needRepeat) {
+            if (keyStates == GameCanvas.LEFT) {
+                selected = lastReachable; // back
+            }
+            switch (keyStates) {
+				case GameCanvas.RIGHT:
+				case GameCanvas.FIRE:
+				case GameCanvas.LEFT:
+					isSelectPressed = true;
+	            	isKnownButton = true;
+					break;
+			}
+            
+            boolean needRepeat = false;
+            do {
                 needRepeat = false;
-                if (keyStates == GameCanvas.UP) {
-                    isKnownButton = true;
-                    isPaused = false;
-                    if (selected > firstReachable) {
-                        selected--;
-                    } else {
-                        selected = lastReachable;
-                    }
-                    //Main.log("up");
-                } else if (keyStates == GameCanvas.DOWN) {
-                    //Main.log("down");
-                    isKnownButton = true;
-                    isPaused = false;
-                    if (selected < lastReachable) {
-                        selected++;
-                    } else {
-                        selected = firstReachable;
-                    }
+                switch (keyStates) {
+                	case GameCanvas.UP:
+                		isKnownButton = true;
+                        isPaused = false;
+                        if (selected > firstReachable) {
+                            selected--;
+                        } else {
+                            selected = lastReachable;
+                        }
+                        //Main.log("up");
+                        break;
+                	case GameCanvas.DOWN:
+                		//Main.log("down");
+                        isKnownButton = true;
+                        isPaused = false;
+                        if (selected < lastReachable) {
+                            selected++;
+                        } else {
+                            selected = firstReachable;
+                        }
+                        break;
                 }
+                
                 if (isStatemapEnabled && !isSelectPressed) {
                     needRepeat = stateMap[selected] == STATE_INACTIVE;
                 }
-            }
+            } while (needRepeat);
         }
         return isSelectPressed && !isSelectAlreadyPressed;
     }
@@ -327,12 +341,7 @@ public abstract class GenericMenu extends GameCanvas {
         }
         selected += firstReachable;
         if (keyCode == GameCanvas.KEY_NUM0 || keyCode == KEY_SOFT_RIGHT || keyCode == SIEMENS_KEY_LEFT || keyCode == SE_KEY_BACK) {
-            isKnownButton = true;
-            selected = lastReachable; // back
-            if (keyPressDelay < 1) {
-                pressed = true;
-                keyPressDelay = KEY_PRESS_DELAY;
-            }
+            return handleKeyStates(GameCanvas.LEFT);
         }
         
         if (pressed) {

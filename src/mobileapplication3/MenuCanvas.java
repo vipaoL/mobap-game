@@ -8,13 +8,16 @@ package mobileapplication3;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.game.GameCanvas;
 
+import utils.MgStruct;
+import utils.Settings;
+
 /**
  *
  * @author vipaol
  */
 public class MenuCanvas extends GenericMenu implements Runnable {
     
-    private String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Debug", "Exit", "-"};
+    private String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Settings", "Exit", "-"};
     
     private final int[] statemap = new int[menuOptions.length]; // array with states of all buttons (active/inactive/enabled)
     private static int defaultSelected = 1; // currently selected option in menu
@@ -45,7 +48,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     
     private void init() {
         Logger.log("menu:init");
-        setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         
         sizeChanged(getWidth(), getHeight());
         
@@ -61,18 +63,11 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             setStateFor(1, 2);
             menuOptions[2] = "Reload";
         }
-        setSpecialOption(menuOptions.length - 3); // to be able to highlight "Debug" option
         isInited = true;
     }
     
     protected void sizeChanged(int w, int h) {
-        if (Settings.bigScreen == Settings.UNDEF) {
-            if (Math.max(w, h) >= GraphicsWorld.BIGSCREEN_SIDE) {
-                Settings.bigScreen = Settings.TRUE;
-            } else {
-                Settings.bigScreen = Settings.FALSE;
-            }
-        }
+    	Settings.isBetterGraphicsEnabled(Math.max(w, h) >= GraphicsWorld.BIGSCREEN_SIDE);
         super.sizeChanged(w, h);
     }
     
@@ -174,9 +169,9 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             isStopped = true;
             Main.set(new AboutScreen());
         }
-        if (selected == 5) { // Debug
+        if (selected == 5) { // Settings
             isStopped = true;
-            Main.set(new DebugMenu());
+            Main.set(new SettingsScreen());
         }
         if (selected == 6) { // Exit
             isStopped = true;
