@@ -184,6 +184,9 @@ public class GraphicsWorld extends World {
             //offsetX-=200;
             //offsetY-=200;
 
+            offsetY += carY / 10;
+            offsetY = Mathh.constrain(-carY * 1000 / zoomOut + scHeight/16, offsetY, -carY * 1000 / zoomOut + scHeight*15/16);
+
             // some very boring code
             if (GameplayCanvas.points > 291 && GameplayCanvas.points < 293) {
                 currColBg = 0x2f92ff;

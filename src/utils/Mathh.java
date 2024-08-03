@@ -77,4 +77,8 @@ public class Mathh {
     public static boolean strictIneq(int leftBound, int a, int rightBound) {
         return ((leftBound < a) & (a < rightBound));
     }
+
+    public static int constrain(int leftBound, int a, int rightBound) {
+        return Math.min(Math.max(leftBound, a), rightBound);
+    }
 }
