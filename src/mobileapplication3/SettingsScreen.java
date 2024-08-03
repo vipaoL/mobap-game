@@ -7,7 +7,8 @@ import utils.Settings;
 
 public class SettingsScreen extends GenericMenu implements Runnable {
     private static final String[] MENU_OPTS = {
-            "better graphics",
+            "Better graphics",
+            "Unlimit FPS",
             "Debug settings",
             "back"
         };
@@ -83,6 +84,10 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 case 0:
                     MobappGameSettings.toggleBetterGraphics();
                     break;
+                case 1:
+                	System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                    MobappGameSettings.toggleFPSUnlimited();
+                    break;
                 default:
                     break;
             }
@@ -98,5 +103,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         }
         void refreshStates() {
         	setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), 0);
+        	setEnabledFor(MobappGameSettings.isFPSUnlimited(), 1);
         }
     }

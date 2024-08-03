@@ -10,8 +10,6 @@ import at.emini.physics2D.util.FXVector;
 import utils.Logger;
 import utils.Mathh;
 import utils.MobappGameSettings;
-import utils.Settings;
-
 import java.util.Random;
 import java.util.Vector;
 import javax.microedition.lcdui.Graphics;
@@ -27,20 +25,19 @@ public class GraphicsWorld extends World {
     int colBodies = 0xffffff;
     int colFunctionalObjects = 0xff5500;
     int currColBg;
-    int colWheel ;
     int currColWheel;
     int currColLandscape = colLandscape;
     int currColBodies;
     
     static boolean bg = false;
-    public static int bgLineStep = Main.sWidth / 3;
-    public static final int BIGSCREEN_SIDE = 480;
+    private static int bgLineStep = Main.sWidth / 10;
+    private int bgLineThickness = Main.sWidth/300;
     
-    int scWidth = Main.sWidth;
-    int halfScWidth = scWidth/2;
-    int scHeight = Main.sHeight;
-    int halfScHeight = scHeight/2;
-    int scMinSide = Math.min(scWidth, scHeight);
+    private int scWidth = Main.sWidth;
+    private int halfScWidth = scWidth/2;
+    private int scHeight = Main.sHeight;
+    private int halfScHeight = scHeight/2;
+    private int scMinSide = Math.min(scWidth, scHeight);
     
     int zoomBase = 0;
     int zoomOut = 100;
@@ -63,11 +60,11 @@ public class GraphicsWorld extends World {
     public GraphicsWorld(World w) {
         super(w);
         if (DebugMenu.whatTheGame) {
-            colWheel = 0x888888;
+            currColWheel = 0x888888;
             colBg = 0x001155;
             colBodies = 0x555555;
         }
-        currColWheel = colWheel;
+        currColWheel = colBg;
         currColBg = colBg;
         currColBodies = colBodies;
     }
@@ -129,7 +126,6 @@ public class GraphicsWorld extends World {
         addConstraint(rightjoint);
         
         WorldGen.bgZeroPoint = spawnX;
-        calculateZoomOut();
     }
     
     public void tickBodies() {
@@ -177,51 +173,11 @@ public class GraphicsWorld extends World {
             carY = carbody.positionFX().yAsInt();
 
             // zooming and moving virtual camera
-            calculateZoomOut();
-            //zoomOut = 500;
-            offsetX = -carX * 1000 / zoomOut + scWidth / 3;
-            offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
-            //offsetX-=200;
-            //offsetY-=200;
+            calcZoomOut();
+            calcOffset();
 
-            offsetY += carY / 10;
-            offsetY = Mathh.constrain(-carY * 1000 / zoomOut + scHeight/16, offsetY, -carY * 1000 / zoomOut + scHeight*15/16);
-
-            // some very boring code
-            if (GameplayCanvas.points > 291 && GameplayCanvas.points < 293) {
-                currColBg = 0x2f92ff;
-                currColLandscape = 0xffffff;
-            } else if (GameplayCanvas.points > 293 && GameplayCanvas.points < 300) {
-                currColBg = colBg;
-                currColLandscape = colLandscape;
-            }
-            
-            if (bg) {
-                currColLandscape = 0x0000ff;
-                g.setColor(63, 0, 31);
-                int offset = (carX - WorldGen.bgZeroPoint) / 16;
-                int l = (scWidth * 16);
-                for (int i = 0; i < l; i+=bgLineStep) {
-                    int x2 = -(i + (offset) % bgLineStep - l/2)/*  *64/8  */;
-                    int x1 = x2 / 32;
-                    g.drawLine(x1 + scWidth / 2, scHeight * 2 / 3, x2 + scWidth / 2, scHeight);
-                }
-                g.setColor(63, 31, 0);
-                int lines = 6;
-                int r = Math.min(scWidth, scHeight) / 4;
-                g.fillArc(scWidth / 2 - r, scHeight * 2 / 5 - r, r * 2, r * 2, 0, 360);
-                g.setColor(currColBg);
-                for (int i = 0; i < lines; i++) {
-                    int y = i * r / lines + scHeight * 2 / 5 - r / 12;
-                    g.drawLine(0, y-1, scWidth, y-1);
-                    g.drawLine(0, y, scWidth, y);
-                    g.drawLine(0, y+1, scWidth, y+1);
-                }
-            }
-            
-            // draw landscape
+            drawBg(g);
             drawLandscape(g);
-            
             drawBodies(g); // draw all bodies, excluding car wheels
             drawCar(g); // draw car wheels
             drawConstraints(g); // disabled
@@ -234,8 +190,39 @@ public class GraphicsWorld extends World {
         }
         //g.fillTriangle(xToPX(carX+viewField/2-10), 0, xToPX(carX+viewField/2), scHeight, xToPX(carX+viewField/2+10), 0);
     }
+    
+    private void drawBg(Graphics g) {
+    	// some very boring code
+        if (GameplayCanvas.points > 291 && GameplayCanvas.points < 293) {
+            currColBg = 0x2f92ff;
+            currColLandscape = 0xffffff;
+        } else if (GameplayCanvas.points > 293 && GameplayCanvas.points < 300) {
+            currColBg = colBg;
+            currColLandscape = colLandscape;
+        }
+        
+    	if (bg) {
+            g.setColor(63, 0, 31);
+            int offset = (carX - WorldGen.bgZeroPoint) / 16;
+            int l = (scWidth * 16);
+            for (int i = 0; i < l; i+=bgLineStep) {
+                int x2 = -(i + (offset) % bgLineStep - l/2)/*  *64/8  */;
+                int x1 = x2 / 32;
+                drawLine(g, x1 + scWidth / 2, scHeight * 2 / 3, x2 + scWidth / 2, scHeight, bgLineThickness, false);
+            }
+            g.setColor(95, 63, 0);
+            int lines = 6;
+            int r = Math.min(scWidth, scHeight) / 4;
+            g.fillArc(scWidth / 2 - r, scHeight * 2 / 5 - r, r * 2, r * 2, 0, 360);
+            g.setColor(currColBg);
+            for (int i = 0; i < lines; i++) {
+                int y = i * r / lines + scHeight * 2 / 5 - r / 12;
+                drawLine(g, 0, y, scWidth, y, bgLineThickness, false);
+            }
+        }
+    }
 
-    public void drawBodies(Graphics g) {
+    private void drawBodies(Graphics g) {
         Body[] bodies = getBodies();
         int bodyCount = getBodyCount();
         for (int i = 0; i < bodyCount; i++) {
@@ -268,7 +255,7 @@ public class GraphicsWorld extends World {
         }
     }
 
-    public void drawBody(Graphics g, Body b) {
+    private void drawBody(Graphics g, Body b) {
         FXVector[] positions = b.getVertices();
         
         if (positions.length == 1) { // if shape of the body is circle
@@ -320,7 +307,7 @@ public class GraphicsWorld extends World {
         }
     }
 
-    public void drawCar(Graphics g) {
+    private void drawCar(Graphics g) {
         drawWheel(g, leftwheel);
         drawWheel(g, rightwheel);
     }
@@ -382,10 +369,10 @@ public class GraphicsWorld extends World {
         }
     }
 
-    void drawWheel(Graphics g, Body b) {
+    private void drawWheel(Graphics g, Body b) {
         int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
         if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] == null) {
-            currColWheel = colWheel;
+            currColWheel = currColBg;
             if (DebugMenu.discoMode) {
                 currColWheel = random.nextInt(16777216);
                 currColBodies = random.nextInt(16777216);
@@ -409,7 +396,11 @@ public class GraphicsWorld extends World {
                 0, 360, 10, currColWheel);
     }
     
-    void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
+    private void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
+    	drawLine(g, x1, y1, x2, y2, thickness, true);
+    }
+    
+    private void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness, boolean zoomThickness) {
         if (DebugMenu.discoMode) {
             g.setColor(random.nextInt(16777216));
         }
@@ -425,8 +416,8 @@ public class GraphicsWorld extends World {
             }
             
             // normal vector
-            int nx = dy*t2 * 1000 / zoomOut / l;
-            int ny = dx*t2 * 1000 / zoomOut / l;
+            int nx = dy*t2 * 1000 / (zoomThickness ? zoomOut : 1000) / l;
+            int ny = dx*t2 * 1000 / (zoomThickness ? zoomOut : 1000) / l;
             
             if (nx == 0 && ny == 0) {
                 g.drawLine(x1, y1, x2, y2);
@@ -436,7 +427,10 @@ public class GraphicsWorld extends World {
             // draw bold line with two triangles (splitting by diagonal)
             g.fillTriangle(x1-nx, y1+ny, x2-nx, y2+ny, x1+nx, y1-ny);
             g.fillTriangle(x2-nx, y2+ny, x2+nx, y2-ny, x1+nx, y1-ny);
-            int r = t2 * 1000 / zoomOut;
+            int r = t2;
+            if (zoomThickness) {
+            	r = r * 1000 / zoomOut;
+            }
             int d = r * 2;
             g.fillArc(x1-r, y1-r, d, d, 0, 360);
             g.fillArc(x2-r, y2-r, d, d, 0, 360);
@@ -445,7 +439,7 @@ public class GraphicsWorld extends World {
         }
     }
     
-    void drawGroundLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
+    private void drawGroundLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
         g.setColor(0x333300);
         if (DebugMenu.discoMode) {
             g.setColor(random.nextInt(16777216));
@@ -492,7 +486,7 @@ public class GraphicsWorld extends World {
         }
     }
     
-    void drawArc(Graphics g, int x, int y, int w, int h, int startAngle, int arcAngle, int thickness, int bgColor) {
+    private void drawArc(Graphics g, int x, int y, int w, int h, int startAngle, int arcAngle, int thickness, int bgColor) {
     	int prevColor = g.getColor();
     	thickness = thickness * 500 / zoomOut * 2;
     	
@@ -507,15 +501,15 @@ public class GraphicsWorld extends World {
     }
 
 
-    public int xToPX(int c) {
+    private int xToPX(int c) {
         return c * 1000 / zoomOut + offsetX;
     }
 
-    public int yToPX(int c) {
+    private int yToPX(int c) {
         return c * 1000 / zoomOut + offsetY;
     }
 
-    void refreshPos() {
+    public void refreshPos() {
         if (carbody != null) {
             FXVector posFX = carbody.positionFX();
             carX = posFX.xAsInt();
@@ -526,7 +520,7 @@ public class GraphicsWorld extends World {
         }
     }
 
-    void refreshScreenParameters() {
+    public void refreshScreenParameters() {
         Logger.log("world:refreshing screen params");
         scWidth = Main.sWidth;
         halfScWidth = scWidth / 2;
@@ -534,10 +528,10 @@ public class GraphicsWorld extends World {
         halfScHeight = scHeight / 2;
         scMinSide = Math.min(scWidth, scHeight);
         zoomBase = 6000 * 240 / scMinSide;
-        calculateZoomOut();
+        calcZoomOut();
     }
 
-    void calculateZoomOut() {
+    private void calcZoomOut() {
         if (DebugMenu.simulationMode) {
             zoomOut = 50000;
         } else {
@@ -561,5 +555,12 @@ public class GraphicsWorld extends World {
         if (DebugMenu.isDebugEnabled && DebugMenu.closerWorldgen || DebugMenu.simulationMode) {
             viewField /= 4;
         }
+    }
+    
+    private void calcOffset() {
+    	offsetX = -carX * 1000 / zoomOut + scWidth / 3;
+        offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
+        offsetY += carY / 20;
+        offsetY = Mathh.constrain(-carY * 1000 / zoomOut + scHeight/16, offsetY, -carY * 1000 / zoomOut + scHeight*4/5);
     }
 }

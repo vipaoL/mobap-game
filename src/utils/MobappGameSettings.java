@@ -5,6 +5,7 @@ public class MobappGameSettings {
 		    IS_SETUP_WIZARD_COMPLETED = "wizardCompleted",
 			MGSTRUCTS_FOLDER_PATH = "mgPath",
 		    IS_BETTER_GRAPHICS_ENABLED = "btrGr",
+    		IS_FPS_UNLIMITED = "unlFPS",
 		    ANIMS = "anims";
     
     private static String mgstructsFolderPath = null;
@@ -15,8 +16,9 @@ public class MobappGameSettings {
     	if (settingsInst == null) {
     		settingsInst = new Settings(new String[]{
     	            IS_SETUP_WIZARD_COMPLETED,
-    	            IS_BETTER_GRAPHICS_ENABLED,
     	            MGSTRUCTS_FOLDER_PATH,
+    	            IS_BETTER_GRAPHICS_ENABLED,
+    	            IS_FPS_UNLIMITED,
     	            ANIMS
     	        });
     	}
@@ -25,6 +27,22 @@ public class MobappGameSettings {
     
     public static boolean isSetupWizardCompleted() {
         return getSettingsInst().getBool(IS_SETUP_WIZARD_COMPLETED);
+    }
+    
+    public static boolean isFPSUnlimited() {
+        return getSettingsInst().getBool(IS_FPS_UNLIMITED);
+    }
+    
+    public static boolean isFPSUnlimited(boolean defaultValue) {
+        return getSettingsInst().getBool(IS_FPS_UNLIMITED, defaultValue);
+    }
+    
+    public static void setFPSUnlimited(boolean b) {
+    	getSettingsInst().set(IS_FPS_UNLIMITED, b);
+    }
+    
+    public static boolean toggleFPSUnlimited() {
+    	return getSettingsInst().toggleBool(IS_FPS_UNLIMITED);
     }
     
     public static boolean isBetterGraphicsEnabled() {

@@ -26,7 +26,7 @@ public class Main extends MIDlet {
     
     // time for one frame. 1000ms / 50ms = 20fps
     public static final int TICK_DURATION = 50;
-    static int sWidth, sHeight;
+    public static int sWidth, sHeight;
     public static Main thiss;
     
     

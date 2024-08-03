@@ -10,6 +10,7 @@ import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
 import utils.Logger;
 import utils.Mathh;
+import utils.MobappGameSettings;
 
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
@@ -21,12 +22,10 @@ import javax.microedition.lcdui.game.GameCanvas;
  */
 public class GameplayCanvas extends GameCanvas implements Runnable {
     
-    String[] menuhint = {"MENU:", "here(touch),", "D, #"};
-    String[] pausehint = {"PAUSE:", "here(touch), *,", "B, right soft"};
-    int hintTime = 120; // in ticks
+    private static final String[] MENU_HINT = {"MENU:", "here(touch),", "D, #"};
+    private static final String[] PAUSE_HINT = {"PAUSE:", "here(touch), *,", "B, right soft"};
     public static final int GAME_SPEED_MULTIPLIER = 2;
     public static final int FORCE_MULTIPLIER = GAME_SPEED_MULTIPLIER;
-    
     public static final short EFFECT_SPEED = 0;
     
     // to prevent siemens' bug which calls hideNotify right after showing canvas
@@ -35,63 +34,67 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     private boolean previousPauseState = false;
     
     // state and mode
-    static boolean isFirstStart = true; // for displaying hints only on first start
+    private static boolean isFirstStart = true; // for displaying hints only on first start
     public static boolean isBusy = false;
     public static boolean uninterestingDebug = false;
     public static boolean shouldWait = false;
     public static boolean isWaiting = false;
-    boolean isWorldLoaded = false;
+    private boolean isWorldLoaded = false;
+    private int hintVisibleTimer = 120; // in ticks
+    private boolean unlimitFPS;
     
-    boolean paused = false;
-    boolean stopped = false;
+    private boolean paused = false;
+    private boolean stopped = false;
     
     // screen
-    int scW = Main.sWidth, scH = Main.sHeight;
-    int maxScSide = Math.max(scW, scH);
+    private int scW = Main.sWidth, scH = Main.sHeight;
+    private int maxScSide = Math.max(scW, scH);
     
     // car
-    boolean leftWheelContacts = false;
-    boolean rightWheelContacts = false;
-    int carVelocitySqr, speedMultipiler;
-    int carAngle = 0;
+    private boolean leftWheelContacts = false;
+    private boolean rightWheelContacts = false;
+    private int carVelocitySqr, speedMultipiler;
+    private int carAngle = 0;
+    // motor state
+    private boolean accel = false;
     
     // indicators
-    int flipIndicator = 255; // for blinking counter when flip done
-    int loadingProgress = 0;
-    int speedoState = 0;
-    int fps = 0;
+    private int flipIndicator = 255; // for blinking counter when flip done
+    private int loadingProgress = 0;
+    private int speedoState = 0;
+    private int tickTime;
+    private int fps;
     
     // touchscreen
-    int pointerX = 0, pointerY = 0;
-    boolean pauseTouched = false;
-    boolean menuTouched = false;
-    // motor state
-    boolean accel = false;
+    private int pointerX = 0, pointerY = 0;
+    private boolean pauseTouched = false;
+    private boolean menuTouched = false;
     
     // counters
     public static int points = 0;
-    int gameoverCountdown;
-    static int timeFlying = 10;
-    int timeMotorTurnedOff = 50;
+    private int gameoverCountdown;
+    private static final int GAME_OVER_COUNTDOWN_STEPS = 7;
+    public static int timeFlying = 10;
+    private int timeMotorTurnedOff = 50;
+    private long lastBigTickTime;
     
-    static short[][] currentEffects = new short[1][];
+    public static short[][] currentEffects = new short[1][];
     
     // fonts
-    Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-    int sFontH = smallfont.getHeight();
-    Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    int lFontH = largefont.getHeight();
-    Font currentFont = largefont;
-    int currentFontH = currentFont.getHeight();
+    private static final Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+    private static final int sFontH = smallfont.getHeight();
+    private static final Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    private static final int lFontH = largefont.getHeight();
+    private Font currentFont = largefont;
+    private int currentFontH = currentFont.getHeight();
     
-    // some constants
-    int KEY_SOFT_RIGHT = -7;
-    int KEY_SOFT_LEFT = -6;
-    int TEN_FX = FXUtil.toFX(10);
+    private int KEY_SOFT_RIGHT = -7;
+    private int KEY_SOFT_LEFT = -6;
+    private int TEN_FX = FXUtil.toFX(10);
     
-    GraphicsWorld world;
-    WorldGen worldgen;
-    FlipCounter flipCounter;
+    private GraphicsWorld world;
+    private WorldGen worldgen;
+    private FlipCounter flipCounter;
 
     public GameplayCanvas() {
         super(false);
@@ -115,6 +118,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         shouldWait = false;
         isWaiting = false;
         timeFlying = 10;
+        unlimitFPS = MobappGameSettings.isFPSUnlimited(false);
         
         log("gcanvas init");
         
@@ -200,6 +204,9 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             log("thread:starting game cycle");
 
             Logger.setLogMessageDelay(0);
+            int baseTimestepFX = world.getTimestepFX();
+            
+            //Logger.log("timeStepFX=" + world.getTimestepFX());\
 
             // Main game cycle
             while (!stopped) {
@@ -210,26 +217,36 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 }
 
                 if (!paused) {
-                    fps = 1000 / ((int) (System.currentTimeMillis() - start));
+                	tickTime = (int) (System.currentTimeMillis() - start);
+                    fps = 1000 / tickTime;
+                    
                     start = System.currentTimeMillis();
+                    boolean bigTick = false;
+                    if (!unlimitFPS || start - lastBigTickTime > Main.TICK_DURATION) {
+                    	lastBigTickTime = start;
+                    	bigTick = true;
+                    }
 
                     isBusy = true;
                     world.tick();
-                    if (!DebugMenu.oneFrameTwoTicks || tick%2 == 0) {
+                    if (!DebugMenu.oneFrameTwoTicks || tick % 2 == 0) {
                         paint();
                     }
                     isBusy = false;
 
-                    // chech if car contacts with the ground or sth else
+                    // check if car contacts with the ground or sth else
                     contacts[0] = world.getContactsForBody(world.leftwheel);
                     contacts[1] = world.getContactsForBody(world.rightwheel);
                     contacts[2] = world.getContactsForBody(world.carbody);
                     leftWheelContacts = contacts[0][0] != null;
                     rightWheelContacts = contacts[1][0] != null;
-                    if ((!leftWheelContacts & !rightWheelContacts)) {
-                        timeFlying += 1;
-                    } else {
-                        timeFlying = 0;
+                    
+                    if (bigTick) {
+	                    if ((!leftWheelContacts & !rightWheelContacts)) { /////////////
+	                        timeFlying += 1;
+	                    } else {
+	                        timeFlying = 0;
+	                    }
                     }
 
                     // set motor power according to car speed
@@ -244,6 +261,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         }
                     }
                     carVelocitySqr = vX * vX + vY * vY;
+                    //System.out.println(carVelocitySqr);
                     if (carVelocitySqr > 1000000) {
                         speedMultipiler = 2;
                         speedoState = 2;
@@ -265,10 +283,11 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     carAngle = 360 - FXUtil.angleInDegrees2FX(world.carbody.rotation2FX());
 
                     // when the motor is turned on
-                    if (accel) {
+                    if (bigTick) if (accel) {
                         timeMotorTurnedOff = 0;
                         if (timeFlying > 2) {
                             // apply rotational force
+                        	//System.out.println(world.carbody.rotationVelocity2FX());
                             if (world.carbody.rotationVelocity2FX() > 50000000) {
                                 world.carbody.applyTorque(FXUtil.toFX(-world.carbody.rotationVelocity2FX()*FORCE_MULTIPLIER/16000));
                             } else {
@@ -305,7 +324,9 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                                 if (timeFlying < 2) {
                                     world.carbody.applyMomentum(new FXVector(-world.carbody.velocityFX().xFX*GAME_SPEED_MULTIPLIER/5, -world.carbody.velocityFX().yFX*GAME_SPEED_MULTIPLIER/5));
                                 }
-                                timeMotorTurnedOff++;
+                                if (bigTick) {
+                                	timeMotorTurnedOff++; //////////////////////////////
+                                }
                             } catch (NullPointerException ex) {
                                 ex.printStackTrace();
                             }
@@ -351,15 +372,17 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         }
                     }
 
-                    for (int i = 0; i < currentEffects.length; i++) {
-                        if (currentEffects[i] != null) {
-                            if (currentEffects[i][0] > 0) {
-                                currentEffects[i][0]--;
-                                log("effect" + i + "," + currentEffects[i][0] + " ticks left");
-                            } else if (currentEffects[i][0] == 0) {
-                                currentEffects[i] = null;
-                            }
-                        }
+                    if (bigTick) {
+	                    for (int i = 0; i < currentEffects.length; i++) {
+	                        if (currentEffects[i] != null) {
+	                            if (currentEffects[i][0] > 0) {
+	                                currentEffects[i][0]--; ///////////////////////////
+	                                log("effect" + i + "," + currentEffects[i][0] + " ticks left");
+	                            } else if (currentEffects[i][0] == 0) {
+	                                currentEffects[i] = null;
+	                            }
+	                        }
+	                    }
                     }
 
                     if (DebugMenu.simulationMode) {
@@ -372,17 +395,23 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         world.rightwheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
                     }
 
-                    if (pauseDelay > 0)
-                        pauseDelay--;
+                    if (pauseDelay > 0 && bigTick)
+                        pauseDelay--; ////////////////
 
                     if (WorldGen.isEnabled) {
                         flipCounter.tick();
                     }
 
                     if (tick < 3) {
-                        tick++;
+                    	if (bigTick) {
+                    		tick++; ////////////////
+                    	}
                     } else {
                         tick = 0;
+                        if (unlimitFPS) {
+                        	world.setTimestepFX(baseTimestepFX*Mathh.constrain(1, tickTime, 100)/50);
+                        }
+                        
                         // start the final countdown and open main menu if the car
                         // lies upside down or fell out of the world
                         int lowestY = 5000;
@@ -393,7 +422,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                             if (uninterestingDebug) {
                                 gameoverCountdown = 0;
                             }
-                            if (gameoverCountdown < 8) {
+                            if (gameoverCountdown <= GAME_OVER_COUNTDOWN_STEPS) {
                                 gameoverCountdown++;
                             } else {
                                 if (uninterestingDebug) {
@@ -439,7 +468,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 }
                 // fps/tps control
                 try {
-                    if (sleep > 0) {
+                    if (sleep > 0 && !unlimitFPS) {
                         Thread.sleep(sleep);
                     }
                 } catch (InterruptedException e) {
@@ -469,8 +498,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     // debug info, on-screen log, game over screen
     private void drawHUD(Graphics g) {
         // show hint on first start
-        if (isFirstStart && hintTime > 0) {
-            int color = 255 * hintTime / 120;
+        if (isFirstStart && hintVisibleTimer > 0) {
+            int color = 255 * hintVisibleTimer / 120;
             g.setColor(color/4, color/2, color/4);
             if (Logger.isOnScreenLogEnabled()) {
                 //g.setColor(color/2, color/2, color/2);
@@ -479,14 +508,14 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             g.fillRect(scW*2/3, 0, scW/3, scH/6);
             g.setColor(color/4, color/4, color);
             g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL));
-            for (int i = 0; i < menuhint.length; i++) {
-                g.drawString(menuhint[i], scW/6, i * sFontH + scH / 12 - sFontH*menuhint.length/2, Graphics.HCENTER | Graphics.TOP);
+            for (int i = 0; i < MENU_HINT.length; i++) {
+                g.drawString(MENU_HINT[i], scW/6, i * sFontH + scH / 12 - sFontH*MENU_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
             }
-            for (int i = 0; i < pausehint.length; i++) {
-                g.drawString(pausehint[i], scW*5/6, i * sFontH + scH / 12 - sFontH*pausehint.length/2, Graphics.HCENTER | Graphics.TOP);
+            for (int i = 0; i < PAUSE_HINT.length; i++) {
+                g.drawString(PAUSE_HINT[i], scW*5/6, i * sFontH + scH / 12 - sFontH*PAUSE_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
             }
             if (isWorldLoaded) {
-                hintTime--;
+                hintVisibleTimer--;
             }
         }
         
@@ -589,8 +618,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 g.setColor(191, 191, 191);
             }
             for (int i = 1; i < gameoverCountdown; i++) {
-                g.fillRect(0, 0, scW, scH*i/7/2 + 1);
-                g.fillRect(0, scH - scH*i/7/2, scW, scH - 1);
+                g.fillRect(0, 0, scW, scH*i/GAME_OVER_COUNTDOWN_STEPS/2 + 1);
+                g.fillRect(0, scH - scH*i/GAME_OVER_COUNTDOWN_STEPS/2, scW, scH - 1);
             }
         }
         
@@ -601,7 +630,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         if (WorldGen.isEnabled && world != null) {
             g.setColor(flipIndicator, flipIndicator, 255);
             setFont(largefont, g);
-            g.drawString(String.valueOf(points), world.halfScWidth, world.scHeight - currentFontH * 3 / 2,
+            g.drawString(String.valueOf(points), scW/2, scH - currentFontH * 3 / 2,
                     Graphics.HCENTER | Graphics.TOP);
             
             // coloring when flip
@@ -615,7 +644,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         
         // draw beautiful(isn't it?) pause screen
         if (paused) {
-            int d = 6 * scH / 240;
+            int d = scH / 40;
             // change color if debug enabled
             if (!DebugMenu.isDebugEnabled) {
                 g.setColor(0, 0, 255);
