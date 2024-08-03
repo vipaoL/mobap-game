@@ -42,6 +42,7 @@ public class Logger {
     public static void disableOnScreenLog() {
         log("disabling log...");
         isOnScreenLogEnabled = false;
+        lastWroteI = 0;
         if (isOnScreenLogInited) {
             onScreenLog = new String[1];
             isOnScreenLogInited = false;
@@ -63,6 +64,11 @@ public class Logger {
         if (logToStdout) {
             System.out.println(newMsg);
         }
+
+        if (!isOnScreenLogEnabled) {
+            return false;
+        }
+
         if (onScreenLog[lastWroteI] == null) {
             return false;
         }
