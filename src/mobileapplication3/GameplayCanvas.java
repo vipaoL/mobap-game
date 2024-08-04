@@ -4,17 +4,19 @@
  */
 package mobileapplication3;
 
-import at.emini.physics2D.*;
+import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.game.GameCanvas;
+
+import at.emini.physics2D.Body;
+import at.emini.physics2D.Contact;
+import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
 import utils.Logger;
 import utils.Mathh;
 import utils.MobappGameSettings;
-
-import javax.microedition.lcdui.Font;
-import javax.microedition.lcdui.Graphics;
-import javax.microedition.lcdui.game.GameCanvas;
 
 /**
  *
@@ -205,6 +207,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
             Logger.setLogMessageDelay(0);
             int baseTimestepFX = world.getTimestepFX();
+            long lastFPSMeasureTime = System.currentTimeMillis();
+            int framesFromLastFPSMeasure = 0;
             
             //Logger.log("timeStepFX=" + world.getTimestepFX());\
 
@@ -217,11 +221,18 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 }
 
                 if (!paused) {
+                	int dtFromLastFPSMeasure = (int) (System.currentTimeMillis() - lastFPSMeasureTime);
+                	if (dtFromLastFPSMeasure > 1000) {
+                		lastFPSMeasureTime = System.currentTimeMillis();
+                		fps = framesFromLastFPSMeasure * 1000 / dtFromLastFPSMeasure;
+                		framesFromLastFPSMeasure = 0;
+                	}
+                	
                 	tickTime = (int) (System.currentTimeMillis() - start);
-                    fps = 1000 / tickTime;
                     if (unlimitFPS) {
                     	world.setTimestepFX(baseTimestepFX*Mathh.constrain(1, tickTime, 100)/50);
                     }
+
                     start = System.currentTimeMillis();
                     boolean bigTick = false;
                     if (!unlimitFPS || start - lastBigTickTime > Main.TICK_DURATION) {
@@ -452,6 +463,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     if (isWaiting && paused){
                         paint();
                     }
+                    framesFromLastFPSMeasure++;
 
                     isWaiting = false;
 
