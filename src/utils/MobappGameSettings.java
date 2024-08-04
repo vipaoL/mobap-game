@@ -5,7 +5,7 @@ public class MobappGameSettings {
 		    IS_SETUP_WIZARD_COMPLETED = "wizardCompleted",
 			MGSTRUCTS_FOLDER_PATH = "mgPath",
 		    IS_BETTER_GRAPHICS_ENABLED = "btrGr",
-    		IS_FPS_UNLIMITED = "unlFPS",
+    		IS_FPS_UNLOCKED = "unlFPS",
 		    SHOW_FPS = "showFPS";
     
     private static String mgstructsFolderPath = null;
@@ -18,7 +18,7 @@ public class MobappGameSettings {
     	            IS_SETUP_WIZARD_COMPLETED,
     	            MGSTRUCTS_FOLDER_PATH,
     	            IS_BETTER_GRAPHICS_ENABLED,
-    	            IS_FPS_UNLIMITED,
+    	            IS_FPS_UNLOCKED,
     	            SHOW_FPS
     	        });
     	}
@@ -43,20 +43,20 @@ public class MobappGameSettings {
     
     ///
     
-    public static boolean isFPSUnlimited() {
-        return getSettingsInst().getBool(IS_FPS_UNLIMITED);
+    public static boolean isFPSUnlocked() {
+        return getSettingsInst().getBool(IS_FPS_UNLOCKED);
     }
     
-    public static boolean isFPSUnlimited(boolean defaultValue) {
-        return getSettingsInst().getBool(IS_FPS_UNLIMITED, defaultValue);
+    public static boolean isFPSUnlocked(boolean defaultValue) {
+        return getSettingsInst().getBool(IS_FPS_UNLOCKED, defaultValue);
     }
     
-    public static void setFPSUnlimited(boolean b) {
-    	getSettingsInst().set(IS_FPS_UNLIMITED, b);
+    public static void setFPSUnlocked(boolean b) {
+    	getSettingsInst().set(IS_FPS_UNLOCKED, b);
     }
     
-    public static boolean toggleFPSUnlimited() {
-    	return getSettingsInst().toggleBool(IS_FPS_UNLIMITED);
+    public static boolean toggleFPSUnlocked() {
+    	return getSettingsInst().toggleBool(IS_FPS_UNLOCKED);
     }
     
     ///

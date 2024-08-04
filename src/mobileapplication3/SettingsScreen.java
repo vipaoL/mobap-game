@@ -7,7 +7,7 @@ import utils.MobappGameSettings;
 public class SettingsScreen extends GenericMenu implements Runnable {
     private static final String[] MENU_OPTS = {
             "Better graphics",
-            "Unlimit FPS",
+            "Unlock FPS",
             "Show FPS",
             "Debug settings",
             "back"
@@ -85,7 +85,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                     MobappGameSettings.toggleBetterGraphics();
                     break;
                 case 1:
-                    MobappGameSettings.toggleFPSUnlimited();
+                    MobappGameSettings.toggleFPSUnlocked();
                     break;
                 case 2:
                 	MobappGameSettings.toggleFPSShown();
@@ -105,7 +105,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         }
         void refreshStates() {
         	setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), 0);
-        	setEnabledFor(MobappGameSettings.isFPSUnlimited(), 1);
+        	setEnabledFor(MobappGameSettings.isFPSUnlocked(), 1);
         	setEnabledFor(MobappGameSettings.isFPSShown(), 2);
         }
     }
