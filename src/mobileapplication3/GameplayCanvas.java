@@ -45,6 +45,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     private int hintVisibleTimer = 120; // in ticks
     private boolean unlimitFPS;
     private boolean showFPS;
+    private boolean oneFrameTwoTicks;
     
     private boolean paused = false;
     private boolean stopped = false;
@@ -66,6 +67,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     private int loadingProgress = 0;
     private int speedoState = 0;
     private int tickTime;
+    private int prevTickTime;
     private int fps;
     
     // touchscreen
@@ -123,6 +125,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         timeFlying = 10;
         unlimitFPS = MobappGameSettings.isFPSUnlocked(false);
         showFPS = MobappGameSettings.isFPSShown(false);
+        oneFrameTwoTicks = MobappGameSettings.isSecFramesSkipEnabled(false);
         
         log("gcanvas init");
         
@@ -192,6 +195,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
             long sleep = 0;
             long start = 0;
+            int bigTickN = 0;
             int tick = 0;
 
             Contact[][] contacts = new Contact[3][];
@@ -211,8 +215,6 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             int baseTimestepFX = world.getTimestepFX();
             long lastFPSMeasureTime = System.currentTimeMillis();
             int framesFromLastFPSMeasure = 0;
-            
-            //Logger.log("timeStepFX=" + world.getTimestepFX());\
 
             // Main game cycle
             while (!stopped) {
@@ -230,9 +232,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 		framesFromLastFPSMeasure = 0;
                 	}
                 	
+                	prevTickTime = tickTime;
                 	tickTime = (int) (System.currentTimeMillis() - start);
                     if (unlimitFPS) {
-                    	world.setTimestepFX(baseTimestepFX*Mathh.constrain(1, tickTime, 100)/50);
+                    	world.setTimestepFX(baseTimestepFX*Mathh.constrain(1, (tickTime + prevTickTime + 1) / 2, 100)/50);
                     }
 
                     start = System.currentTimeMillis();
@@ -244,7 +247,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
                     isBusy = true;
                     world.tick();
-                    if (!DebugMenu.oneFrameTwoTicks || tick % 2 == 0) {
+                    if (!oneFrameTwoTicks || tick % 2 == 0) {
                         paint();
                     }
                     isBusy = false;
@@ -257,7 +260,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     rightWheelContacts = contacts[1][0] != null;
                     
                     if (bigTick) {
-	                    if ((!leftWheelContacts & !rightWheelContacts)) { /////////////
+	                    if ((!leftWheelContacts & !rightWheelContacts)) {
 	                        timeFlying += 1;
 	                    } else {
 	                        timeFlying = 0;
@@ -339,9 +342,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                                 if (timeFlying < 2) {
                                     world.carbody.applyMomentum(new FXVector(-world.carbody.velocityFX().xFX*GAME_SPEED_MULTIPLIER/5, -world.carbody.velocityFX().yFX*GAME_SPEED_MULTIPLIER/5));
                                 }
-                                if (bigTick) {
-                                	timeMotorTurnedOff++; //////////////////////////////
-                                }
+                            	timeMotorTurnedOff++;
                             } catch (NullPointerException ex) {
                                 ex.printStackTrace();
                             }
@@ -416,13 +417,19 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     if (WorldGen.isEnabled) {
                         flipCounter.tick();
                     }
-
+                    
                     if (tick < 3) {
+                    	tick++;
+                    } else {
+                    	tick = 0;
+                    }
+
+                    if (bigTickN < 3) {
                     	if (bigTick) {
-                    		tick++; ////////////////
+                    		bigTickN++;
                     	}
                     } else {
-                        tick = 0;
+                        bigTickN = 0;
                         
                         // start the final countdown and open main menu if the car
                         // lies upside down or fell out of the world
@@ -580,7 +587,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     g.setColor(255, 0, 0);
                 }
             }
-            if (DebugMenu.oneFrameTwoTicks) {
+            if (oneFrameTwoTicks) {
                 g.drawString("FPS:" + fps/2, 0, debugTextOffset, 0);
             } else {
                 g.drawString("FPS:" + fps, 0, debugTextOffset, 0);

@@ -23,7 +23,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
         "GAMING MODE",
         "what?",
         "music",
-        "10 FPS screen",
+        "draw second ticks only",
         "back"
     };
     
@@ -43,7 +43,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean showAngle = false;
     public static boolean showLinePoints = false;
     public static boolean simulationMode = false;
-    public static boolean oneFrameTwoTicks = false;
     public static boolean whatTheGame = false;
     
     public DebugMenu() {
@@ -137,9 +136,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
                     Sound sound = new Sound();
                     sound.startBgMusic();
                 }   break;
-            case 7:
-                oneFrameTwoTicks = !oneFrameTwoTicks;
-                break;
             default:
                 break;
         }
@@ -158,7 +154,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
             setEnabledFor(discoMode, 4);
             setEnabledFor(whatTheGame, 5);
             setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 6); // set "music" as inactive button. it's buggy
-            setEnabledFor(oneFrameTwoTicks, 7);
         } else {
             for (int i = 2; i < MENU_OPTS.length - 1; i++) {
                 setStateFor(-1, i);

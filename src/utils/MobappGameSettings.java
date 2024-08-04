@@ -6,7 +6,8 @@ public class MobappGameSettings {
 			MGSTRUCTS_FOLDER_PATH = "mgPath",
 		    IS_BETTER_GRAPHICS_ENABLED = "btrGr",
     		IS_FPS_UNLOCKED = "unlFPS",
-		    SHOW_FPS = "showFPS";
+		    SHOW_FPS = "showFPS",
+		    SKIP_SECOND_FRAMES = "skipSecFrames";
     
     private static String mgstructsFolderPath = null;
     
@@ -19,11 +20,30 @@ public class MobappGameSettings {
     	            MGSTRUCTS_FOLDER_PATH,
     	            IS_BETTER_GRAPHICS_ENABLED,
     	            IS_FPS_UNLOCKED,
-    	            SHOW_FPS
+    	            SHOW_FPS,
+    	            SKIP_SECOND_FRAMES
     	        });
     	}
     	return settingsInst;
     }
+    
+    public static boolean isSecFramesSkipEnabled() {
+        return getSettingsInst().getBool(SKIP_SECOND_FRAMES);
+    }
+    
+    public static boolean isSecFramesSkipEnabled(boolean defaultValue) {
+        return getSettingsInst().getBool(SKIP_SECOND_FRAMES, defaultValue);
+    }
+    
+    public static void setSecFramesSkipEnabled(boolean b) {
+    	getSettingsInst().set(SKIP_SECOND_FRAMES, b);
+    }
+    
+    public static boolean toggleSecFramesSkipEnabled() {
+    	return getSettingsInst().toggleBool(SKIP_SECOND_FRAMES);
+    }
+    
+    ///
     
     public static boolean isFPSShown() {
         return getSettingsInst().getBool(SHOW_FPS);
