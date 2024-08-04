@@ -23,7 +23,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
         "GAMING MODE",
         "what?",
         "music",
-        "draw second ticks only",
         "back"
     };
     
