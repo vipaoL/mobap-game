@@ -78,7 +78,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     // counters
     public static int points = 0;
     private int gameoverCountdown;
-    private static final int GAME_OVER_COUNTDOWN_STEPS = 7;
+    private static final int GAME_OVER_COUNTDOWN_STEPS = 8;
     public static int timeFlying = 10;
     private int timeMotorTurnedOff = 50;
     private long lastBigTickTime;
@@ -441,7 +441,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                             if (uninterestingDebug) {
                                 gameoverCountdown = 0;
                             }
-                            if (gameoverCountdown <= GAME_OVER_COUNTDOWN_STEPS) {
+                            if (gameoverCountdown < GAME_OVER_COUNTDOWN_STEPS) {
                                 gameoverCountdown++;
                             } else {
                                 if (uninterestingDebug) {
@@ -561,7 +561,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 g.drawString(String.valueOf(carVelocitySqr), 0, debugTextOffset, 0);
                 debugTextOffset += currentFontH;
             }
-            // car angled
+            // car angle
             if (DebugMenu.showAngle) {
                 if (timeFlying > 0) {
                     g.setColor(0, 0, 255);
@@ -634,13 +634,9 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             g.setFont(largefont);
             g.setColor(255, 0, 0);
             g.drawString("!", scW / 2, scH / 3 + currentFontH / 2, Graphics.HCENTER | Graphics.TOP);
-            if (!DebugMenu.isDebugEnabled) {
-                g.setColor(191, 191, 191);
-            }
-            for (int i = 1; i < gameoverCountdown; i++) {
-                g.fillRect(0, 0, scW, scH*i/GAME_OVER_COUNTDOWN_STEPS/2 + 1);
-                g.fillRect(0, scH - scH*i/GAME_OVER_COUNTDOWN_STEPS/2, scW, scH - 1);
-            }
+            g.setColor(0, 0, Math.min(127 * (GAME_OVER_COUNTDOWN_STEPS - gameoverCountdown) / GAME_OVER_COUNTDOWN_STEPS, 255));
+            g.fillRect(0, 0, scW, scH*gameoverCountdown/GAME_OVER_COUNTDOWN_STEPS/2 + 1);
+            g.fillRect(0, scH - scH*gameoverCountdown/GAME_OVER_COUNTDOWN_STEPS/2, scW, scH - 1);
         }
         
         // draw on-screen log if enabled
