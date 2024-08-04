@@ -44,6 +44,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     private boolean isWorldLoaded = false;
     private int hintVisibleTimer = 120; // in ticks
     private boolean unlimitFPS;
+    private boolean showFPS;
     
     private boolean paused = false;
     private boolean stopped = false;
@@ -121,6 +122,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         isWaiting = false;
         timeFlying = 10;
         unlimitFPS = MobappGameSettings.isFPSUnlimited(false);
+        showFPS = MobappGameSettings.isFPSShown(false);
         
         log("gcanvas init");
         
@@ -570,7 +572,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             debugTextOffset += currentFontH;
         }
         
-        if (DebugMenu.showFPS) {
+        if (showFPS) {
             g.setColor(0, 255, 0);
             if (fps < 19) {
                 g.setColor(127, 127, 0);

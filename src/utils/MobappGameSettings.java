@@ -6,7 +6,7 @@ public class MobappGameSettings {
 			MGSTRUCTS_FOLDER_PATH = "mgPath",
 		    IS_BETTER_GRAPHICS_ENABLED = "btrGr",
     		IS_FPS_UNLIMITED = "unlFPS",
-		    ANIMS = "anims";
+		    SHOW_FPS = "showFPS";
     
     private static String mgstructsFolderPath = null;
     
@@ -19,15 +19,29 @@ public class MobappGameSettings {
     	            MGSTRUCTS_FOLDER_PATH,
     	            IS_BETTER_GRAPHICS_ENABLED,
     	            IS_FPS_UNLIMITED,
-    	            ANIMS
+    	            SHOW_FPS
     	        });
     	}
     	return settingsInst;
     }
     
-    public static boolean isSetupWizardCompleted() {
-        return getSettingsInst().getBool(IS_SETUP_WIZARD_COMPLETED);
+    public static boolean isFPSShown() {
+        return getSettingsInst().getBool(SHOW_FPS);
     }
+    
+    public static boolean isFPSShown(boolean defaultValue) {
+        return getSettingsInst().getBool(SHOW_FPS, defaultValue);
+    }
+    
+    public static void setFPSShown(boolean b) {
+    	getSettingsInst().set(SHOW_FPS, b);
+    }
+    
+    public static boolean toggleFPSShown() {
+    	return getSettingsInst().toggleBool(SHOW_FPS);
+    }
+    
+    ///
     
     public static boolean isFPSUnlimited() {
         return getSettingsInst().getBool(IS_FPS_UNLIMITED);
@@ -45,6 +59,8 @@ public class MobappGameSettings {
     	return getSettingsInst().toggleBool(IS_FPS_UNLIMITED);
     }
     
+    ///
+    
     public static boolean isBetterGraphicsEnabled() {
         return getSettingsInst().getBool(IS_BETTER_GRAPHICS_ENABLED);
     }
@@ -61,6 +77,8 @@ public class MobappGameSettings {
     	return getSettingsInst().toggleBool(IS_BETTER_GRAPHICS_ENABLED);
     }
     
+    ///
+    
     public static String getMgstructsFolderPath() {
         if (mgstructsFolderPath == null) {
             mgstructsFolderPath = getSettingsInst().getStr(MGSTRUCTS_FOLDER_PATH);
@@ -72,6 +90,12 @@ public class MobappGameSettings {
 
     public static void setMgstructsFolderPath(String path) {
     	getSettingsInst().set(MGSTRUCTS_FOLDER_PATH, path);
+    }
+    
+    ///
+    
+    public static boolean isSetupWizardCompleted() {
+        return getSettingsInst().getBool(IS_SETUP_WIZARD_COMPLETED);
     }
 
     public static void setIsSetupWizardCompleted(boolean b) {

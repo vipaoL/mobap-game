@@ -3,12 +3,12 @@ package mobileapplication3;
 import javax.microedition.lcdui.Graphics;
 
 import utils.MobappGameSettings;
-import utils.Settings;
 
 public class SettingsScreen extends GenericMenu implements Runnable {
     private static final String[] MENU_OPTS = {
             "Better graphics",
             "Unlimit FPS",
+            "Show FPS",
             "Debug settings",
             "back"
         };
@@ -85,9 +85,11 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                     MobappGameSettings.toggleBetterGraphics();
                     break;
                 case 1:
-                	System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
                     MobappGameSettings.toggleFPSUnlimited();
                     break;
+                case 2:
+                	MobappGameSettings.toggleFPSShown();
+                	break;
                 default:
                     break;
             }
@@ -104,5 +106,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         void refreshStates() {
         	setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), 0);
         	setEnabledFor(MobappGameSettings.isFPSUnlimited(), 1);
+        	setEnabledFor(MobappGameSettings.isFPSShown(), 2);
         }
     }

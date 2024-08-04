@@ -43,7 +43,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean showAngle = false;
     public static boolean showLinePoints = false;
     public static boolean simulationMode = false;
-    public static boolean showFPS = false;
     public static boolean oneFrameTwoTicks = false;
     public static boolean whatTheGame = false;
     
@@ -111,7 +110,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
         switch (selected) {
             case 0:
                 isDebugEnabled = !isDebugEnabled;
-                showFPS = isDebugEnabled;
                 showFontSize = isDebugEnabled;
                 setIsSpecialOptnActivated(isDebugEnabled);
                 Logger.logToStdout(isDebugEnabled);
