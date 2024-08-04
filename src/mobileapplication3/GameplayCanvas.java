@@ -219,7 +219,9 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 if (!paused) {
                 	tickTime = (int) (System.currentTimeMillis() - start);
                     fps = 1000 / tickTime;
-                    
+                    if (unlimitFPS) {
+                    	world.setTimestepFX(baseTimestepFX*Mathh.constrain(1, tickTime, 100)/50);
+                    }
                     start = System.currentTimeMillis();
                     boolean bigTick = false;
                     if (!unlimitFPS || start - lastBigTickTime > Main.TICK_DURATION) {
@@ -288,8 +290,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         if (timeFlying > 2) {
                             // apply rotational force
                         	//System.out.println(world.carbody.rotationVelocity2FX());
-                            if (world.carbody.rotationVelocity2FX() > 50000000) {
-                                world.carbody.applyTorque(FXUtil.toFX(-world.carbody.rotationVelocity2FX()*FORCE_MULTIPLIER/16000));
+                            if (world.carbody.rotationVelocity2FX() > 100000000) {
+                                world.carbody.applyTorque(-world.carbody.rotationVelocity2FX()/16000*FORCE_MULTIPLIER);
                             } else {
                                 world.carbody.applyTorque(FXUtil.toFX(-10000*FORCE_MULTIPLIER));
                             }
@@ -408,9 +410,6 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     	}
                     } else {
                         tick = 0;
-                        if (unlimitFPS) {
-                        	world.setTimestepFX(baseTimestepFX*Mathh.constrain(1, tickTime, 100)/50);
-                        }
                         
                         // start the final countdown and open main menu if the car
                         // lies upside down or fell out of the world
