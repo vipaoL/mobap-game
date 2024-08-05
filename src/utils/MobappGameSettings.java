@@ -7,7 +7,8 @@ public class MobappGameSettings {
 		    IS_BETTER_GRAPHICS_ENABLED = "btrGr",
     		IS_FPS_UNLOCKED = "unlFPS",
 		    SHOW_FPS = "showFPS",
-		    SKIP_SECOND_FRAMES = "skipSecFrames";
+		    SKIP_SECOND_FRAMES = "skipSecFrames",
+		    SHOW_BG = "enBG";
     
     private static String mgstructsFolderPath = null;
     
@@ -21,11 +22,31 @@ public class MobappGameSettings {
     	            IS_BETTER_GRAPHICS_ENABLED,
     	            IS_FPS_UNLOCKED,
     	            SHOW_FPS,
-    	            SKIP_SECOND_FRAMES
+    	            SKIP_SECOND_FRAMES,
+    	            SHOW_BG
     	        });
     	}
     	return settingsInst;
     }
+    
+    public static boolean isBGEnabled() {
+        return getSettingsInst().getBool(SHOW_BG);
+    }
+    
+    public static boolean isBGEnabled(boolean defaultValue) {
+        return getSettingsInst().getBool(SHOW_BG, defaultValue);
+    }
+    
+    public static void setBGEnabled(boolean b) {
+    	getSettingsInst().set(SHOW_BG, b);
+    }
+    
+    public static boolean toggleBG() {
+    	return getSettingsInst().toggleBool(SHOW_BG);
+    }
+    
+    ///
+    
     
     public static boolean isSecFramesSkipEnabled() {
         return getSettingsInst().getBool(SKIP_SECOND_FRAMES);

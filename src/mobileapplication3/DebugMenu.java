@@ -124,7 +124,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 break;
             case 4:
                 discoMode = !discoMode;
-                GraphicsWorld.bg = discoMode;
+                GraphicsWorld.bgOverride = discoMode;
                 break;
             case 5:
                 whatTheGame = !whatTheGame;

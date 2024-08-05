@@ -19,6 +19,8 @@ import javax.microedition.lcdui.Graphics;
  * @author vipaol
  */
 public class GraphicsWorld extends World {
+	
+	private static final int BIGSCREEN_SIDE = 480;
 
     int colBg = 0x000000;
     int colLandscape = 0x4444ff;
@@ -29,7 +31,9 @@ public class GraphicsWorld extends World {
     int currColLandscape = colLandscape;
     int currColBodies;
     
-    static boolean bg = false;
+    private boolean betterGraphics;
+    private boolean bg;
+    public static boolean bgOverride = false;
     private static int bgLineStep = Main.sWidth / 10;
     private int bgLineThickness = Main.sWidth/300;
     
@@ -67,6 +71,9 @@ public class GraphicsWorld extends World {
         currColWheel = colBg;
         currColBg = colBg;
         currColBodies = colBodies;
+        
+        betterGraphics = MobappGameSettings.isBetterGraphicsEnabled(Math.max(Main.sWidth, Main.sHeight) >= BIGSCREEN_SIDE);
+    	bg = bgOverride || MobappGameSettings.isBGEnabled(false);
     }
 
     public void addCar() {
@@ -404,7 +411,7 @@ public class GraphicsWorld extends World {
         if (DebugMenu.discoMode) {
             g.setColor(random.nextInt(16777216));
         }
-        if (thickness > 1 && MobappGameSettings.isBetterGraphicsEnabled()) {
+        if (thickness > 1 && betterGraphics) {
             int t2 = thickness/2;
             int dx = x2 - x1;
             int dy = y2 - y1;
@@ -454,7 +461,7 @@ public class GraphicsWorld extends World {
         
         g.setColor(0x00ff00);
         
-        if (thickness > 1 && MobappGameSettings.isBetterGraphicsEnabled()) {
+        if (thickness > 1 && betterGraphics) {
             int t2 = thickness/2;
             int dx = x2 - x1;
             int dy = y2 - y1;
@@ -490,7 +497,7 @@ public class GraphicsWorld extends World {
     	int prevColor = g.getColor();
     	thickness = thickness * 500 / zoomOut * 2;
     	
-    	if (thickness > 1 && MobappGameSettings.isBetterGraphicsEnabled()) {
+    	if (thickness > 1 && betterGraphics) {
 	    	g.fillArc(x - thickness / 2, y - thickness / 2, w + thickness, h + thickness, startAngle, arcAngle);
 	    	g.setColor(bgColor);
 	    	g.fillArc(x + thickness / 2, y + thickness / 2, w - thickness, h - thickness, startAngle, arcAngle);
@@ -521,7 +528,8 @@ public class GraphicsWorld extends World {
     }
 
     public void refreshScreenParameters() {
-        Logger.log("world:refreshing screen params");
+        Logger.log("world:refreshing screen params:");
+        Logger.log(Main.sWidth + " " + Main.sHeight);
         scWidth = Main.sWidth;
         halfScWidth = scWidth / 2;
         scHeight = Main.sHeight;

@@ -19,8 +19,6 @@ import utils.Settings;
  */
 public class MenuCanvas extends GenericMenu implements Runnable {
 	
-	private static final int BIGSCREEN_SIDE = 480;
-	
     private String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Settings", "Exit", "-"};
     
     private final int[] statemap = new int[menuOptions.length]; // array with states of all buttons (active/inactive/enabled)
@@ -71,7 +69,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     }
     
     protected void sizeChanged(int w, int h) {
-    	MobappGameSettings.isBetterGraphicsEnabled(Math.max(w, h) >= BIGSCREEN_SIDE);
         super.sizeChanged(w, h);
     }
     

@@ -10,6 +10,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             "Unlock FPS",
             "Show FPS",
             "Skip every second frame",
+            "Enable background",
             "Debug settings",
             "back"
         };
@@ -94,6 +95,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 case 3:
                 	MobappGameSettings.toggleSecFramesSkipEnabled();
                 	break;
+                case 4:
+                	MobappGameSettings.toggleBG();
+                	break;
                 default:
                     break;
             }
@@ -112,5 +116,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         	setEnabledFor(MobappGameSettings.isFPSUnlocked(), 1);
         	setEnabledFor(MobappGameSettings.isFPSShown(), 2);
         	setEnabledFor(MobappGameSettings.isSecFramesSkipEnabled(), 3);
+        	setEnabledFor(MobappGameSettings.isBGEnabled(), 4);
         }
     }
