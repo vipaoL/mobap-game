@@ -39,16 +39,7 @@ if [ ! -e "${MANIFEST}" ] ; then
 fi
 
 MANIFEST_TMP="${PROJ_HOME}"/bin/manifest-tmp.mf
-MANIFEST_VERSION_LINE='Manifest-Version: 1.0'
-if ! grep -qF "${MANIFEST_VERSION_LINE}" "${MANIFEST}"; then
-    echo Adding manifest version
-    echo "${MANIFEST_VERSION_LINE}" > "${MANIFEST_TMP}"
-    cat "${MANIFEST}" >> $MANIFEST_TMP
-else
-    echo Manifest version is already added
-    cat "${MANIFEST}" > $MANIFEST_TMP
-fi
-
+cat "${MANIFEST}" > $MANIFEST_TMP
 MANIFEST=$MANIFEST_TMP
 
 # add commit number to manifest
