@@ -141,7 +141,7 @@ public class Settings {
     
     public boolean getBool(String key, boolean defaultValue) {
     	String value = getStr(key);
-    	if (value == null) {
+    	if (value == null || "".equals(value)) {
     		set(key, defaultValue);
     		return TRUE.equals(getStr(key));
     	}
