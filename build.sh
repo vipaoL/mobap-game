@@ -1,53 +1,51 @@
 #!/bin/sh -e
 
+PROJ_HOME="$(pwd)"
 echo "Downloading and updating compiler..."
-if git clone https://github.com/vipaoL/j2me_compiler.git 2>/dev/null ; then
+if git clone https://github.com/vipaoL/j2me_compiler.git bin/j2me_compiler 2>/dev/null ; then
 	echo "Done."
 else
 	echo "Already downloaded."
 fi
-cd j2me_compiler
+cd bin/j2me_compiler
 git pull
-cd ..
+cd "${PROJ_HOME}"
 PATHSEP=":"
-JAVA_HOME=./j2me_compiler/jdk1.6.0_45
-WTK_HOME=./j2me_compiler/WTK2.5.2
+JAVA_HOME="${PROJ_HOME}"/bin/j2me_compiler/jdk1.6.0_45
+WTK_HOME="${PROJ_HOME}"/bin/j2me_compiler/WTK2.5.2
 
 
 
 
 ######## CONFIG ########
 ########
-YOUR_LIBS=../lib       # YOUR LIBRARIES
-RES=../rsc
-APP=MobileApplication3   # Output jar name
-MANIFEST=../manifest.mf
+YOUR_LIBS="${PROJ_HOME}"/lib       # YOUR LIBRARIES
+RES="${PROJ_HOME}"/rsc
+APP="${PROJ_HOME}"/bin/MobileApplication3.jar   # Output jar name
+MANIFEST="${PROJ_HOME}"'/Application Descriptor'
 ########
 ########
 
 
-if [ ! -e ${MANIFEST} ] ; then
-	MANIFEST=../MANIFEST.MF
-	if [ ! -e ${MANIFEST} ] ; then
+if [ ! -e "${MANIFEST}" ] ; then
+	MANIFEST=./MANIFEST.MF
+	if [ ! -e "${MANIFEST}" ] ; then
 		MANIFEST=./manifest.mf
-		if [ ! -e ${MANIFEST} ] ; then
-			MANIFEST=./MANIFEST.MF
-			if [ ! -e ${MANIFEST} ] ; then
-				echo "No MANIFEST.MF or manifest.mf found in ./ or ../"
-				exit 2
-			fi
+		if [ ! -e "${MANIFEST}" ] ; then
+			echo "No MANIFEST.MF or manifest.mf or Application Descriptor found in ./"
+			exit 2
 		fi
 	fi
 fi
 
-MANIFEST_TMP=./manifest-tmp.mf
-cp $MANIFEST $MANIFEST_TMP
+MANIFEST_TMP="${PROJ_HOME}"/bin/manifest-tmp.mf
+cp "${MANIFEST}" $MANIFEST_TMP
 MANIFEST=$MANIFEST_TMP
 
 # add commit number to manifest
 COMMIT=$(git rev-parse --short HEAD)
 echo Adding commit hash $COMMIT to $MANIFEST
-echo Commit: $COMMIT >> ${MANIFEST}
+echo Commit: $COMMIT >> "${MANIFEST}"
 
 LIB_DIR=${WTK_HOME}/lib
 CLASSPATH=${LIB_DIR}/*
@@ -82,7 +80,7 @@ rm -rf ../classes/*
 
 echo "Unpacking your libraries: " ${YOUR_LIBS}/*.jar
 cd ../tmpclasses
-../bin/${JAR} xf ${YOUR_LIBS}/*.jar
+${JAR} xf ${YOUR_LIBS}/*.jar
 rm -rf META-INF
 
 
@@ -95,7 +93,7 @@ ${JAVAC} \
     -d ../tmpclasses \
     -classpath ../tmpclasses${PATHSEP}${CLASSPATH} \
 	-extdirs ../lib \
-    `find ../src -name '*'.java`
+    `find "${PROJ_HOME}"/src -name '*'.java`
 
 echo "Preverifying class files..."
 
@@ -105,12 +103,12 @@ ${PREVERIFY} \
     ../tmpclasses
 
 echo "Jaring preverified class files..."
-${JAR} cmf ${MANIFEST} ${APP}.jar -C ../classes .
+${JAR} cmf "${MANIFEST}" "${APP}" -C ../classes .
 
 if [ -d ${RES} ] ; then
-  ${JAR} uf ${APP}.jar -C ${RES} .
+  ${JAR} uf "${APP}" -C ${RES} .
 fi
 
-echo "Done!" ./${APP}.jar
+echo "Done!" "${APP}"
 #echo "Don't forget to update the JAR file size in the JAD file!!!"
 #echo
