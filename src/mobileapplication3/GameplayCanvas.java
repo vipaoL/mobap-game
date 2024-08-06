@@ -127,7 +127,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         shouldWait = false;
         isWaiting = false;
         timeFlying = 10;
-        unlimitFPS = MobappGameSettings.isFPSUnlocked(false);
+        unlimitFPS = MobappGameSettings.isFPSUnlocked(true);
         showFPS = MobappGameSettings.isFPSShown(false);
         oneFrameTwoTicks = MobappGameSettings.isSecFramesSkipEnabled(false);
         battIndicator = MobappGameSettings.isBattIndicatorEnabled(false);
