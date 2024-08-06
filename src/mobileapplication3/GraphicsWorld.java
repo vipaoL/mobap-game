@@ -41,7 +41,7 @@ public class GraphicsWorld extends World {
     private boolean bg;
     public static boolean bgOverride = false;
     private int bgLineStep = scMinSide / 3;
-    private int bgLineThickness = Main.sWidth/250;
+    private int bgLineThickness = Math.max(Main.sWidth, Main.sHeight)/250;
     
     int zoomBase = 0;
     int zoomOut = 100;
@@ -248,7 +248,7 @@ public class GraphicsWorld extends World {
             g.setColor(currColBg);
             for (int i = 0; i < lines; i++) {
                 int y = i * sunR / lines + sunCenterY - sunR / 12;
-                drawLine(g, 0, y, scWidth, y, 10*(i+1)/n, false);
+                drawLine(g, 0, y, scWidth, y, bgLineThickness*2*(i+1)/lines, false);
             }
         }
     }
