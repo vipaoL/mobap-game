@@ -62,11 +62,15 @@ public class MgStruct {
             InputStream is = getClass().getResourceAsStream(path);
             DataInputStream dis = new DataInputStream(is);
             readFromDataInputStream(dis);
-            is.close();
+            try {
+            	is.close();
+            } catch (IOException e) { }
             return true;
         } catch (IOException ex) {
+        	Logger.log(ex.toString());
             return false;
         } catch (NullPointerException ex) {
+        	Logger.log(ex.toString());
             return false;
         }
     }
@@ -145,11 +149,15 @@ public class MgStruct {
                     structure[c] = data;
                 }
                 saveStructToStorage(structure);
-                dis.close();
+                try {
+                	dis.close();
+                } catch (IOException e) { }
                 return true;
             } else {
                 Logger.log("Unsupported file format version: " + fileFormatVervion);
-                dis.close();
+                try {
+                	dis.close();
+                } catch (IOException e) { }
                 return false;
             }
         } catch(ArrayIndexOutOfBoundsException ex) {
