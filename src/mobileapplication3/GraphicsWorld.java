@@ -20,7 +20,7 @@ import javax.microedition.lcdui.Graphics;
  */
 public class GraphicsWorld extends World {
 	
-	private static final int BIGSCREEN_SIDE = 360;
+	private static final int BIGSCREEN_SIDE = 480;
 
     int colBg = 0x000000;
     int colLandscape = 0x4444ff;
