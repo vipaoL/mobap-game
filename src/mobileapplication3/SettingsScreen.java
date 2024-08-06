@@ -12,7 +12,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             "Skip every second frame",
             "Enable background",
             "Debug settings",
-            "back"
+            "Back"
         };
         
         // array with states of all buttons (active/inactive/enabled)

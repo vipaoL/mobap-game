@@ -29,9 +29,9 @@ public abstract class GenericMenu extends GameCanvas {
     public int selected;
     
     // colors
-    private int normalColor = 0x00ffffff, selectedColor = 0x00ff4040,
-            pressedColor = 0x00E03838, specialOptionActivatedColor = 0x00ffff00,
-            colUnreachable = 0x00888888, colReachableEnabled = 0x00ccff00;
+    private int normalColor = 0xffffff, selectedColor = 0xff4040,
+            pressedColor = 0xE03838, specialOptionActivatedColor = 0xffff00,
+            colUnreachable = 0x888888, colReachableEnabled = 0x88ff00;
     private String[] options;
     
     private boolean isPressedByPointerNow, firstload = true,

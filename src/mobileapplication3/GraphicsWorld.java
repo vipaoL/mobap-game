@@ -31,17 +31,17 @@ public class GraphicsWorld extends World {
     int currColLandscape = colLandscape;
     int currColBodies;
     
-    private boolean betterGraphics;
-    private boolean bg;
-    public static boolean bgOverride = false;
-    private static int bgLineStep = Main.sWidth / 10;
-    private int bgLineThickness = Main.sWidth/300;
-    
     private int scWidth = Main.sWidth;
     private int halfScWidth = scWidth/2;
     private int scHeight = Main.sHeight;
     private int halfScHeight = scHeight/2;
     private int scMinSide = Math.min(scWidth, scHeight);
+    
+    private boolean betterGraphics;
+    private boolean bg;
+    public static boolean bgOverride = false;
+    private int bgLineStep = scMinSide / 3;
+    private int bgLineThickness = Main.sWidth/250;
     
     int zoomBase = 0;
     int zoomOut = 100;
@@ -63,6 +63,13 @@ public class GraphicsWorld extends World {
     
     public GraphicsWorld(World w) {
         super(w);
+        
+        betterGraphics = MobappGameSettings.isBetterGraphicsEnabled(Math.max(Main.sWidth, Main.sHeight) >= BIGSCREEN_SIDE);
+    	bg = bgOverride || MobappGameSettings.isBGEnabled(false);
+    	if (bg) {
+    		colBg = 0x150031;
+    	}
+        
         if (DebugMenu.whatTheGame) {
             currColWheel = 0x888888;
             colBg = 0x001155;
@@ -71,9 +78,6 @@ public class GraphicsWorld extends World {
         currColWheel = colBg;
         currColBg = colBg;
         currColBodies = colBodies;
-        
-        betterGraphics = MobappGameSettings.isBetterGraphicsEnabled(Math.max(Main.sWidth, Main.sHeight) >= BIGSCREEN_SIDE);
-    	bg = bgOverride || MobappGameSettings.isBGEnabled(false);
     }
 
     public void addCar() {
@@ -209,22 +213,42 @@ public class GraphicsWorld extends World {
         }
         
     	if (bg) {
-            g.setColor(63, 0, 31);
+    		int sunR = Math.min(scWidth, scHeight) / 4;
+            int sunCenterY = scHeight - scHeight * 3 / 5;
+            
+            g.setColor(191, 0, 127);
             int offset = (carX - WorldGen.bgZeroPoint) / 16;
-            int l = (scWidth * 16);
-            for (int i = 0; i < l; i+=bgLineStep) {
-                int x2 = -(i + (offset) % bgLineStep - l/2)/*  *64/8  */;
-                int x1 = x2 / 32;
-                drawLine(g, x1 + scWidth / 2, scHeight * 2 / 3, x2 + scWidth / 2, scHeight, bgLineThickness, false);
+            int l = (scWidth * 4);
+            int y1 = sunCenterY + sunR;
+            int y2 = scHeight;
+            int ii = 0;
+            int n = l/bgLineStep;
+            // horizontal lines
+            for (int i = 0; i < n; i++) {
+                int x2 = -(ii + (offset) % bgLineStep - l/2)/*  *64/8  */;
+                ii += bgLineStep;
+                int x1 = x2 / 4;
+                int thickness = bgLineThickness;
+                if (Math.abs(i*8 - n*4) > n) {
+                	thickness -= 1;
+                }
+                drawLine(g, x1 + halfScWidth, y1, x2 + halfScWidth, y2, thickness, false);
             }
-            g.setColor(95, 63, 0);
+            // vertical lines
+            n = scHeight*2/bgLineStep;
+            for (int i = 0; i < n; i++) {
+            	int y = y1 + (y2 - y1) * i * i / n / n;
+            	drawLine(g, 0, y, scWidth, y, 1, false);
+            }
+            g.setColor(255, 170, 0);
+            
+            // sun
             int lines = 6;
-            int r = Math.min(scWidth, scHeight) / 4;
-            g.fillArc(scWidth / 2 - r, scHeight * 2 / 5 - r, r * 2, r * 2, 0, 360);
+            g.fillArc(halfScWidth - sunR, sunCenterY - sunR, sunR * 2, sunR * 2, 0, 360);
             g.setColor(currColBg);
             for (int i = 0; i < lines; i++) {
-                int y = i * r / lines + scHeight * 2 / 5 - r / 12;
-                drawLine(g, 0, y, scWidth, y, bgLineThickness, false);
+                int y = i * sunR / lines + sunCenterY - sunR / 12;
+                drawLine(g, 0, y, scWidth, y, 10*(i+1)/n, false);
             }
         }
     }
@@ -281,7 +305,7 @@ public class GraphicsWorld extends World {
         		if (DebugMenu.whatTheGame) {
         			g.setColor(0xff0000);
         		}
-                
+        		
                 g.fillTriangle(xToPX(positions[0].xAsInt()),
                         yToPX(positions[0].yAsInt()),
                         xToPX(positions[1].xAsInt()),
@@ -304,6 +328,15 @@ public class GraphicsWorld extends World {
                         xToPX(positions[i + 1].xAsInt()),
                         yToPX(positions[i + 1].yAsInt()),
                         10);
+                if (b != carbody) {
+	                g.fillTriangle(
+	                		xToPX(positions[0].xAsInt()),
+	                        yToPX(positions[0].yAsInt()),
+	                        xToPX(positions[i].xAsInt()),
+	                        yToPX(positions[i].yAsInt()),
+	                        xToPX(positions[i + 1].xAsInt()),
+	                        yToPX(positions[i + 1].yAsInt()));
+                }
             }
             drawLine(g,
                     xToPX(positions[positions.length - 1].xAsInt()),
@@ -493,13 +526,13 @@ public class GraphicsWorld extends World {
         }
     }
     
-    private void drawArc(Graphics g, int x, int y, int w, int h, int startAngle, int arcAngle, int thickness, int bgColor) {
+    private void drawArc(Graphics g, int x, int y, int w, int h, int startAngle, int arcAngle, int thickness, int fillColor) {
     	int prevColor = g.getColor();
     	thickness = thickness * 500 / zoomOut * 2;
     	
     	if (thickness > 1 && betterGraphics) {
 	    	g.fillArc(x - thickness / 2, y - thickness / 2, w + thickness, h + thickness, startAngle, arcAngle);
-	    	g.setColor(bgColor);
+	    	g.setColor(fillColor);
 	    	g.fillArc(x + thickness / 2, y + thickness / 2, w - thickness, h - thickness, startAngle, arcAngle);
 	    	g.setColor(prevColor);
     	} else {

@@ -40,7 +40,7 @@ public class Levels extends GenericMenu implements Runnable {
         levelNames = new Vector();
         Logger.log("Levels:start()");
         try {
-            levelNames.addElement("---levels---");
+            levelNames.addElement("Levels");
             getLevels();
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -51,7 +51,7 @@ public class Levels extends GenericMenu implements Runnable {
             e.printStackTrace();
         }
         // TODO: separate with pages -----------------------!
-        levelNames.addElement("--Back--");
+        levelNames.addElement("Back");
         loadParams(Main.sWidth, Main.sHeight, levelNames, 1, levelNames.size() - 1, levelNames.size() - 1, fontSizeCache);
         fontSizeCache = getFontSize();
         showNotify();

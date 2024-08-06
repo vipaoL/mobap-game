@@ -19,7 +19,15 @@ import utils.Settings;
  */
 public class MenuCanvas extends GenericMenu implements Runnable {
 	
-    private String[] menuOptions = {"-", "Play", "Ext Structs", "Levels", "About", "Settings", "Exit", "-"};
+    private String[] menuOptions = {
+    		"",
+    		"Play",
+    		"Ext Structs",
+    		"Levels",
+    		"About",
+    		"Settings",
+    		"Exit",
+    		""};
     
     private final int[] statemap = new int[menuOptions.length]; // array with states of all buttons (active/inactive/enabled)
     private static int defaultSelected = 1; // currently selected option in menu
