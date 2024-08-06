@@ -2,14 +2,14 @@ package utils;
 
 import java.io.IOException;
 
-import javax.microedition.io.Connector;
+/*import javax.microedition.io.Connector;
 import javax.microedition.sensor.Data;
 import javax.microedition.sensor.SensorConnection;
 import javax.microedition.sensor.SensorInfo;
-import javax.microedition.sensor.SensorManager;
+import javax.microedition.sensor.SensorManager;*/
 
 public class BatteryViaSensors {
-	public int getBatteryLevel() {
+	/*public int getBatteryLevel() {
 		try {
 			SensorInfo[] batteryInfo = SensorManager.findSensors("battery_charge", null);
 			SensorConnection sensor = (SensorConnection) Connector.open(batteryInfo[0].getUrl());
@@ -18,5 +18,5 @@ public class BatteryViaSensors {
 		} catch (IOException ex) {
 			return Battery.ERROR;
 		}
-	}
+	}*/
 }
