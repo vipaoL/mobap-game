@@ -14,6 +14,7 @@ import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
+import utils.Battery;
 import utils.Logger;
 import utils.Mathh;
 import utils.MobappGameSettings;
@@ -26,9 +27,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     
     private static final String[] MENU_HINT = {"MENU:", "here(touch),", "D, #"};
     private static final String[] PAUSE_HINT = {"PAUSE:", "here(touch), *,", "B, right soft"};
-    public static final int GAME_SPEED_MULTIPLIER = 2;
-    public static final int FORCE_MULTIPLIER = GAME_SPEED_MULTIPLIER;
+    private static final int GAME_SPEED_MULTIPLIER = 2;
+    private static final int FORCE_MULTIPLIER = GAME_SPEED_MULTIPLIER;
     public static final short EFFECT_SPEED = 0;
+    private static final int BATT_UPD_PERIOD = 10000;
     
     // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
@@ -46,6 +48,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
     private boolean unlimitFPS;
     private boolean showFPS;
     private boolean oneFrameTwoTicks;
+    private boolean battIndicator;
+    private int batLevel;
     
     private boolean paused = false;
     private boolean stopped = false;
@@ -126,6 +130,13 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         unlimitFPS = MobappGameSettings.isFPSUnlocked(false);
         showFPS = MobappGameSettings.isFPSShown(false);
         oneFrameTwoTicks = MobappGameSettings.isSecFramesSkipEnabled(false);
+        battIndicator = MobappGameSettings.isBattIndicatorEnabled(false);
+        
+        if (battIndicator) {
+        	if (!Battery.checkAndInit()) {
+        		battIndicator = false;
+        	}
+        }
         
         log("gcanvas init");
         
@@ -215,6 +226,7 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
             int baseTimestepFX = world.getTimestepFX();
             long lastFPSMeasureTime = System.currentTimeMillis();
             int framesFromLastFPSMeasure = 0;
+            long lastBattUpdateTime = 0;
 
             // Main game cycle
             while (!stopped) {
@@ -460,6 +472,11 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
 
                         world.tickBodies();
                     }
+                    
+                    if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD) {
+                    	batLevel = Battery.getBatteryLevel();
+                    	lastBattUpdateTime = System.currentTimeMillis();
+                    }
 
                     while (shouldWait) {
                         isWaiting = true;
@@ -542,9 +559,23 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
         }
         
         // draw some debug info if debug is enabled
-        int debugTextOffset = 0;
+        setFont(smallfont, g);
+        int hudLeftTextOffset = 0;
+        if (battIndicator) {
+        	if (batLevel < 30) {
+        		g.setColor(0xffff00);
+        	} else if (batLevel < 10) {
+        		g.setColor(0xff8000);
+        	} else if (batLevel < 6) {
+        		g.setColor(0x00ff00);
+        	} else {
+        		g.setColor(0x00ff00);
+        	}
+        	
+            g.drawString("BAT: " + batLevel + "%", 0, hudLeftTextOffset, 0);
+            hudLeftTextOffset += currentFontH;
+        }
         if (DebugMenu.isDebugEnabled) {
-            setFont(smallfont, g);
             // speedometer
             if (DebugMenu.speedo) {
                 switch (speedoState) {
@@ -558,10 +589,10 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                         g.setColor(255, 0, 0);
                         break;
                 }
-                g.fillRect(0, debugTextOffset, currentFontH * 5, currentFontH);
+                g.fillRect(0, hudLeftTextOffset, currentFontH * 5, currentFontH);
                 g.setColor(255, 255, 255);
-                g.drawString(String.valueOf(carVelocitySqr), 0, debugTextOffset, 0);
-                debugTextOffset += currentFontH;
+                g.drawString(String.valueOf(carVelocitySqr), 0, hudLeftTextOffset, 0);
+                hudLeftTextOffset += currentFontH;
             }
             // car angle
             if (DebugMenu.showAngle) {
@@ -570,15 +601,15 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 } else {
                     g.setColor(255, 255, 255);
                 }
-                g.drawString(String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())), 0, debugTextOffset, 0);
-                debugTextOffset += currentFontH;
+                g.drawString(String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())), 0, hudLeftTextOffset, 0);
+                hudLeftTextOffset += currentFontH;
             }
         }
         // show coordinates of car if enabled
         if (DebugMenu.coordinates) {
             g.setColor(127, 127, 127);
-            g.drawString(GraphicsWorld.carX + " " + GraphicsWorld.carY, 0, debugTextOffset, 0); 
-            debugTextOffset += currentFontH;
+            g.drawString(GraphicsWorld.carX + " " + GraphicsWorld.carY, 0, hudLeftTextOffset, 0); 
+            hudLeftTextOffset += currentFontH;
         }
         
         if (showFPS) {
@@ -590,11 +621,11 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 }
             }
             if (oneFrameTwoTicks) {
-                g.drawString("FPS:" + fps/2, 0, debugTextOffset, 0);
+                g.drawString("FPS:" + fps/2, 0, hudLeftTextOffset, 0);
             } else {
-                g.drawString("FPS:" + fps, 0, debugTextOffset, 0);
+                g.drawString("FPS:" + fps, 0, hudLeftTextOffset, 0);
             }
-            debugTextOffset += currentFontH;
+            hudLeftTextOffset += currentFontH;
         }
         
         try {
@@ -621,11 +652,11 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     default:
                         break;
                 }
-                g.drawString("wg: mspt" + WorldGen.mspt + " step:" + WorldGen.currStep, 0, debugTextOffset, 0);
-                debugTextOffset += currentFontH;
+                g.drawString("wg: mspt" + WorldGen.mspt + " step:" + WorldGen.currStep, 0, hudLeftTextOffset, 0);
+                hudLeftTextOffset += currentFontH;
                 
-                g.drawString("sgs" + worldgen.getSegmentCount() + " bds" + world.getBodyCount(), 0, debugTextOffset, 0);
-                debugTextOffset += currentFontH;
+                g.drawString("sgs" + worldgen.getSegmentCount() + " bds" + world.getBodyCount(), 0, hudLeftTextOffset, 0);
+                hudLeftTextOffset += currentFontH;
             }
         } catch(NullPointerException ex) {
             

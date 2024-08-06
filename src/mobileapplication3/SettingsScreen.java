@@ -2,21 +2,24 @@ package mobileapplication3;
 
 import javax.microedition.lcdui.Graphics;
 
+import utils.Battery;
+import utils.Logger;
 import utils.MobappGameSettings;
 
 public class SettingsScreen extends GenericMenu implements Runnable {
-    private static final String[] MENU_OPTS = {
+    private static String[] menuOpts = {
             "Better graphics",
             "Unlock FPS",
             "Show FPS",
             "Skip every second frame",
             "Enable background",
+            "Show battery level",
             "Debug settings",
             "Back"
         };
         
         // array with states of all buttons (active/inactive/enabled)
-        private final int[] statemap = new int[MENU_OPTS.length];
+        private final int[] statemap = new int[menuOpts.length];
         private static int fontSizeCache = -1;
         
         public SettingsScreen() {
@@ -26,10 +29,10 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         
         private void init() {
             sizeChanged(getWidth(), getHeight());
-            loadParams(Main.sWidth, Main.sHeight, MENU_OPTS, statemap, fontSizeCache);
+            loadParams(Main.sWidth, Main.sHeight, menuOpts, statemap, fontSizeCache);
             fontSizeCache = getFontSize();
             
-            setSpecialOption(MENU_OPTS.length - 2); // highlight "Debug settings" if enabled
+            setSpecialOption(menuOpts.length - 2); // highlight "Debug settings" if enabled
             setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
             
             refreshStates();
@@ -98,13 +101,30 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 case 4:
                 	MobappGameSettings.toggleBG();
                 	break;
+                case 5:
+                	if (!MobappGameSettings.isBattIndicatorEnabled()) {
+                		if (!Battery.checkAndInit()) {
+                			setStateFor(STATE_INACTIVE, selected);
+                    		break;
+                    	} else {
+                    		int batLevel = Battery.getBatteryLevel();
+                    		if (batLevel == Battery.ERROR) {
+                    			menuOpts[selected] = "Can't get battery level";
+                    		} else {
+                    			menuOpts[selected] = "Battery: " + batLevel + "%";
+                    			Logger.log("bat method: " + Battery.getMethod());
+                    		}
+                    	}
+                	}
+                	MobappGameSettings.toggleBattIndicator();
+                	break;
                 default:
                     break;
             }
-            if (selected == MENU_OPTS.length - 2) {
+            if (selected == menuOpts.length - 2) {
                 isStopped = true;
                 Main.set(new DebugMenu());
-            } else if (selected == MENU_OPTS.length - 1) {
+            } else if (selected == menuOpts.length - 1) {
                 isStopped = true;
                 Main.set(new MenuCanvas());
             } else {
@@ -117,5 +137,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         	setEnabledFor(MobappGameSettings.isFPSShown(), 2);
         	setEnabledFor(MobappGameSettings.isSecFramesSkipEnabled(), 3);
         	setEnabledFor(MobappGameSettings.isBGEnabled(), 4);
+        	setEnabledFor(MobappGameSettings.isBattIndicatorEnabled(), 5);
         }
     }

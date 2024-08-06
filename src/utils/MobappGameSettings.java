@@ -8,7 +8,8 @@ public class MobappGameSettings {
     		IS_FPS_UNLOCKED = "unlFPS",
 		    SHOW_FPS = "showFPS",
 		    SKIP_SECOND_FRAMES = "skipSecFrames",
-		    SHOW_BG = "enBG";
+		    SHOW_BG = "enBG",
+		    BATTERY_INDICATOR = "Batt";
     
     private static String mgstructsFolderPath = null;
     
@@ -23,11 +24,30 @@ public class MobappGameSettings {
     	            IS_FPS_UNLOCKED,
     	            SHOW_FPS,
     	            SKIP_SECOND_FRAMES,
-    	            SHOW_BG
+    	            SHOW_BG,
+    	            BATTERY_INDICATOR
     	        });
     	}
     	return settingsInst;
     }
+    
+    public static boolean isBattIndicatorEnabled() {
+        return getSettingsInst().getBool(BATTERY_INDICATOR);
+    }
+    
+    public static boolean isBattIndicatorEnabled(boolean defaultValue) {
+        return getSettingsInst().getBool(BATTERY_INDICATOR, defaultValue);
+    }
+    
+    public static void setBattIndicatorEnabled(boolean b) {
+    	getSettingsInst().set(BATTERY_INDICATOR, b);
+    }
+    
+    public static boolean toggleBattIndicator() {
+    	return getSettingsInst().toggleBool(BATTERY_INDICATOR);
+    }
+    
+    ///
     
     public static boolean isBGEnabled() {
         return getSettingsInst().getBool(SHOW_BG);
@@ -46,7 +66,6 @@ public class MobappGameSettings {
     }
     
     ///
-    
     
     public static boolean isSecFramesSkipEnabled() {
         return getSettingsInst().getBool(SKIP_SECOND_FRAMES);
