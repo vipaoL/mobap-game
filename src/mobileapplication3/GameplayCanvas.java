@@ -509,6 +509,13 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                 try {
                     if (sleep > 0 && !unlimitFPS) {
                         Thread.sleep(sleep);
+                    } else if (System.currentTimeMillis() == start) {
+                    	Thread thread = Thread.currentThread();
+                    	while (System.currentTimeMillis() == start) {
+                    		synchronized (thread) {
+								thread.wait(0, 30);
+							}
+                    	}
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
