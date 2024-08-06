@@ -475,6 +475,8 @@ public class GameplayCanvas extends GameCanvas implements Runnable {
                     framesFromLastFPSMeasure++;
 
                     isWaiting = false;
+                    
+                    Thread.yield();
 
                     sleep = Main.TICK_DURATION - (System.currentTimeMillis() - start);
                     sleep = Math.max(sleep, 0);
