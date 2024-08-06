@@ -21,6 +21,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         // array with states of all buttons (active/inactive/enabled)
         private final int[] statemap = new int[menuOpts.length];
         private static int fontSizeCache = -1;
+        private boolean batFailed = false;
         
         public SettingsScreen() {
             setFullScreenMode(true);
@@ -104,12 +105,16 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 case 5:
                 	if (!MobappGameSettings.isBattIndicatorEnabled()) {
                 		if (!Battery.checkAndInit()) {
-                			setStateFor(STATE_INACTIVE, selected);
+                			batFailed = true;
+                			Logger.log("Battery init failed");
                     		break;
                     	} else {
                     		int batLevel = Battery.getBatteryLevel();
                     		if (batLevel == Battery.ERROR) {
-                    			menuOpts[selected] = "Can't get battery level";
+                    			String err = "Can't get battery level";
+                    			menuOpts[selected] = err;
+                    			Logger.log(err);
+                    			break;
                     		} else {
                     			menuOpts[selected] = "Battery: " + batLevel + "%";
                     			Logger.log("bat method: " + Battery.getMethod());
@@ -137,6 +142,10 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         	setEnabledFor(MobappGameSettings.isFPSShown(), 2);
         	setEnabledFor(MobappGameSettings.isSecFramesSkipEnabled(), 3);
         	setEnabledFor(MobappGameSettings.isBGEnabled(), 4);
-        	setEnabledFor(MobappGameSettings.isBattIndicatorEnabled(), 5);
+        	if (!batFailed) {
+        		setEnabledFor(MobappGameSettings.isBattIndicatorEnabled(), 5);
+        	} else {
+        		setStateFor(STATE_INACTIVE, selected);
+        	}
         }
     }
