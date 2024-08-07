@@ -32,9 +32,9 @@ public class Battery {
 		
 		try {
 			Class.forName("javax.microedition.sensor.SensorManager");
-			//method = METHOD_SENSOR_API;
-			Logger.log("method 2 success but is not supported yet");
-			return false; // true;
+			method = METHOD_SENSOR_API;
+			Logger.log("method 2 success");
+			return true;
 		} catch (ClassNotFoundException e) {
 			Logger.log("method 2 failed: " + e);
 		}
@@ -49,8 +49,8 @@ public class Battery {
 				return Integer.parseInt(System.getProperty("batterylevel"));
 			case METHOD_COM_NOKIA_MID_BATTERYLEVEL:
 				return Integer.parseInt(System.getProperty("com.nokia.mid.batterylevel").replace('%', ' ').trim());
-			/*case METHOD_SENSOR_API:
-				return new BatteryViaSensors().getBatteryLevel();*/
+			case METHOD_SENSOR_API:
+				return new BatteryViaSensors().getBatteryLevel();
 			}
 		} catch (Exception ex) {
 			Logger.log("can't get battery level:");
