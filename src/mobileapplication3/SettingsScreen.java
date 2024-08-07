@@ -145,7 +145,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         	if (!batFailed) {
         		setEnabledFor(MobappGameSettings.isBattIndicatorEnabled(), 5);
         	} else {
-        		setStateFor(STATE_INACTIVE, selected);
+        		setStateFor(STATE_INACTIVE, 5);
         	}
         }
     }
