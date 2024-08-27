@@ -93,7 +93,7 @@ ${JAVAC} \
     -d ../tmpclasses \
     -classpath ../tmpclasses${PATHSEP}${CLASSPATH} \
 	-extdirs ../lib \
-    `find "${PROJ_HOME}"/src -name '*'.java`
+    `find "${PROJ_HOME}"/src "${PROJ_HOME}"/lib/*/src -name '*'.java`
 
 echo "Preverifying class files..."
 

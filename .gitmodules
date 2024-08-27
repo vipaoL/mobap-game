@@ -1,0 +1,10 @@
+[submodule "lib/mobapp-platform-j2me"]
+	path = lib/mobapp-platform-j2me
+	url = https://github.com/vipaoL/mobapp-platform.git
+	branch = j2me
+[submodule "lib/mobapp-ui"]
+	path = lib/mobapp-ui
+	url = https://github.com/vipaoL/mobapp-ui.git
+[submodule "lib/mobapp-game-base"]
+	path = lib/mobapp-game-base
+	url = https://github.com/vipaoL/mobapp-game-base.git

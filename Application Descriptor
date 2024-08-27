@@ -5,7 +5,7 @@ LGE-MIDlet-On-Screen-Keypad: no
 MicroEdition-Configuration: CLDC-1.1
 Nokia-MIDlet-Category: Game
 MIDlet-Name: mobapp-game
-MIDlet-1: mobapp-game,/icon.png,mobileapplication3.Main
+MIDlet-1: mobapp-game,/icon.png,mobileapplication3.game.Main
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Jar-URL: mobapp.jar
 Nokia-MIDlet-On-Screen-Keypad: no

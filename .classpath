@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="lib/mobapp-game-base/src"/>
+	<classpathentry kind="src" path="lib/mobapp-platform-j2me/src"/>
+	<classpathentry kind="src" path="lib/mobapp-ui/src"/>
+	<classpathentry kind="src" path="res"/>
+	<classpathentry kind="con" path="org.elipse.mtj.JavaMEContainer/KEmulator nnx64/KEmulator"/>
+	<classpathentry exported="true" kind="lib" path="lib/PhysicsEngine_v135a.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
