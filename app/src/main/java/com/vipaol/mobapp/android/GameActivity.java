@@ -61,7 +61,7 @@ public class GameActivity extends Activity {
 
     public void setRootComponent(RootContainer currentRoot) {
         this.currentRoot = currentRoot;
-        Platform.getActivityInst().runOnUiThread(new Runnable() {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 setContentView(currentRoot);
