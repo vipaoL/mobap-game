@@ -22,6 +22,8 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Add commit hash info to the build
+      run: echo "Commit=$(git rev-parse --short HEAD)" >> "app/src/main/assets/app.properties"
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle

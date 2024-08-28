@@ -7,7 +7,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.vipaol.mobapp.editor.android'
+        applicationId 'com.vipaol.mobapp.game.android'
         minSdk 16
         targetSdk 34
         versionCode 1

@@ -2,6 +2,7 @@ package com.vipaol.mobapp.android;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 
 import mobileapplication3.game.MenuCanvas;
 import mobileapplication3.platform.Platform;
@@ -9,7 +10,7 @@ import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.UISettings;
 
 public class GameActivity extends Activity {
-    private RootContainer currentRoot;
+    private RootContainer currentRoot = null;
     private GameActivity inst;
     private static boolean activityVisible;
 
@@ -43,6 +44,21 @@ public class GameActivity extends Activity {
         }
     }
 
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (currentRoot != null) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                currentRoot.keyPressed(event.getKeyCode());
+                return true;
+            }
+            if (event.getAction() == KeyEvent.ACTION_UP) {
+                currentRoot.keyReleased(event.getKeyCode());
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void setRootComponent(RootContainer currentRoot) {
         this.currentRoot = currentRoot;
         Platform.getActivityInst().runOnUiThread(new Runnable() {
@@ -53,15 +69,5 @@ public class GameActivity extends Activity {
         });
     }
 
-    public static boolean isActivityVisible() {
-        return activityVisible;
-    }
 
-    public static void activityResumed() {
-        activityVisible = true;
-    }
-
-    public static void activityPaused() {
-        activityVisible = false;
-    }
 }
