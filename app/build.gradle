@@ -28,6 +28,7 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/lib/mobapp-platform-android/src'
         main.java.srcDirs += 'src/main/lib/mobapp-game-base/src'
+        main.java.srcDirs += 'src/main/lib/mobapp-editor-base/src'
         main.java.srcDirs += 'src/main/lib/mobapp-ui/src'
     }
 }
