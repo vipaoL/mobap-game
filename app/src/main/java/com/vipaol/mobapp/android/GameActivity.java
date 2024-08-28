@@ -11,6 +11,8 @@ import mobileapplication3.ui.UISettings;
 public class GameActivity extends Activity {
     private RootContainer currentRoot;
     private GameActivity inst;
+    private static boolean activityVisible;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,5 +51,17 @@ public class GameActivity extends Activity {
                 setContentView(currentRoot);
             }
         });
+    }
+
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
+    public static void activityResumed() {
+        activityVisible = true;
+    }
+
+    public static void activityPaused() {
+        activityVisible = false;
     }
 }
