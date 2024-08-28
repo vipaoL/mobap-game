@@ -1,10 +1,10 @@
-[submodule "lib/mobapp-platform-j2me"]
-	path = lib/mobapp-platform-j2me
+[submodule "lib/mobapp-platform-android"]
+	path = app/src/main/lib/mobapp-platform-android
 	url = https://github.com/vipaoL/mobapp-platform.git
-	branch = j2me
+	branch = android
 [submodule "lib/mobapp-ui"]
-	path = lib/mobapp-ui
+	path = app/src/main/lib/mobapp-ui
 	url = https://github.com/vipaoL/mobapp-ui.git
 [submodule "lib/mobapp-game-base"]
-	path = lib/mobapp-game-base
+	path = app/src/main/lib/mobapp-game-base
 	url = https://github.com/vipaoL/mobapp-game-base.git
