@@ -1,76 +1,19 @@
 package com.vipaol.mobapp.android;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.KeyEvent;
-
 import mobileapplication3.game.MenuCanvas;
-import mobileapplication3.platform.Platform;
-import mobileapplication3.platform.ui.RootContainer;
+import mobileapplication3.platform.ui.MobappActivity;
+import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.UISettings;
 
-public class GameActivity extends Activity {
-    private RootContainer currentRoot = null;
-    private GameActivity inst;
-    private static boolean activityVisible;
+public class GameActivity extends MobappActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Platform.init(this);
-        inst = this;
-        try {
-            final UISettings uiSettings = new UISettings() {
-                public boolean getKeyRepeatedInListsEnabled() {
-                    return true;
-                }
-
-                public boolean getAnimsEnabled() {
-                    return false;
-                }
-
-                public void onChange() {
-                    try {
-                        currentRoot.init();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            };
-            setRootComponent(new RootContainer(inst, new MenuCanvas(), uiSettings));
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            Platform.showError(ex);
-        }
+    protected IUIComponent getRootUIComponent() {
+        return new MenuCanvas();
     }
 
     @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getRepeatCount() > 0)  {
-            return false;
-        }
-        if (currentRoot != null) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                currentRoot.keyPressed(event.getKeyCode());
-                return true;
-            }
-            if (event.getAction() == KeyEvent.ACTION_UP) {
-                currentRoot.keyReleased(event.getKeyCode());
-                return true;
-            }
-        }
-        return false;
+    protected UISettings getUISettings() {
+        return null;
     }
-
-    public void setRootComponent(RootContainer currentRoot) {
-        this.currentRoot = currentRoot;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                setContentView(currentRoot);
-            }
-        });
-    }
-
-
 }
