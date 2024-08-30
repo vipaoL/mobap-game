@@ -57,6 +57,9 @@ public class EditorActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getRepeatCount() > 0)  {
+            return false;
+        }
         int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:

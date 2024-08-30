@@ -46,6 +46,9 @@ public class GameActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getRepeatCount() > 0)  {
+            return false;
+        }
         if (currentRoot != null) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 currentRoot.keyPressed(event.getKeyCode());
