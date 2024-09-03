@@ -34,5 +34,5 @@ android {
 }
 
 dependencies {
-implementation files('lib/PhysicsEngine_v135a.jar')
+implementation files('lib/PhysicsEngine_v135b.jar')
 }
