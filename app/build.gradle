@@ -2,6 +2,34 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+def getVersionCode = { ->
+    try {
+        def code = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'tag', '--list'
+            standardOutput = code
+        }
+        return code.toString().split("\n").size()
+    }
+    catch (ignored) {
+        return -1;
+    }
+}
+
+def getVersionName = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--dirty'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+    catch (ignored) {
+        return null;
+    }
+}
+
 android {
     namespace 'com.vipaol.mobapp.android'
     compileSdk 34
@@ -10,8 +38,8 @@ android {
         applicationId 'com.vipaol.mobapp.game.android'
         minSdk 2
         targetSdk 35
-        versionCode 1
-        versionName '0.9.3'
+        versionCode getVersionCode()
+        versionName getVersionName()
     }
 
     buildTypes {
@@ -32,7 +60,6 @@ android {
         main.java.srcDirs += 'src/main/lib/mobapp-ui/src'
     }
 }
-
 dependencies {
-implementation files('lib/PhysicsEngine_v135b.jar')
+    implementation files('lib/PhysicsEngine_v135b.jar')
 }
