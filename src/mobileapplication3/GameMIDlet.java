@@ -24,7 +24,7 @@ public class GameMIDlet extends MobappMIDlet {
     public static final int TICK_DURATION = 50;
     private boolean isStartedAlready = false;
 
-    public void startApp() {
+    public void onStart() {
         if (isStartedAlready) {
             Logger.log("Main:startApp:already started");
             return;
@@ -34,7 +34,7 @@ public class GameMIDlet extends MobappMIDlet {
         isStartedAlready = true;
         Logger.log("Main:constr");
         MenuCanvas menuCanvas = new MenuCanvas();
-        Platform.setCurrent(new RootContainer(menuCanvas, null));
+        RootContainer.setRootUIComponent(menuCanvas);
     }
     
 }

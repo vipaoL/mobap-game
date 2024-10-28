@@ -1,10 +1,10 @@
-MIDlet-Version: 0.9.3
+MIDlet-Version: 0.9.4
 MIDlet-Vendor: vipaoL
 LGE-MIDlet-On-Screen-Keypad: no
 MicroEdition-Configuration: CLDC-1.1
 Nokia-MIDlet-Category: Game
 MIDlet-Name: mobapp-game
-MIDlet-1: mobapp-game,/icon.png,mobileapplication3.GameMIDlet
+MIDlet-1: mobapp-game,/gameicon.png,mobileapplication3.GameMIDlet
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Jar-URL: mobapp.jar
 Nokia-MIDlet-On-Screen-Keypad: no

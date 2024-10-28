@@ -8,3 +8,6 @@
 [submodule "lib/mobapp-game-base"]
 	path = lib/mobapp-game-base
 	url = https://github.com/vipaoL/mobapp-game-base.git
+[submodule "lib/mobapp-editor-base"]
+	path = lib/mobapp-editor-base
+	url = https://github.com/vipaoL/mobapp-editor-base.git
