@@ -17,3 +17,15 @@ A crossplatform game on emini physics engine
 ![Debug menu](https://user-images.githubusercontent.com/59665125/170510660-60e9d6e1-d99e-4bc7-8931-ed5b952cd5ab.png)
 ![Main menu](https://user-images.githubusercontent.com/59665125/166309387-667bae51-8be3-45fe-a087-62cd5a91de9d.png)
 
+
+# Build (Ubuntu 20.04)
+Install dependencies:
+```
+sudo apt-get install gcc-multilib libxt6:i386
+```
+Build:
+```
+git clone --recurse-submodules https://github.com/vipaoL/mobap-game.git
+cd mobap-game
+git pull && chmod +x ./build.sh && ./build.sh
+```

@@ -1,0 +1,65 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+def getVersionCode = { ->
+    try {
+        def code = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'tag', '--list'
+            standardOutput = code
+        }
+        return code.toString().split("\n").size()
+    }
+    catch (ignored) {
+        return -1
+    }
+}
+
+def getVersionName = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--dirty'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+    catch (ignored) {
+        return null
+    }
+}
+
+android {
+    namespace 'com.vipaol.mobapp.android'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.vipaol.mobapp.game.android'
+        minSdk 2
+        targetSdk 35
+        versionCode getVersionCode()
+        versionName getVersionName()
+    }
+
+    buildTypes {
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/lib/mobapp-platform-android/src'
+        main.java.srcDirs += 'src/main/lib/mobapp-game-base/src'
+        main.java.srcDirs += 'src/main/lib/mobapp-editor-base/src'
+        main.java.srcDirs += 'src/main/lib/mobapp-ui/src'
+    }
+}
+dependencies {
+    implementation files('lib/PhysicsEngine_v135b.jar')
+}

@@ -1,8 +1,13 @@
-name: Build Action
+name: J2ME Build Action
 on:
   push:
     paths-ignore:
       - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+
 jobs:
   Build-J2ME:
     runs-on: ubuntu-20.04
@@ -17,10 +22,10 @@ jobs:
       - name: Install build dependencies
         run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt-get install gcc-multilib libxt6:i386 openjdk-8-jdk
       - name: Build
-        run: cd ${{ github.workspace }} && JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 ./build.sh
+        run: cd ${{ github.workspace }} && JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 j2me/build.sh
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
           name: mobapp-game-j2me
-          path: ${{ github.workspace }}/bin/MobileApplication3.jar
+          path: ${{ github.workspace }}j2me/bin/MobileApplication3.jar
 

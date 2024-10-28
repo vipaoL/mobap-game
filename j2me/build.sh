@@ -100,15 +100,15 @@ ${PREVERIFY} \
 
 echo
 echo "Jaring preverified class files..."
-APP="${PROJ_HOME}"/bin/"${APP_NAME}".jar
+APP="${WORK_DIR}"/bin/"${APP_NAME}".jar
 ${JAR} cmf "${MANIFEST}" "${APP}" -C bin/classes .
 
 echo
-if [ -d ${RES} ] ; then
+if [ -d "${RES}" ] ; then
   echo "Adding resources: ${RES}"
-  ${JAR} uf "${APP}" -C ${RES} .
+  ${JAR} uf "${APP}" -C "${RES}" .
 else
-  echo "Resource folder ${RES} not found, skipping..."
+  echo "Resource folder "${RES}" not found, skipping..."
 fi
 
 echo

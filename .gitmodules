@@ -11,3 +11,7 @@
 [submodule "lib/mobapp-editor-base"]
 	path = lib/mobapp-editor-base
 	url = https://github.com/vipaoL/mobapp-editor-base.git
+[submodule "lib/mobapp-platform-android"]
+	path = lib/mobapp-platform-android
+	url = https://github.com/vipaoL/mobapp-platform.git
+	branch = android
