@@ -4,7 +4,7 @@
 WORK_DIR=`readlink -f $(dirname $0)`
 cd ${WORK_DIR}
 
-source ./build-config.sh
+. ./build-config.sh
 
 echo "Downloading and updating build tools..."
 J2ME_BUILD_TOOLS="$(pwd)"/bin/j2me-build-tools

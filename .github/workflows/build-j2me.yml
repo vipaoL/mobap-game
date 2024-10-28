@@ -15,9 +15,9 @@ jobs:
       - name: Test
         run: cd ${{ github.workspace }} && ls .
       - name: Install build dependencies
-        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt-get install gcc-multilib libxt6:i386 openjdk-8-jdk:i386
+        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt-get install gcc-multilib libxt6:i386 openjdk-8-jdk
       - name: Build
-        run: cd ${{ github.workspace }} && ./build.sh
+        run: cd ${{ github.workspace }} && JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 ./build.sh
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
