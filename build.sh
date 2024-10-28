@@ -1,114 +1,116 @@
 #!/bin/sh -e
 
-PROJ_HOME="$(pwd)"
-echo "Downloading and updating compiler..."
-if git clone https://github.com/vipaoL/j2me_compiler.git bin/j2me_compiler 2>/dev/null ; then
-	echo "Done."
-else
-	echo "Already downloaded."
-fi
-cd bin/j2me_compiler
-git pull
-cd "${PROJ_HOME}"
-PATHSEP=":"
-JAVA_HOME="${PROJ_HOME}"/bin/j2me_compiler/jdk1.6.0_45
-WTK_HOME="${PROJ_HOME}"/bin/j2me_compiler/WTK2.5.2
-
-
-
-
-######## CONFIG ########
-########
-YOUR_LIBS="${PROJ_HOME}"/lib       # YOUR LIBRARIES
-RES="${PROJ_HOME}"/rsc
-APP="${PROJ_HOME}"/bin/MobileApplication3.jar   # Output jar name
-MANIFEST="${PROJ_HOME}"'/Application Descriptor'
-########
-########
-
-
-if [ ! -e "${MANIFEST}" ] ; then
-	MANIFEST=./MANIFEST.MF
-	if [ ! -e "${MANIFEST}" ] ; then
-		MANIFEST=./manifest.mf
-		if [ ! -e "${MANIFEST}" ] ; then
-			echo "No MANIFEST.MF or manifest.mf or Application Descriptor found in ./"
-			exit 2
-		fi
-	fi
-fi
-
-MANIFEST_TMP="${PROJ_HOME}"/bin/manifest-tmp.mf
-cat "${MANIFEST}" > $MANIFEST_TMP
-MANIFEST=$MANIFEST_TMP
-
-# add commit number to manifest
-COMMIT=$(git rev-parse --short HEAD)
-echo Adding commit hash $COMMIT to $MANIFEST
-echo Commit: $COMMIT >> "${MANIFEST}"
-
-LIB_DIR=${WTK_HOME}/lib
-CLASSPATH=${LIB_DIR}/*
-CLDCAPI=${LIB_DIR}/cldcapi11.jar
-MIDPAPI=${LIB_DIR}/midpapi20.jar
-PREVERIFY=${WTK_HOME}/bin/preverify
-JAVAC=javac
-JAR=jar
-
-#ls ${JAVA_HOME}
-#file ${JAVA_HOME}/bin/javac
-#file ${JAVA_HOME}/bin/jar
-#ldd ${JAVA_HOME}/bin/javac
-#ls -la ${JAVA_HOME}/bin/javac
-
-if [ -n "${JAVA_HOME}" ] ; then
-  JAVAC=${JAVA_HOME}/bin/javac
-  JAR=${JAVA_HOME}/bin/jar
-fi
-
-#
-# Make possible to run this script from any directory'`
-#
+# Make it possible to run this script from any directory'`
 WORK_DIR=`readlink -f $(dirname $0)`
 cd ${WORK_DIR}
 
-echo "Creating or cleaning directories..."
-mkdir -p ../tmpclasses
-mkdir -p ../classes
-rm -rf ../tmpclasses/*
-rm -rf ../classes/*
+source ./build-config.sh
 
-echo "Unpacking your libraries: " ${YOUR_LIBS}/*.jar
-cd ../tmpclasses
-${JAR} xf ${YOUR_LIBS}/*.jar
+echo "Downloading and updating build tools..."
+J2ME_BUILD_TOOLS="$(pwd)"/bin/j2me-build-tools
+if [ ! -e "${J2ME_BUILD_TOOLS}" ] ; then
+  git clone https://github.com/vipaoL/j2me-build-tools.git "${J2ME_BUILD_TOOLS}"
+  echo "Done."
+else
+  echo "Already downloaded."
+fi
+
+set +e
+cd bin/j2me-build-tools && git pull
+set -e
+
+cd "${WORK_DIR}"
+
+if [ ! -e "${MANIFEST}" ] ; then
+  echo
+  echo "${MANIFEST} is not found in $(pwd)"
+  exit 2
+fi
+
+MANIFEST_TMP="${WORK_DIR}"/bin/manifest-tmp.mf
+cat "${MANIFEST}" > $MANIFEST_TMP
+MANIFEST=$MANIFEST_TMP
+
+# add commit hash to the manifest
+COMMIT=$(git rev-parse --short HEAD)
+echo
+echo Adding commit hash $COMMIT to $MANIFEST
+echo "Commit: ${COMMIT}" >> "${MANIFEST}"
+
+J2ME_CLASSPATH_DIR=${J2ME_BUILD_TOOLS}/lib
+CLASSPATH=${J2ME_CLASSPATH_DIR}/*
+CLDCAPI=${J2ME_CLASSPATH_DIR}/cldc11.jar
+MIDPAPI=${J2ME_CLASSPATH_DIR}/midp21.jar
+PREVERIFY=${J2ME_BUILD_TOOLS}/bin/preverify
+JAVAC=javac
+JAR=jar
+
+echo
+if [ ! -n "${JAVA_HOME}" ] ; then
+  # let's assume you have openjdk-8 installed
+  JAVA_HOME="$(dirname $(dirname $(readlink -f $(which javac))))"
+fi
+
+if [ -d "${JAVA_HOME}" ] ; then
+  JAVAC=${JAVA_HOME}/bin/javac
+  JAR=${JAVA_HOME}/bin/jar
+else
+  echo "Error: java is not found:"
+  file "${JAVA_HOME}"
+fi
+
+echo "Java: ${JAVA_HOME}"
+"${JAVA_HOME}"/bin/java -version
+
+echo
+echo "Cleaning tmp directories..."
+mkdir -p bin/tmpclasses
+mkdir -p bin/classes
+rm -rf bin/tmpclasses/*
+rm -rf bin/classes/*
+
+cd bin/tmpclasses
+LIB_JARS="${YOUR_LIBS}/*.jar"
+echo $LIB_JARS
+echo "Unpacking your libraries: ${LIB_JARS}"
+${JAR} xf ${LIB_JARS}
 rm -rf META-INF
 
-
 cd ${WORK_DIR}
+echo
 echo "Compiling source files..."
+PATHSEP=":"
 ${JAVAC} \
+    -Xlint:-options \
     -bootclasspath ${CLDCAPI}${PATHSEP}${MIDPAPI} \
     -source 1.3 \
     -target 1.3 \
-    -d ../tmpclasses \
-    -classpath ../tmpclasses${PATHSEP}${CLASSPATH} \
+    -d bin/tmpclasses \
+    -classpath bin/tmpclasses${PATHSEP}${CLASSPATH} \
 	-extdirs ../lib \
-    `find "${PROJ_HOME}"/src "${PROJ_HOME}"/lib/*/src -name '*'.java`
+    `find "${WORK_DIR}"/src "${WORK_DIR}"/lib/*/src -name '*'.java`
 
+echo
 echo "Preverifying class files..."
-
+PREVERIFY_CLASSPATH="${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}${CLASSPATH}${PATHSEP}bin/tmpclasses"
 ${PREVERIFY} \
-    -classpath ${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}${CLASSPATH}${PATHSEP}../tmpclasses \
-    -d ../classes \
-    ../tmpclasses
+    -classpath "${PREVERIFY_CLASSPATH}" \
+    -d bin/classes \
+    bin/tmpclasses
 
+echo
 echo "Jaring preverified class files..."
-${JAR} cmf "${MANIFEST}" "${APP}" -C ../classes .
+APP="${PROJ_HOME}"/bin/"${APP_NAME}".jar
+${JAR} cmf "${MANIFEST}" "${APP}" -C bin/classes .
 
+echo
 if [ -d ${RES} ] ; then
+  echo "Adding resources: ${RES}"
   ${JAR} uf "${APP}" -C ${RES} .
+else
+  echo "Resource folder ${RES} not found, skipping..."
 fi
 
+echo
 echo "Done!" "${APP}"
-#echo "Don't forget to update the JAR file size in the JAD file!!!"
-#echo
+
