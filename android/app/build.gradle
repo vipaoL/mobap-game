@@ -54,12 +54,11 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += 'src/main/lib/mobapp-platform-android/src'
-        main.java.srcDirs += 'src/main/lib/mobapp-game-base/src'
-        main.java.srcDirs += 'src/main/lib/mobapp-editor-base/src'
-        main.java.srcDirs += 'src/main/lib/mobapp-ui/src'
+        main.java.srcDirs += '../../src'
+        main.java.srcDirs += '../../lib/mobapp-platform-android/src'
+        main.java.srcDirs += '../../lib/mobapp-ui/src'
     }
 }
 dependencies {
-    implementation files('lib/PhysicsEngine_v135b.jar')
+    implementation files('../../lib/PhysicsEngine_v135b.jar')
 }
