@@ -190,7 +190,10 @@ public class GraphicsWorld extends World {
             try {
                 int intValue = ((Integer) waitingTime.elementAt(i)).intValue();
                 intValue -= diffTime;
-                waitingTime.setElementAt(new Integer(intValue), i);
+                // The constructor Integer(int) was deprecated in Java 9
+                // Integer.valueOf() accepts only String in Java 1.3
+                // So this is the only way?
+                waitingTime.setElementAt(Integer.valueOf(String.valueOf(intValue)), i);
 				if (intValue <= 0) {
                     ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
                     waitingForDynamic.removeElementAt(i);

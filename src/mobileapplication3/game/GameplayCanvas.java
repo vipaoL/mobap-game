@@ -595,7 +595,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                         case MUserData.TYPE_FALLING_PLATFORM:
                             if (!world.waitingForDynamic.contains(body)) {
                                 world.waitingForDynamic.addElement(body);
-                                world.waitingTime.addElement(new Integer(600));
+                                // The constructor Integer(int) was deprecated in Java 9
+                                // Integer.valueOf() only accepts String in Java 1.3
+                                // So this is the only way?
+                                world.waitingTime.addElement(Integer.valueOf(String.valueOf(600)));
                                 if (uninterestingDebug) world.removeBody(body);
                             }
                             break;
