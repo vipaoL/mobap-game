@@ -728,8 +728,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             if (Logger.isOnScreenLogEnabled()) {
                 //g.setColor(color/2, color/2, color/2);
             }
-            g.fillRect(0, 0, scW/3, scH/6);
-            g.fillRect(scW*2/3, 0, scW/3, scH/6);
+			int btnW = scW/3;
+			int btnH = scH/6;
+			int btnRoundingD = Math.min(btnW, btnH) / 4;
+            g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
+            g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
             g.setColor(color/4, color/4, color);
             g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL));
             for (int i = 0; i < MENU_HINT.length; i++) {
