@@ -434,7 +434,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                                if (currentEffects[EFFECT_SPEED][0] > 0) {
 	                                    directionOffset = currentEffects[EFFECT_SPEED][1];
 	                                    speedMultipiler = speedMultipiler * currentEffects[EFFECT_SPEED][2] / 100;
-	                                    Logger.log(speedMultipiler);
 	                                }
 	                            }
 	                            int motorForceX = Mathh.cos(carAngle - 15 + directionOffset) * speedMultipiler / 50;
@@ -626,7 +625,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             if (currentEffects[i] != null) {
                 if (currentEffects[i][0] > 0) {
                     currentEffects[i][0]--;
-                    log("effect" + i + "," + currentEffects[i][0] + " ticks left");
                 } else if (currentEffects[i][0] == 0) {
                     currentEffects[i] = null;
                 }

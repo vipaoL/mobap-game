@@ -157,10 +157,8 @@ public class MgStruct {
                             data[i] = dis.readShort();
                         }
                     } catch (EOFException ex) {
-                        System.out.println(Utils.shortArrayToString(data));
                         throw ex;
                     }
-                    System.out.println(Utils.shortArrayToString(data));
                     structure[c] = data;
                 }
 
