@@ -74,7 +74,7 @@ public class Levels extends GenericMenu implements Runnable {
             e.printStackTrace();
             buttons[0] = e.toString();
         }
-        buttons[0] = "Load emini \".phy\" world";
+        buttons[0] = "Load custom level or emini world";
         refreshButtons();
     }
 
