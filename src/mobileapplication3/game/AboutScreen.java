@@ -174,10 +174,9 @@ public class AboutScreen extends GenericMenu implements Runnable {
             	int leftX = scW / 2 - qrSide / 2;
             	int rightX = scW / 2 + qrSide / 2;
                 g.drawLine(leftX, offset, rightX, offset);
-                g.drawLine(leftX, offset + qrSide, rightX, offset + qrSide);
+                g.drawLine(leftX, offset + qrSide - 1, rightX, offset + qrSide - 1);
                 g.drawLine(leftX, offset, leftX, offset + qrSide);
                 g.drawLine(rightX, offset, rightX, offset + qrSide);
-                g.setFont(font3);
                 int x = scW / 2;
                 int y = offset + qrSide / 2;
                 g.drawString("Your ad", x, y, Graphics.HCENTER|Graphics.BOTTOM);
