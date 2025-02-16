@@ -56,7 +56,7 @@ public class EditorQuickMenu extends AbstractPopupPage {
             }
         }.setBgColor(0x112211).setSelectedColor(0x115511).setIsActive(gameIncluded);
 
-        Button saveButton = new Button("Save as \"" + parent.getFileName() + "\"") {
+        Button saveButton = new Button("Save \"" + parent.getFileName() + "\"") {
             public void buttonPressed() {
             	close();
             	try {
@@ -79,7 +79,7 @@ public class EditorQuickMenu extends AbstractPopupPage {
             	} else {
             		path = EditorSettings.getLevelsFolderPath();
             	}
-                parent.showPopup(new PathPicker(mode, parent).pickFolder(path, "Save as " + PathPicker.QUESTION_REPLACE_WITH_PATH + " ?", new PathPicker.Feedback() {
+                parent.showPopup(new PathPicker(mode, parent).pickFolder(path, "Save as \"" + PathPicker.QUESTION_REPLACE_WITH_PATH + "\" ?", new PathPicker.Feedback() {
                     public void onComplete(final String path) {
                         (new Thread(new Runnable() {
                             public void run() {
