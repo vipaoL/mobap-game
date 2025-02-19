@@ -14,24 +14,16 @@ import mobileapplication3.platform.ui.RootContainer;
  * @author vipaol
  */
 public class GameMIDlet extends MobappMIDlet {
-    
-    // for numbering snapshots. e.g.: '1', '2', '3', ... .
-    // '-1' if release
-    // TODO: move to manifest
-    public static int PRE_VERSION = -1;
-    
-    // time for one frame. 1000ms / 50ms = 20fps
-    public static final int TICK_DURATION = 50;
-    private boolean isStartedAlready = false;
+    private boolean isRunning = false;
 
     public void onStart() {
-        if (isStartedAlready) {
+        if (isRunning) {
             Logger.log("Main:startApp:already started");
             return;
         }
 
         Platform.init(this);
-        isStartedAlready = true;
+        isRunning = true;
         Logger.log("Main:constr");
         MenuCanvas menuCanvas = new MenuCanvas();
         RootContainer.setRootUIComponent(menuCanvas);
