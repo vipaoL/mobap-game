@@ -998,7 +998,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
 		if (gameMode == GAME_MODE_ENDLESS) {
 			try {
-				Records.saveRecord("Records", points, 9);
+				Records.saveRecord(points, 9);
 			} catch (Exception ex) {
 				Platform.showError("Can't save record:", ex);
 			}

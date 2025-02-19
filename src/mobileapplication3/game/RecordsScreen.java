@@ -10,14 +10,12 @@ import mobileapplication3.platform.ui.RootContainer;
  */
 public class RecordsScreen extends GenericMenu implements Runnable {
 
-	public static final String STORE_NAME = "Records";
-
     private String[] buttons;
 
     public RecordsScreen() {
         int[] records = new int[0];
 		try {
-			records = Records.getRecords(STORE_NAME);
+			records = Records.getRecords();
 		} catch (Exception ex) {
 			Platform.showError("Can't get records:", ex);
 		}
