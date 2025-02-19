@@ -20,6 +20,7 @@ public class MobappGameSettings {
     public static final int MAX_PHYSICS_PRECISION = 16, MAX_DETAIL_LEVEL = 3;
 
     private static String mgstructsFolderPath = null;
+    private static String detailLevel = Settings.UNDEF;
     
     private static Settings settingsInst = null;
     
@@ -149,10 +150,18 @@ public class MobappGameSettings {
     ///
 
     public static int getDetailLevel() {
-        return getSettingsInst().getInt(DETAIL_LEVEL, DEFAULT_DETAIL_LEVEL);
+        int value;
+        if (detailLevel.equals(Settings.UNDEF)) {
+            value = getSettingsInst().getInt(DETAIL_LEVEL, DEFAULT_DETAIL_LEVEL);
+            detailLevel = String.valueOf(value);
+        } else {
+            value = Integer.valueOf(detailLevel).intValue();
+        }
+        return value;
     }
 
     public static void setDetailLevel(int value) {
+        detailLevel = String.valueOf(value);
         getSettingsInst().set(DETAIL_LEVEL, String.valueOf(value));
     }
 }
