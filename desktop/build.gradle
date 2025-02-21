@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+}
+
+def getVersionName = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--dirty'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+    catch (ignored) {
+        return null
+    }
+}
+
+group = 'com.vipaol'
+version = getVersionName()
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation fileTree(dir: '../lib/', include: ['*.jar'])
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += '../src'
+            srcDirs += '../lib/mobapp-platform-desktop/src'
+            srcDirs += '../lib/mobapp-ui/src'
+        }
+    }
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Version': version
+        attributes 'Main-Class': 'com.vipaol.MobappGameDesktopMain'
+    }
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+}

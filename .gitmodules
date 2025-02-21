@@ -9,3 +9,7 @@
 	path = lib/mobapp-platform-android
 	url = https://github.com/vipaoL/mobapp-platform.git
 	branch = android
+[submodule "lib/mobapp-platform-desktop"]
+	path = lib/mobapp-platform-desktop
+	url = https://github.com/vipaoL/mobapp-platform.git
+	branch = desktop
