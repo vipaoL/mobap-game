@@ -8,7 +8,7 @@ import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.Button;
 import mobileapplication3.ui.IPopupFeedback;
-import mobileapplication3.ui.UIComponent;
+import mobileapplication3.ui.IUIComponent;
 
 public class LevelsMenu extends AbstractEditorMenu {
 
@@ -25,7 +25,7 @@ public class LevelsMenu extends AbstractEditorMenu {
 		return path;
 	}
 
-	public UIComponent[] getGridContent() {
+	public IUIComponent[] getGridContent() {
 		Vector gridContentVector = new Vector();
 		String[] files = { };
 		try {
@@ -35,17 +35,21 @@ public class LevelsMenu extends AbstractEditorMenu {
 		}
 		try {
 			for (int i = 0; i < files.length; i++) {
-				String path = getPath() + files[i];
+				final String filePath = getPath() + files[i];
 				try {
-					gridContentVector.addElement(new StructureViewerInteractive(MGStructs.readMGStruct(path), path));
+					gridContentVector.addElement(new EditorFileListCell(filePath) {
+						public void openInEditor() {
+							LevelsMenu.this.openInEditor(filePath);
+						}
+					});
 				} catch (Exception ignored) { }
 			}
 		} catch (Exception e) {
 			Platform.showError(e);
 		}
-		UIComponent[] gridContent = new UIComponent[gridContentVector.size()];
+		IUIComponent[] gridContent = new IUIComponent[gridContentVector.size()];
 		for (int i = 0; i < gridContentVector.size(); i++) {
-			gridContent[i] = (UIComponent) gridContentVector.elementAt(i);
+			gridContent[i] = (IUIComponent) gridContentVector.elementAt(i);
 		}
 		return gridContent;
 	}
@@ -70,32 +74,6 @@ public class LevelsMenu extends AbstractEditorMenu {
 			};
 		}
 		return buttons;
-	}
-
-	private class StructureViewerInteractive extends StructureViewerComponent {
-		private final String path;
-		public StructureViewerInteractive(Element[] mgStruct, String path) {
-			super(mgStruct);
-			this.path = path;
-		}
-
-		public boolean canBeFocused() {
-			return true;
-		}
-
-		protected boolean handlePointerClicked(int x, int y) {
-			openInEditor();
-			return true;
-		}
-
-		protected boolean handleKeyPressed(int keyCode, int count) {
-			openInEditor();
-			return true;
-		}
-
-		public void openInEditor() {
-			LevelsMenu.this.openInEditor(elements, path);
-		}
 	}
 
 	public void openInEditor(String path) {

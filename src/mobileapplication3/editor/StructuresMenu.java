@@ -9,7 +9,7 @@ import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.Button;
 import mobileapplication3.ui.IPopupFeedback;
-import mobileapplication3.ui.UIComponent;
+import mobileapplication3.ui.IUIComponent;
 
 public class StructuresMenu extends AbstractEditorMenu {
 
@@ -26,7 +26,7 @@ public class StructuresMenu extends AbstractEditorMenu {
 		return path;
 	}
 
-	public UIComponent[] getGridContent() {
+	public IUIComponent[] getGridContent() {
 		Vector gridContentVector = new Vector();
 		String[] files = { };
 		try {
@@ -37,9 +37,13 @@ public class StructuresMenu extends AbstractEditorMenu {
 		Logger.log("getting grid content: " + files.length + " files");
 		try {
 			for (int i = 0; i < files.length; i++) {
-				String path = getPath() + files[i];
+				final String filePath = getPath() + files[i];
 				try {
-					gridContentVector.addElement(new StructureViewerInteractive(MGStructs.readMGStruct(path), path));
+					gridContentVector.addElement(new EditorFileListCell(filePath) {
+						public void openInEditor() {
+							StructuresMenu.this.openInEditor(filePath);
+						}
+					});
 				} catch (Exception ex) {
 					Logger.log("Can't create StructureViewer:");
 					Logger.log(ex);
@@ -48,9 +52,9 @@ public class StructuresMenu extends AbstractEditorMenu {
 		} catch (Exception e) {
 			Platform.showError(e);
 		}
-		UIComponent[] gridContent = new UIComponent[gridContentVector.size()];
+		IUIComponent[] gridContent = new IUIComponent[gridContentVector.size()];
 		for (int i = 0; i < gridContentVector.size(); i++) {
-			gridContent[i] = (UIComponent) gridContentVector.elementAt(i);
+			gridContent[i] = (IUIComponent) gridContentVector.elementAt(i);
 		}
 		Logger.log("Grid: " + gridContent.length + " cells");
 		return gridContent;
@@ -76,32 +80,6 @@ public class StructuresMenu extends AbstractEditorMenu {
 			};
 		}
 		return buttons;
-	}
-
-	private class StructureViewerInteractive extends StructureViewerComponent {
-		private String path;
-		public StructureViewerInteractive(Element[] mgStruct, String path) {
-			super(mgStruct);
-			this.path = path;
-		}
-
-		public boolean canBeFocused() {
-			return true;
-		}
-
-		protected boolean handlePointerClicked(int x, int y) {
-			openInEditor();
-			return true;
-		}
-
-		protected boolean handleKeyPressed(int keyCode, int count) {
-			openInEditor();
-			return true;
-		}
-
-		public void openInEditor() {
-			StructuresMenu.this.openInEditor(elements, path);
-		}
 	}
 
 	public void openInEditor(String path) {

@@ -4,21 +4,9 @@ import java.io.IOException;
 
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Mathh;
+import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.Font;
-import mobileapplication3.ui.AbstractPopupWindow;
-import mobileapplication3.ui.BackButton;
-import mobileapplication3.ui.Button;
-import mobileapplication3.ui.ButtonCol;
-import mobileapplication3.ui.ButtonComponent;
-import mobileapplication3.ui.ButtonRow;
-import mobileapplication3.ui.ButtonStub;
-import mobileapplication3.ui.Grid;
-import mobileapplication3.ui.IPopupFeedback;
-import mobileapplication3.ui.IUIComponent;
-import mobileapplication3.ui.Keys;
-import mobileapplication3.ui.Switch;
-import mobileapplication3.ui.TextComponent;
-import mobileapplication3.ui.UIComponent;
+import mobileapplication3.ui.*;
 
 public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 
@@ -118,9 +106,9 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 				setComponents(new IUIComponent[]{title, buttons, backButtonComponent});
 				break;
 			case LAYOUT_GRID:
-				UIComponent[] thumbnails = getGridContent();
+				IUIComponent[] thumbnails = getGridContent();
 				int topExtraCells = 2;
-				UIComponent[] cells = new UIComponent[topExtraCells + thumbnails.length];
+				IUIComponent[] cells = new IUIComponent[topExtraCells + thumbnails.length];
 				cells[0] = new ButtonComponent(createButton);
 				cells[1] = new ButtonComponent(alwaysShowGridSwitch);
 				for (int i = 0; i < thumbnails.length; i++) {
@@ -174,7 +162,41 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 	}
 
 	protected abstract Button[] getList();
-	protected abstract UIComponent[] getGridContent();
+	protected abstract IUIComponent[] getGridContent();
 	protected abstract void createNew();
 
+	protected abstract class EditorFileListCell extends Container {
+		protected String path;
+		private StructureViewerComponent structureViewer;
+		private TextComponent fileNameLabel;
+
+		public EditorFileListCell(String path) {
+			this.path = path;
+			structureViewer = new StructureViewerComponent(MGStructs.readMGStruct(path));
+			String[] tmp = Utils.split(path, String.valueOf(FileUtils.SEP));
+			fileNameLabel = new TextComponent(tmp[tmp.length - 1]);
+			setComponents(new IUIComponent[]{structureViewer, fileNameLabel});
+		}
+
+		protected void onSetBounds(int x0, int y0, int w, int h) {
+			fileNameLabel.setSize(w, TextComponent.HEIGHT_AUTO).setPos(x0, y0 + h, TextComponent.BOTTOM | TextComponent.LEFT);
+			structureViewer.setSize(w, fileNameLabel.getTopY() - y0).setPos(x0, y0, TextComponent.TOP | TextComponent.LEFT);
+		}
+
+		public boolean canBeFocused() {
+			return true;
+		}
+
+		public boolean pointerClicked(int x, int y) {
+			openInEditor();
+			return true;
+		}
+
+		public boolean keyPressed(int keyCode, int count) {
+			openInEditor();
+			return true;
+		}
+
+		protected abstract void openInEditor();
+	}
 }
