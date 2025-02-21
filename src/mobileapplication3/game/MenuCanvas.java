@@ -136,7 +136,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         }
     }
     
-    protected boolean onKeyPressed(int keyCode, int count) {         // Keyboard
+    public boolean handleKeyPressed(int keyCode, int count) {         // Keyboard
         if (keyCode == Keys.KEY_STAR | keyCode == -10) {
             if (!Logger.isOnScreenLogEnabled()) {
                 Logger.enableOnScreenLog(h);
