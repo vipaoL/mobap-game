@@ -613,6 +613,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 							break;
 						case MUserData.TYPE_LAVA:
 							world.destroyCar();
+							stop(true, false, 1000);
 							break;
                     }
                 }
@@ -986,27 +987,38 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     	return color & 0xff;
     }
 
-    public void stop(final boolean openMenu, boolean blockUntilCompleted) {
+	public void stop(final boolean openMenu, boolean blockUntilCompleted) {
+		stop(openMenu, blockUntilCompleted, 0);
+	}
+
+    public void stop(final boolean openMenu, final boolean blockUntilCompleted, final int delay) {
     	log("stopping game thread");
-        stopped = true;
         if (isStopping) {
         	return;
         }
-        isStopping = true;
-        isFirstStart = false;
-        uninterestingDebug = false;
-
-		if (gameMode == GAME_MODE_ENDLESS) {
-			try {
-				Records.saveRecord(points, 9);
-			} catch (Exception ex) {
-				Platform.showError("Can't save record:", ex);
-			}
-		}
 
         final GameplayCanvas inst = this;
         Runnable stopperRunnable = new Runnable() {
             public void run() {
+				if (!blockUntilCompleted) {
+					try {
+						Thread.sleep(delay);
+					} catch (InterruptedException ex) {
+					}
+				}
+
+				isStopping = true;
+				stopped = true;
+				isFirstStart = false;
+				uninterestingDebug = false;
+
+				if (gameMode == GAME_MODE_ENDLESS) {
+					try {
+						Records.saveRecord(points, 9);
+					} catch (Exception ex) {
+						Platform.showError("Can't save record:", ex);
+					}
+				}
             	if (worldgen != null) {
             		worldgen.stop();
             	}
