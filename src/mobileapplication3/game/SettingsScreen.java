@@ -9,13 +9,14 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     private static final int
             PHYSICS_PRECISION = 0,
             DETAIL_LEVEL = 1,
-            HI_RES_GRAPHICS = 2,
-            SHOW_FPS = 3,
-            BG = 4,
-            BATTERY = 5,
-            DEBUG = 6,
-            ABOUT = 7,
-            BACK = 8;
+            FRAME_TIME = 2,
+            HI_RES_GRAPHICS = 3,
+            SHOW_FPS = 4,
+            BG = 5,
+            BATTERY = 6,
+            DEBUG = 7,
+            ABOUT = 8,
+            BACK = 9;
 
     private static String[] menuOpts = new String[BACK + 1];
         
@@ -30,7 +31,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         public void init() {
             getFontSize();
             
-            setSpecialOption(menuOpts.length - 2); // highlight "Debug settings" if enabled
+            setSpecialOption(DEBUG); // highlight "Debug settings" if enabled
             setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
             
             refreshStates();
@@ -67,9 +68,10 @@ public class SettingsScreen extends GenericMenu implements Runnable {
 
         void selectPressed() {
             int selected = this.selected;
+            int value;
             switch (selected) {
                 case PHYSICS_PRECISION:
-                    int value = MobappGameSettings.getPhysicsPrecision() * 2;
+                    value = MobappGameSettings.getPhysicsPrecision() * 2;
                     if (value > MobappGameSettings.MAX_PHYSICS_PRECISION) {
                         value = MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
                     } else if (value == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {
@@ -79,6 +81,19 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                     break;
                 case DETAIL_LEVEL:
                     MobappGameSettings.setDetailLevel(MobappGameSettings.getDetailLevel() % MobappGameSettings.MAX_DETAIL_LEVEL + 1);
+                    break;
+                case FRAME_TIME:
+                    value = MobappGameSettings.getFrameTime();
+                    int newFrameTime = value;
+                    if (newFrameTime <= 1) {
+                        newFrameTime = MobappGameSettings.MAX_FRAME_TIME;
+                    } else {
+                        int prevFps = 1000 / value;
+                        while (1000 / newFrameTime <= prevFps) {
+                            newFrameTime--;
+                        }
+                    }
+                    MobappGameSettings.setFrameTime(newFrameTime);
                     break;
                 case HI_RES_GRAPHICS:
                     MobappGameSettings.toggleBetterGraphics();
@@ -131,8 +146,10 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         void refreshStates() {
             int physicsPrecision = MobappGameSettings.getPhysicsPrecision();
             int detailLvl = MobappGameSettings.getDetailLevel();
+            int frameTime = MobappGameSettings.getFrameTime();
             menuOpts[PHYSICS_PRECISION] = "Physics precision: " + (physicsPrecision == 0 ? "Dynamic" : String.valueOf(physicsPrecision));
             menuOpts[DETAIL_LEVEL] = "Detail level: " + detailLvl;
+            menuOpts[FRAME_TIME] = "FPS: " + round(1000f / frameTime) + " (" + frameTime + "ms/frame)";
             menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
             menuOpts[SHOW_FPS] = "Show FPS";
             menuOpts[BG] = "Enable background";
@@ -150,5 +167,10 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         	} else {
         		setStateFor(STATE_INACTIVE, BATTERY);
         	}
+        }
+
+        // round to two decimal places
+        private double round(float d) {
+            return (Math.floor(d * 100 + 0.5)) / 100;
         }
     }

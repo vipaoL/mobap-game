@@ -15,13 +15,14 @@ public class MobappGameDesktopMain extends Frame {
     }
 
     public MobappGameDesktopMain() {
-        setSize(1200, 900);
+        setSize(128, 64);
+        setUndecorated(true);
         Platform.init(this);
         RootContainer.getInst().setBgColor(0);
         setVisible(true);
         setLayout(new BorderLayout());
         add(RootContainer.getInst(), BorderLayout.CENTER);
-        setMinimumSize(new Dimension(400, 300));
+        setMinimumSize(new Dimension(48, 48));
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent){
                 System.exit(0);
@@ -29,5 +30,6 @@ public class MobappGameDesktopMain extends Frame {
         });
         setLocationRelativeTo(null);
         RootContainer.setRootUIComponent(new MenuCanvas());
+        RootContainer.getInst().setSize(getSize());
     }
 }

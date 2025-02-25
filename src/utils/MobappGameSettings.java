@@ -1,23 +1,28 @@
 package utils;
 
 import mobileapplication3.platform.Logger;
+import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Settings;
 
 public class MobappGameSettings {
-    private static final String
+    public static final String
     		RECORD_STORE_SETTINGS = "gamesettings",
 		    IS_SETUP_WIZARD_COMPLETED = "wizardCompleted",
 			MGSTRUCTS_FOLDER_PATH = "mgPath",
 		    IS_BETTER_GRAPHICS_ENABLED = "btrGr",
             PHYSICS_PRECISION = "PhyPrecision",
             DETAIL_LEVEL = "DetailLvl",
+            FRAME_TIME = "FrameTime",
 		    SHOW_FPS = "showFPS",
 		    SHOW_BG = "enBG",
 		    BATTERY_INDICATOR = "Batt";
 
     public static final int DYNAMIC_PHYSICS_PRECISION = 0;
-    public static final int DEFAULT_PHYSICS_PRECISION = DYNAMIC_PHYSICS_PRECISION, DEFAULT_DETAIL_LEVEL = 1;
-    public static final int MAX_PHYSICS_PRECISION = 16, MAX_DETAIL_LEVEL = 3;
+    public static final int
+            DEFAULT_PHYSICS_PRECISION = DYNAMIC_PHYSICS_PRECISION,
+            DEFAULT_DETAIL_LEVEL = 1,
+            DEFAULT_FRAME_TIME = 16;
+    public static final int MAX_PHYSICS_PRECISION = 16, MAX_DETAIL_LEVEL = 3, MAX_FRAME_TIME = 100;
 
     private static String mgstructsFolderPath = null;
     private static String detailLevel = Settings.UNDEF;
@@ -34,6 +39,7 @@ public class MobappGameSettings {
     	            IS_BETTER_GRAPHICS_ENABLED,
                     PHYSICS_PRECISION,
                     DETAIL_LEVEL,
+                    FRAME_TIME,
     	            SHOW_FPS,
     	            SHOW_BG,
     	            BATTERY_INDICATOR
@@ -163,5 +169,15 @@ public class MobappGameSettings {
     public static void setDetailLevel(int value) {
         detailLevel = String.valueOf(value);
         getSettingsInst().set(DETAIL_LEVEL, String.valueOf(value));
+    }
+
+    ///
+
+    public static int getFrameTime() {
+        return Mathh.constrain(1, getSettingsInst().getInt(FRAME_TIME, DEFAULT_FRAME_TIME), MAX_FRAME_TIME);
+    }
+
+    public static void setFrameTime(int valueMs) {
+        getSettingsInst().set(FRAME_TIME, String.valueOf(Mathh.constrain(1, valueMs, MAX_FRAME_TIME)));
     }
 }

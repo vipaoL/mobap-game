@@ -265,7 +265,7 @@ public class GraphicsWorld extends World {
             int sunCenterY = scHeight - scHeight * 3 / 5;
             
             g.setColor(191, 0, 127);
-            int offset = (carX - bgXOffset) / 16;
+            int offset = (carX - bgXOffset) / 32;
             int l = (scWidth * 4);
             int y1 = sunCenterY + sunR;
             int y2 = scHeight;
@@ -374,7 +374,7 @@ public class GraphicsWorld extends World {
             }
         	
             for (int i = 0; i < positions.length - 1; i++) {
-                drawLine(g,
+                drawBodyLine(g,
                         xToPX(positions[i].xAsInt()),
                         yToPX(positions[i].yAsInt()),
                         xToPX(positions[i + 1].xAsInt()),
@@ -390,7 +390,7 @@ public class GraphicsWorld extends World {
 	                        yToPX(positions[i + 1].yAsInt()));
                 }
             }
-            drawLine(g,
+            drawBodyLine(g,
                     xToPX(positions[positions.length - 1].xAsInt()),
                     yToPX(positions[positions.length - 1].yAsInt()),
                     xToPX(positions[0].xAsInt()),
@@ -426,7 +426,7 @@ public class GraphicsWorld extends World {
                             endPointY,
                             24);
                 } else {
-                    drawLine(
+                    drawBodyLine(
                             g,
                             stPointX,
                             stPointY,
@@ -484,7 +484,7 @@ public class GraphicsWorld extends World {
                 0, 360, 10, currColWheel);
     }
     
-    private void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
+    private void drawBodyLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
     	drawLine(g, x1, y1, x2, y2, thickness, true);
     }
     
