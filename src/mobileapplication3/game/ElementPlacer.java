@@ -194,7 +194,7 @@ public class ElementPlacer {
         if (amp == 0) {
             line(x, y, x + l, y);
         } else {
-            int step = 30 / detailLevel / detailLevel;
+            int step = 30 / detailLevel;
             int endAngle = startAngle + halfPeriods * 180;
             int a = endAngle - startAngle;
 
