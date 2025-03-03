@@ -1024,11 +1024,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				uninterestingDebug = false;
 
 				if (gameMode == GAME_MODE_ENDLESS && !(DebugMenu.isDebugEnabled || DebugMenu.simulationMode)) {
-					try {
-						Records.saveRecord(points, 9);
-					} catch (Exception ex) {
-						Platform.showError("Can't save record:", ex);
-					}
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								Records.saveRecord(points, 9);
+							} catch (Exception ex) {
+								Platform.showError("Can't save record:", ex);
+							}
+						}
+					}, "record saver").start();
 				}
             	if (worldgen != null) {
             		worldgen.stop();
