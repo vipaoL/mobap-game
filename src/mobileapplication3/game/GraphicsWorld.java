@@ -494,7 +494,7 @@ public class GraphicsWorld extends World {
                         int x = structureData[c++];
                         int y = structureData[c++];
                         int r = structureData[c++];
-                        g.drawArc(xToPX(x - r), yToPX(y - r), r * 2 * 1000 / zoomOut, r * 2 * 1000 / zoomOut, 0, 360, 24, zoomOut, true, true, true);
+                        g.drawArc(xToPX(x - r), yToPX(y - r), r * 2 * 1000 / zoomOut, r * 2 * 1000 / zoomOut, 0, 360, 24, zoomOut, betterGraphics, true, true);
                         break;
                     }
                     case ElementPlacer.DRAWING_DATA_ID_ARC: {
@@ -514,7 +514,7 @@ public class GraphicsWorld extends World {
                                 g.drawString("arcAngle=" + arcAngle, xToPX(x), yToPX(y), Graphics.TOP | Graphics.HCENTER);
                             }
                         }
-                        g.drawArc(xToPX(x - r * kx / 10), yToPX(y - r * ky / 10), r*2 * kx * 100 / zoomOut, r*2 * ky * 100 / zoomOut, startAngle, arcAngle, 24, zoomOut, true, true, true);
+                        g.drawArc(xToPX(x - r * kx / 10), yToPX(y - r * ky / 10), r*2 * kx * 100 / zoomOut, r*2 * ky * 100 / zoomOut, startAngle, arcAngle, 24, zoomOut, betterGraphics, true, true);
                         break;
                     }
                 }
