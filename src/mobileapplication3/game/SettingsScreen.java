@@ -30,7 +30,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         public void init() {
             getFontSize();
             
-            setSpecialOption(menuOpts.length - 2); // highlight "Debug settings" if enabled
+            setSpecialOption(DEBUG); // highlight "Debug settings" if enabled
             setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
             
             refreshStates();
