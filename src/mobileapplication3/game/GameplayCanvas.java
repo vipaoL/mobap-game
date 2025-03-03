@@ -1023,7 +1023,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				isFirstStart = false;
 				uninterestingDebug = false;
 
-				if (gameMode == GAME_MODE_ENDLESS) {
+				if (gameMode == GAME_MODE_ENDLESS && !(DebugMenu.isDebugEnabled || DebugMenu.simulationMode)) {
 					try {
 						Records.saveRecord(points, 9);
 					} catch (Exception ex) {
