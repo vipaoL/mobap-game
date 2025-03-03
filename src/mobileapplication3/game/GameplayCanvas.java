@@ -637,12 +637,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     		return false;
     	}
 
-    	world.setTimestepFX(baseTimestepFX);
+		world.setTimestepFX(baseTimestepFX / 7);
     	world.refreshCarPos();
     	setSimulationArea();
     	world.tickCustomBodies();
     	tickEffects();
-    	world.tick();
+		for (int i = 0; i < 7; i++) {
+			world.tick();
+		}
     	tickCustomBodyInteractions(getCarContacts());
     	tickGameOverCheck();
     	if (worldgen != null) {
