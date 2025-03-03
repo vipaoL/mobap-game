@@ -5,32 +5,40 @@ import at.emini.physics2D.Shape;
 import mobileapplication3.platform.Mathh;
 
 public class StructurePlacer {
+    public static final int STRUCTURE_ID_UNKNOWN = -1,
+            STRUCTURE_ID_ARC1 = 0,
+            STRUCTURE_ID_SIN = 1,
+            STRUCTURE_ID_FLOOR_STAT = 2,
+            STRUCTURE_ID_ARC2 = 3,
+            STRUCTURE_ID_ABYSS = 4,
+            STRUCTURE_ID_SLANTED_DOTTED_LINE = 5;
+
     public static int[] place(GraphicsWorld world, boolean skipPlacingBodies, short[][] data, int x, int y) {
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
         for (int i = 1; i < data.length; i++) {
             elementPlacer.place(data[i], x, y);
         }
-        return new int[] {x + data[0][1], y + data[0][2], elementPlacer.getLineCount()}; //
+        return WorldGen.concatArrays(new int[] {x + data[0][1], y + data[0][2], elementPlacer.getLineCount(), STRUCTURE_ID_UNKNOWN}, elementPlacer.getDrawingData());
     }
 
-    public static int[] arc1(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int r, int va) { // 0
+    public static int[] arc1(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int r, int va) { // id0
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
         int endX = x;
 
         x+=r;
         int r2 = r*3/2;
 
-        elementPlacer.arc(x-r, y-r2, r2, 60, 30);
+        elementPlacer.arc(x - r, y - r2, r2, 60, 30);
         elementPlacer.arc(x+r/2, y-r*2, r, 300, va);
         int ofs = (1000 - Mathh.cos(30))*2*r2/1000;
         elementPlacer.arc(x+r*2-ofs, y-r2, r2, 60, 90);
 
         int l = r2+r2-ofs;
         endX += l;
-        return new int[] {endX, y, elementPlacer.getLineCount()};
+        return WorldGen.concatArrays(new int[] {endX, y, elementPlacer.getLineCount(), STRUCTURE_ID_ARC1}, elementPlacer.getDrawingData());
     }
 
-    public static int[] arc2(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int r, int sn) { // 4
+    public static int[] arc2(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int r, int sn) { // id3
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
         int endY = y;
 
@@ -83,14 +91,14 @@ public class StructurePlacer {
 
         int l = r+r;
         x += l;
-        return new int[] {x, endY, elementPlacer.getLineCount()};
+        return WorldGen.concatArrays(new int[] {x, endY, elementPlacer.getLineCount(), STRUCTURE_ID_ARC2}, elementPlacer.getDrawingData());
     }
 
     public static int[] floor(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int l, int y2) {
         int amp = (y2 - y) / 2;
         return sinStruct(world, skipPlacingBodies, x, y + amp, l, 1, 270, amp);
     }
-    public static int[] sinStruct(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int l, int halfPeriods, int offset, int amp) {    //3
+    public static int[] sinStruct(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int l, int halfPeriods, int offset, int amp) { // id1
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
 
         elementPlacer.sin(x, y, l, halfPeriods, offset, amp);
@@ -98,16 +106,16 @@ public class StructurePlacer {
         if (amp != 0) {
             y = y + amp*Mathh.sin(180*halfPeriods+offset)/1000;
         }
-        return new int[] {x, y, elementPlacer.getLineCount()};
+        return WorldGen.concatArrays(new int[] {x, y, elementPlacer.getLineCount(), STRUCTURE_ID_SIN}, elementPlacer.getDrawingData());
     }
-    public static int[] floorStat(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int l) {      // 1
+    public static int[] floorStat(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int l) { // id2
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
 
         elementPlacer.line1(x, y, x + l, y);
         x += l;
-        return new int[] {x, y, elementPlacer.getLineCount()};
+        return WorldGen.concatArrays(new int[] {x, y, elementPlacer.getLineCount(), STRUCTURE_ID_FLOOR_STAT}, elementPlacer.getDrawingData());
     }
-    public static int[] abyss(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int l) {
+    public static int[] abyss(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int l) { // id4
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
         int endX = x;
 
@@ -121,9 +129,9 @@ public class StructurePlacer {
         elementPlacer.line(x+l - l / 5, y - r * Mathh.cos(ang) / 1000, x+l, y - r * Mathh.cos(ang) / 1000);
         endX += l;
         y -= r * Mathh.cos(ang) / 1000;
-        return new int[] {endX, y, elementPlacer.getLineCount()};
+        return WorldGen.concatArrays(new int[] {endX, y, elementPlacer.getLineCount(), STRUCTURE_ID_ABYSS}, elementPlacer.getDrawingData());
     }
-    public static int[] slantedDottedLine(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int n) {
+    public static int[] slantedDottedLine(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int n) { // id5
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
 
         int offsetL = 600;
@@ -132,6 +140,6 @@ public class StructurePlacer {
         }
         x += n * offsetL;
 
-        return new int[] {x, y, elementPlacer.getLineCount()};
+        return WorldGen.concatArrays(new int[] {x, y, elementPlacer.getLineCount(), STRUCTURE_ID_SLANTED_DOTTED_LINE}, elementPlacer.getDrawingData());
     }
 }

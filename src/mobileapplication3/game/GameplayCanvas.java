@@ -650,8 +650,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     	if (worldgen != null) {
     		worldgen.tick();
     	}
-    	world.drawWorld(g);
-    	if (world.carY > getLowestSafeY()) {
+
+        if (worldgen != null) {
+            world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
+        } else {
+			world.drawWorld(g, null, 0, 0);
+		}
+
+        if (world.carY > getLowestSafeY()) {
     		if (bgTick % 10 == 0) {
     			dimColors();
     			bgTick = 0;
@@ -673,7 +679,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             drawLoading(g);
             Logger.paint(g);
         } else {
-            world.drawWorld(g);
+            if (worldgen != null) {
+                world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
+            } else {
+				world.drawWorld(g, null, 0, 0);
+			}
             drawHUD(g);
         }
     }

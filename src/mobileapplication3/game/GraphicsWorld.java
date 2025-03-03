@@ -223,7 +223,7 @@ public class GraphicsWorld extends World {
         currColWheel = color;
     }
     
-    public void drawWorld(Graphics g) {
+    public void drawWorld(Graphics g, int[][] structuresData, int structureRingBufferOffset, int structureCount) {
         // fill background
         g.setColor(currColBg);
         g.fillRect(0, 0, scWidth, scHeight);
@@ -236,7 +236,13 @@ public class GraphicsWorld extends World {
             calcOffset();
 
             drawBg(g);
-            drawLandscape(g);
+            if (structuresData != null) {
+                try {
+                    drawLandscape(g, structuresData, structureRingBufferOffset, structureCount);
+                } catch (Exception ex) { }
+            } else {
+                drawLandscape(g);
+            }
             drawBodies(g); // draw all bodies, excluding car wheels
             drawCar(g); // draw car wheels
             //drawConstraints(g); // don't draw constraints
@@ -439,6 +445,103 @@ public class GraphicsWorld extends World {
                     g.fillArc(stPointX-1, stPointY-1, 2, 2, 0, 360);
                     g.fillArc(endPointX-1, endPointY-1, 2, 2, 0, 360);
                 }
+            }
+        }
+    }
+
+    private void drawLandscape(Graphics g, int[][] structuresData, int structureRingBufferOffset, int structureCount) {
+        int prevStructureEndX = 0;
+        int prevStructureEndY = 0;
+        for (int i = structureRingBufferOffset; i < structureRingBufferOffset + structureCount; i++) {
+            int[] structureData = structuresData[i % structuresData.length];
+            int c = 0;
+            int endX = structureData[c++];
+            int endY = structureData[c++];
+            int lineCount = structureData[c++];
+            int structureID = structureData[c++];
+            int color = currColLandscape;
+            if (DebugMenu.isDebugEnabled) {
+                Random random = new Random(structureID);
+                g.setColor(128 + random.nextInt() % 128, 128 + random.nextInt() % 128, 128 + random.nextInt() % 128);
+                color = g.getColor();
+            } else {
+                g.setColor(currColLandscape);
+            }
+
+            if (xToPX(endX) < 0) {
+                prevStructureEndX = endX;
+                prevStructureEndY = endY;
+                continue;
+            }
+
+            while (c < structureData.length - 1) {
+                int id = structureData[c++];
+                switch (id) {
+                    case ElementPlacer.DRAWING_DATA_ID_LINE:
+                        int x1 = xToPX(structureData[c++]);
+                        int y1 = yToPX(structureData[c++]);
+                        drawLine(g, x1, y1, xToPX(structureData[c++]), yToPX(structureData[c++]), 24);
+                        break;
+                    case ElementPlacer.DRAWING_DATA_ID_PATH:
+                        int pointsCount = structureData[c++];
+                        int prevX = xToPX(structureData[c++]);
+                        int prevY = yToPX(structureData[c++]);
+                        for (int j = 1; j < pointsCount; j++) {
+                            drawLine(g, prevX, prevY, prevX = xToPX(structureData[c++]), prevY = yToPX(structureData[c++]), 24);
+                        }
+                        break;
+                    case ElementPlacer.DRAWING_DATA_ID_CIRCLE: {
+                        int x = structureData[c++];
+                        int y = structureData[c++];
+                        int r = structureData[c++];
+                        g.drawArc(xToPX(x - r), yToPX(y - r), r * 2 * 1000 / zoomOut, r * 2 * 1000 / zoomOut, 0, 360, 24, zoomOut, true, true, true);
+                        break;
+                    }
+                    case ElementPlacer.DRAWING_DATA_ID_ARC: {
+                        int x = structureData[c++];
+                        int y = structureData[c++];
+                        int r = structureData[c++];
+                        int startAngle = structureData[c++];
+                        int arcAngle = structureData[c++];
+                        if (arcAngle == 0) {
+                            arcAngle = 360;
+                        }
+                        int kx = structureData[c++];
+                        int ky = structureData[c++];
+                        if (DebugMenu.isDebugEnabled) {
+                            if (!DebugMenu.simulationMode) {
+                                g.drawString("startAngle=" + startAngle, xToPX(x), yToPX(y), Graphics.BOTTOM | Graphics.HCENTER);
+                                g.drawString("arcAngle=" + arcAngle, xToPX(x), yToPX(y), Graphics.TOP | Graphics.HCENTER);
+                            }
+                        }
+                        g.drawArc(xToPX(x - r * kx / 10), yToPX(y - r * ky / 10), r*2 * kx * 100 / zoomOut, r*2 * ky * 100 / zoomOut, startAngle, arcAngle, 24, zoomOut, true, true, true);
+                        break;
+                    }
+                }
+            }
+
+            if (DebugMenu.isDebugEnabled) {
+                if (prevStructureEndX == 0) {
+                    prevStructureEndX = endX - 1000;
+                    prevStructureEndY = endY - 100;
+                }
+                g.setColor(0x000033);
+                String str = String.valueOf(lineCount);
+                int x = xToPX((endX + prevStructureEndX) / 2);
+                int y = yToPX((endY + prevStructureEndY) / 2);
+                int w = g.stringWidth(str);
+                int h = g.getFontHeight();
+                g.fillRect(x - w/2, y - h/2, w, h);
+                g.setColor(color);
+                g.drawLine(xToPX(endX), 0, xToPX(endX), scHeight);
+                g.drawString(str, x, y, Graphics.VCENTER | Graphics.HCENTER);
+            }
+
+            prevStructureEndX = endX;
+            prevStructureEndY = endY;
+
+            if (xToPX(endX) >= scWidth) {
+                break;
             }
         }
     }

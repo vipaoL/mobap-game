@@ -23,17 +23,21 @@ public class ElementPlacer {
     public static final short LEVEL_FINISH = 10;
     public static final short LAVA = 11;
 
+    public static final int DRAWING_DATA_ID_LINE = 1, DRAWING_DATA_ID_PATH = 2, DRAWING_DATA_ID_CIRCLE = 3, DRAWING_DATA_ID_ARC = 4;
+
     private int lineCount;
     private int detailLevel;
     private final GraphicsWorld w;
     private final Landscape landscape;
     private final boolean dontPlaceBodies;
+    private int[] drawingData;
 
     public ElementPlacer(GraphicsWorld world, boolean dontPlaceBodies) {
         lineCount = 0;
         w = world;
         landscape = world.getLandscape();
         this.dontPlaceBodies = dontPlaceBodies;
+        drawingData = null;
 
         detailLevel = MobappGameSettings.DEFAULT_DETAIL_LEVEL;
         try {
@@ -191,6 +195,7 @@ public class ElementPlacer {
     }
 
     public void sin(int x, int y, int l, int halfPeriods, int startAngle, int amp) {    //3
+        int pointCount = 0;
         if (amp == 0) {
             line(x, y, x + l, y);
         } else {
@@ -200,58 +205,82 @@ public class ElementPlacer {
 
             int prevPointX = x;
             int prevPointY = y + amp * Mathh.sin(startAngle) / 1000;
+
             int nextPointX;
             int nextPointY;
+
+            int[] points = new int[2 * (endAngle - startAngle) / step + 10]; // IDK how much exactly it will take, but 10 extra reserved cells should be enough
+            points[0] = prevPointX;
+            points[1] = prevPointY;
+            pointCount++;
 
             for (int i = startAngle; i <= endAngle; i+=step) {
                 nextPointX = x + (i - startAngle)*l/a;
                 nextPointY = y + amp*Mathh.sin(i)/1000;
-                line1(prevPointX, prevPointY, nextPointX, nextPointY);
+                line(prevPointX, prevPointY, nextPointX, nextPointY, 1, false);
                 prevPointX = nextPointX;
                 prevPointY = nextPointY;
+                points[pointCount * 2] = prevPointX;
+                points[pointCount++ * 2 + 1] = prevPointY;
             }
 
             if (a % step != 0) {
                 nextPointX = x + l;
                 nextPointY = y + amp*Mathh.sin(endAngle)/1000;
-                line1(prevPointX, prevPointY, nextPointX, nextPointY);
+                line(prevPointX, prevPointY, nextPointX, nextPointY, 1, false);
+                prevPointX = nextPointX;
+                prevPointY = nextPointY;
+                points[2 + pointCount * 2] = prevPointX;
+                points[2 + pointCount++ * 2 + 1] = prevPointY;
             }
+
+            // ID, point count, points
+            int[] drawingData = new int[2 + pointCount * 2];
+            drawingData[0] = DRAWING_DATA_ID_PATH;
+            drawingData[1] = pointCount;
+            System.arraycopy(points, 0, drawingData, 2, pointCount * 2);
+            appendDrawingData(drawingData);
         }
         updateLowestY(y + amp);
     }
-    public void arc(int x, int y, int r, int ang, int of) {
-        arc(x, y, r, ang, of, 10, 10);
+    public void arc(int x, int y, int r, int angle, int startAngle) {
+        arc(x, y, r, angle, startAngle, 10, 10);
     }
-    public void arc(int x, int y, int r, int ang, int of, int kx, int ky) { //k: 100 = 1.0
+    public void arc(int x, int y, int r, int angle, int startAngle, int kx, int ky) { //k: 10 = 1.0
         // calculated formula. r=20: sn=5,step=72; r=1000: sn=36,step=10
         int step = 10000/(140+r);
         if ((step = step / detailLevel) <= 2) {
-            arcSmooth(x, y, r, ang, of, kx, ky);
-            return;
+            arcSmooth(x, y, r, angle, startAngle, kx, ky);
         }
         step = Mathh.constrain( 10 / detailLevel, step, 72 / detailLevel);
 
-        while (of < 0) {
-            of += 360;
+        while (startAngle < 0) {
+            startAngle += 360;
         }
 
         int linesFacing = 0;
-        if (ang == 360) {
+        if (angle == 360) {
             linesFacing = 1; // these lines push bodies only in one direction
         }
 
         int lastAng = 0;
-        for(int i = 0; i <= ang - step; i+=step) {
-            line(x+Mathh.cos(i+of)*kx*r/10000, y+Mathh.sin(i+of)*ky*r/10000, x+Mathh.cos(i+step+of)*kx*r/10000,y+Mathh.sin(i+step+of)*ky*r/10000, linesFacing);
+        for(int i = 0; i <= angle - step; i+=step) {
+            line(x+Mathh.cos(i+startAngle)*kx*r/10000, y+Mathh.sin(i+startAngle)*ky*r/10000, x+Mathh.cos(i+step+startAngle)*kx*r/10000,y+Mathh.sin(i+step+startAngle)*ky*r/10000, linesFacing, false);
             lastAng = i + step;
         }
 
         // close the circle if the angle is not multiple of the step (step)
-        if (ang % step != 0) {
-            line(x+Mathh.cos(lastAng+of)*kx*r/10000, y+Mathh.sin(lastAng+of)*ky*r/10000, x+Mathh.cos(ang+of)*kx*r/10000,y+Mathh.sin(ang+of)*ky*r/10000, linesFacing);
+        if (angle % step != 0) {
+            line(x+Mathh.cos(lastAng+startAngle)*kx*r/10000, y+Mathh.sin(lastAng+startAngle)*ky*r/10000, x+Mathh.cos(angle+startAngle)*kx*r/10000,y+Mathh.sin(angle+startAngle)*ky*r/10000, linesFacing, false);
         }
 
         updateLowestY(y + r);
+
+        if (angle == 360 && startAngle == 0 && kx == 10 && ky == 10) {
+            appendDrawingData(new int[] {DRAWING_DATA_ID_CIRCLE, x, y, r});
+        } else {
+            appendDrawingData(new int[] {DRAWING_DATA_ID_ARC, x, y, r, startAngle, angle, kx, ky});
+        }
     }
 
     public void arcSmooth(int x, int y, int r, int angle, int startAngle, int kx, int ky) { //k: 100 = 1.0
@@ -272,66 +301,59 @@ public class ElementPlacer {
 
         double lastAng = 0;
         for(double i = 0; i <= angleD - step; i+=step) {
-            line((int) (x+Math.cos(i+startAngleD)*kx*r/10), (int) (y+Math.sin(i+startAngleD)*ky*r/10), (int) (x+Math.cos(i+step+startAngleD)*kx*r/10), (int) (y+Math.sin(i+step+startAngleD)*ky*r/10), linesFacing);
+            line((int) (x+Math.cos(i+startAngleD)*kx*r/10), (int) (y+Math.sin(i+startAngleD)*ky*r/10), (int) (x+Math.cos(i+step+startAngleD)*kx*r/10), (int) (y+Math.sin(i+step+startAngleD)*ky*r/10), linesFacing, false);
             lastAng = i + step;
         }
 
         // close the circle if the angle is not multiple of the step (step)
         if (angleD % step != 0) {
-            line((int) (x+Math.cos(lastAng+startAngleD)*kx*r/10), (int) (y+Math.sin(lastAng+startAngleD)*ky*r/10), (int) (x+Math.cos(angleD+startAngleD)*kx*r/10), (int) (y+Math.sin(angleD+startAngleD)*ky*r/10), linesFacing);
+            line((int) (x+Math.cos(lastAng+startAngleD)*kx*r/10), (int) (y+Math.sin(lastAng+startAngleD)*ky*r/10), (int) (x+Math.cos(angleD+startAngleD)*kx*r/10), (int) (y+Math.sin(angleD+startAngleD)*ky*r/10), linesFacing, false);
         }
 
         updateLowestY(y + r);
+
+        if (angle == 360 && startAngle == 0 && kx == 10 && ky == 10) {
+            appendDrawingData(new int[] {DRAWING_DATA_ID_CIRCLE, x, y, r});
+        } else {
+            appendDrawingData(new int[] {DRAWING_DATA_ID_ARC, x, y, r, startAngle, angle, kx, ky});
+        }
     }
 
     public void line(int x1, int y1, int x2, int y2) {
-        line(x1, y1, x2, y2, 0);
+        line(x1, y1, x2, y2, 0, true);
     }
 
     public void line1(int x1, int y1, int x2, int y2) {
-        line(x1, y1, x2, y2, 1);
+        line(x1, y1, x2, y2, 1, true);
     }
 
-    //int prevLineK = Integer.MIN_VALUE;
     public void line(int x1, int y1, int x2, int y2, int facing) {
-        //x1 += 1;
-        //System.out.println(x1 + " " + x2);
+        line(x1, y1, x2, y2, facing, true);
+    }
+
+    public void line(int x1, int y1, int x2, int y2, int facing, boolean saveDrawingData) {
         int dx = x2-x1;
         int dy = y2-y1;
         if (dx == 0 && dy == 0) {
             return;
         }
-
-        /*
-        * experimental optimization. instead of adding a new line with same
-        * tilt angle, move end point of previous line.
-        * It is buggy when it concatenates a line with line from
-        * another (previous) structure. That's why I disabled it
-        *
-        int lineK;
-        if (dx != 0) {
-            lineK = 1000*dy/dx; // TODO: experiment with "1000"
-        } else {
-            lineK = Integer.MIN_VALUE;
-        }
-        if (lineK == prevLineK) {
-            int prevLineEndPointID = lndscp.segmentCount()-1;
-            int prevLineEndPointX = lndscp.elementEndPoints()[prevLineEndPointID].xAsInt();
-            int prevLineEndPointY = lndscp.elementEndPoints()[prevLineEndPointID].yAsInt();
-            if (x1 == prevLineEndPointX && y1 == prevLineEndPointY) {
-                lndscp.elementEndPoints()[prevLineEndPointID] = FXVector.newVector(x2, y2);
-                int prevStructID = structlogger.getElementID(structlogger.getNumberOfLogged() - 1);
-                structlogger.structLog[prevStructID][1] -= 1;
-            }
-        } else {*/
         landscape.addSegment(FXVector.newVector(x1, y1), FXVector.newVector(x2, y2), (short) facing);
-            /*prevLineK = lineK;
-        }*/
         lineCount++;
         updateLowestY(Math.max(y1, y2));
+        if (saveDrawingData) {
+            appendDrawingData(new int[] {DRAWING_DATA_ID_LINE, x1, y1, x2, y2});
+        }
+    }
+
+    private void appendDrawingData(int[] newData) {
+        drawingData = WorldGen.concatArrays(drawingData, newData);
     }
 
     private void updateLowestY(int y) {
         w.lowestY = Math.max(y, w.lowestY);
+    }
+
+    public int[] getDrawingData() {
+        return drawingData;
     }
 }
