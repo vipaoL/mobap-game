@@ -228,9 +228,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             tickTime = TICK_DURATION;
             int prevTickTime = TICK_DURATION;
 			int physicsIterationsSetting = MobappGameSettings.DEFAULT_PHYSICS_PRECISION;
+			int maxFrameTime = MobappGameSettings.DEFAULT_FRAME_TIME;
 			try {
             	log("reading settings");
 				physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
+				maxFrameTime = MobappGameSettings.getFrameTime();
     	        showFPS = MobappGameSettings.isFPSShown(showFPS);
     	        battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
             } catch (Throwable ex) {
@@ -493,7 +495,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                    isWaiting = false;
 	                    
 	                    Thread.yield();
-	                    sleep = TICK_DURATION - (System.currentTimeMillis() - start);
+	                    sleep = maxFrameTime - (System.currentTimeMillis() - start);
 	                    sleep = Math.max(sleep, 0);
 	                } else {
 	                    // Pause screen
@@ -506,7 +508,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
 	                // FPS/TPS control
 	                try {
-	                    if ((limitFPS || paused) && sleep > 0) {
+	                    if (sleep > 0) {
 	                        Thread.sleep(sleep);
 	                    } else if (System.currentTimeMillis() == start) {
 	                    	Thread thread = Thread.currentThread();
