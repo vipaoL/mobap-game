@@ -271,7 +271,7 @@ public class GraphicsWorld extends World {
             int sunCenterY = scHeight - scHeight * 3 / 5;
             
             g.setColor(191, 0, 127);
-            int offset = (carX - bgXOffset) / 16;
+            int offset = (carX - bgXOffset) / 32;
             int l = (scWidth * 4);
             int y1 = sunCenterY + sunR;
             int y2 = scHeight;
