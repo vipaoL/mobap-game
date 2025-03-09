@@ -2,15 +2,10 @@ package com.vipaol;
 
 import mobileapplication3.game.DebugMenu;
 import mobileapplication3.game.MenuCanvas;
-import mobileapplication3.platform.Platform;
+import mobileapplication3.platform.MobappDesktopMain;
 import mobileapplication3.platform.ui.RootContainer;
 
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-public class MobappGameDesktopMain extends Frame {
-
+public class MobappGameDesktopMain extends MobappDesktopMain {
     public static void main(String[] args) {
         if (args != null) {
             for (String arg : args) {
@@ -29,23 +24,11 @@ public class MobappGameDesktopMain extends Frame {
                 }
             }
         }
-        new MobappGameDesktopMain();
+        new MobappGameDesktopMain(args);
     }
 
-    public MobappGameDesktopMain() {
-        setSize(1200, 900);
-        Platform.init(this);
-        RootContainer.getInst().setBgColor(0);
-        setVisible(true);
-        setLayout(new BorderLayout());
-        add(RootContainer.getInst(), BorderLayout.CENTER);
-        setMinimumSize(new Dimension(400, 300));
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent windowEvent){
-                System.exit(0);
-            }
-        });
-        setLocationRelativeTo(null);
+    public MobappGameDesktopMain(String[] args) {
+        super(args);
         RootContainer.setRootUIComponent(new MenuCanvas());
     }
 }
