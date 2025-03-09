@@ -1025,7 +1025,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
 				if (gameMode == GAME_MODE_ENDLESS && !(DebugMenu.isDebugEnabled || DebugMenu.simulationMode)) {
 					new Thread(new Runnable() {
-						@Override
 						public void run() {
 							try {
 								Records.saveRecord(points, 9);
