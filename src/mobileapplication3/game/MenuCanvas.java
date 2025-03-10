@@ -63,7 +63,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             menuOptions[2] = "Reload";
         }
         try {
-            Class.forName("mobileapplication3.editor.MainMenu");
+            Class.forName("mobileapplication3.editor.Editor");
         } catch (ClassNotFoundException ex) {
         	setStateFor(STATE_INACTIVE, 4);
         }
@@ -166,7 +166,11 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         }
         if (selected == 4) { // Editor
         	stop();
-        	mobileapplication3.editor.Editor.startEditor();
+        	try {
+				Class.forName("mobileapplication3.editor.Editor").newInstance();
+			} catch (Exception ex) {
+				Logger.log("Can't open editor: " + ex);
+			}
         	Logger.log("opened editor");
         }
         if (selected == 5) { // Records

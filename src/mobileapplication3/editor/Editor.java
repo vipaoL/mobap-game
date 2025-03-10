@@ -7,6 +7,10 @@ import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.UISettings;
 
 public class Editor {
+	public Editor() {
+		startEditor();
+	}
+
 	public static void startEditor() {
     	try {
         	RootContainer.setUISettings(new UISettings() {
