@@ -72,9 +72,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             switch (selected) {
                 case PHYSICS_PRECISION:
                     value = MobappGameSettings.getPhysicsPrecision();
-                    if (value == MobappGameSettings.AUTO_PHYSICS_PRECISION) {
+                    if (value == MobappGameSettings.AUTO_PHYSICS_PRECISION) {/*
                         value = MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
-                    } else if (value == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {
+                    } else if (value == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {*/
                         value = 1;
                     } else {
                         value *= 2;
