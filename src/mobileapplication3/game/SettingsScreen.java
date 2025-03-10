@@ -71,11 +71,16 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             int value;
             switch (selected) {
                 case PHYSICS_PRECISION:
-                    value = MobappGameSettings.getPhysicsPrecision() * 2;
-                    if (value > MobappGameSettings.MAX_PHYSICS_PRECISION) {
+                    value = MobappGameSettings.getPhysicsPrecision();
+                    if (value == MobappGameSettings.AUTO_PHYSICS_PRECISION) {
                         value = MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
                     } else if (value == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {
                         value = 1;
+                    } else {
+                        value *= 2;
+                        if (value > MobappGameSettings.MAX_PHYSICS_PRECISION) {
+                            value = MobappGameSettings.AUTO_PHYSICS_PRECISION;
+                        }
                     }
                     MobappGameSettings.setPhysicsPrecision(value);
                     break;
@@ -147,7 +152,14 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             int physicsPrecision = MobappGameSettings.getPhysicsPrecision();
             int detailLvl = MobappGameSettings.getDetailLevel();
             int frameTime = MobappGameSettings.getFrameTime();
-            menuOpts[PHYSICS_PRECISION] = "Physics precision: " + (physicsPrecision == 0 ? "Dynamic" : String.valueOf(physicsPrecision));
+            menuOpts[PHYSICS_PRECISION] = "Physics precision: ";
+            if (physicsPrecision == MobappGameSettings.AUTO_PHYSICS_PRECISION) {
+                menuOpts[PHYSICS_PRECISION] += "Auto";
+            } else if (physicsPrecision == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {
+                menuOpts[PHYSICS_PRECISION] += "Dynamic";
+            } else {
+                menuOpts[PHYSICS_PRECISION] += String.valueOf(physicsPrecision);
+            }
             menuOpts[DETAIL_LEVEL] = "Detail level: " + detailLvl;
             menuOpts[FRAME_TIME] = "FPS: " + round(1000f / frameTime) + " (" + frameTime + "ms/frame)";
             menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";

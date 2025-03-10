@@ -17,9 +17,9 @@ public class MobappGameSettings {
 		    SHOW_BG = "enBG",
 		    BATTERY_INDICATOR = "Batt";
 
-    public static final int DYNAMIC_PHYSICS_PRECISION = 0;
+    public static final int DYNAMIC_PHYSICS_PRECISION = -1, AUTO_PHYSICS_PRECISION = 0;
     public static final int
-            DEFAULT_PHYSICS_PRECISION = DYNAMIC_PHYSICS_PRECISION,
+            DEFAULT_PHYSICS_PRECISION = AUTO_PHYSICS_PRECISION,
             DEFAULT_DETAIL_LEVEL = 1,
             DEFAULT_FRAME_TIME = 16;
     public static final int MAX_PHYSICS_PRECISION = 16, MAX_DETAIL_LEVEL = 3, MAX_FRAME_TIME = 100;

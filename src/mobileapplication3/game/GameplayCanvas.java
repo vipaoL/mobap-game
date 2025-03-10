@@ -228,17 +228,25 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             tickTime = TICK_DURATION;
             int prevTickTime = TICK_DURATION;
 			int physicsIterationsSetting = MobappGameSettings.DEFAULT_PHYSICS_PRECISION;
+			boolean lockPhysicsPrecision;
+			boolean dynamicPhysicsPrecision;
 			int maxFrameTime = MobappGameSettings.DEFAULT_FRAME_TIME;
 			try {
             	log("reading settings");
-				physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
+                physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
 				maxFrameTime = MobappGameSettings.getFrameTime();
     	        showFPS = MobappGameSettings.isFPSShown(showFPS);
     	        battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
             } catch (Throwable ex) {
     			ex.printStackTrace();
     		}
-            
+			dynamicPhysicsPrecision = physicsIterationsSetting == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
+			lockPhysicsPrecision = !dynamicPhysicsPrecision && physicsIterationsSetting != MobappGameSettings.AUTO_PHYSICS_PRECISION;
+			physicsIterations = physicsIterationsSetting;
+			if (physicsIterations <= 0) {
+				physicsIterations = 2;
+			}
+
             if (world == null) {
                 // new world
                 setDefaultWorld();
@@ -279,6 +287,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             baseTimestepFX = world.getTimestepFX();
             long lastFPSMeasureTime = System.currentTimeMillis();
             long lastBattUpdateTime = 0;
+			int physicsIterationsUnalteredCount = 0;
 
             // Main game cycle
             while (!stopped) {
@@ -294,10 +303,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                		ticksFromLastTPSMeasure = 0;
 	                	}
 
-						if (fps > 2) {
-							physicsIterations = physicsIterationsSetting != MobappGameSettings.DYNAMIC_PHYSICS_PRECISION ? physicsIterationsSetting : Math.max(1, 140 / fps + 1);
-						} else {
-							physicsIterations = 2;
+						if (!lockPhysicsPrecision) {
+							if (framesFromLastFPSMeasure == 0) {
+								int prevValue = physicsIterations;
+								physicsIterations = Math.max(1, 140 / fps + 1);
+								if (physicsIterations == prevValue) {
+									physicsIterationsUnalteredCount++;
+								} else {
+									physicsIterationsUnalteredCount = 0;
+								}
+								if (!dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
+									Logger.log("locking precision multiplier: ", physicsIterations);
+									lockPhysicsPrecision = true;
+								}
+							}
 						}
 
                         // Adjust physics engine tick time to current TPS
