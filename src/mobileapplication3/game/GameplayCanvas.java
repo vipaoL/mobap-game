@@ -75,7 +75,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private boolean motorTurnedOn = false;
 
     // indicators
-    private int flipIndicator = 255; // for blinking counter when flip done
+    private int flipIndicator = 255; // blink the counter after flip
+	private int posResetIndicator = 0; // show when wg moves the world
     private int loadingProgress = 0;
     private int speedoState = 0;
     private int tickTime;
@@ -172,7 +173,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 		WorldGen.isEnabled = gameMode == GAME_MODE_ENDLESS;
         if (WorldGen.isEnabled) {
         	log("starting wg");
-            worldgen = new WorldGen(world);
+            worldgen = new WorldGen(this, world);
 			if (deferredStructures != null) {
 				while (!deferredStructures.isEmpty()) {
 					worldgen.addDeferredStructure((short[][]) deferredStructures.elementAt(0));
@@ -374,7 +375,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                            pauseDelay--;
 	                        }
 	
-	                        // flip counter
+	                        // flip counter and debug posReset indicator
 	                        if (WorldGen.isEnabled) {
 	                            // highlight the score counter on flip
 	                            if (flipIndicator < 255) {
@@ -384,6 +385,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                                }
 	                            }
 	                            flipCounter.tick();
+
+								if (posResetIndicator > 0) {
+									posResetIndicator-=16;
+									if (posResetIndicator <= 0) {
+										posResetIndicator = 0;
+									}
+								}
 	                        }
 
 	                        // move the car to the right in the simulation mode
@@ -899,12 +907,17 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             g.fillRect(0, scH - scH*gameoverCountdown/GAME_OVER_COUNTDOWN_STEPS/2, scW, scH - 1);
         }
         
-        // score counter
+        // score counter and debug posReset indicator
         if (WorldGen.isEnabled && world != null) {
             g.setColor(flipIndicator, flipIndicator, 255);
             setFont(largefont, g);
             g.drawString(String.valueOf(points), scW/2, scH - currentFontH * 3 / 2,
                     Graphics.HCENTER | Graphics.TOP);
+			if (DebugMenu.isDebugEnabled && posResetIndicator > 0) {
+				g.setColor(posResetIndicator, 0, 0);
+				int d = h / 20;
+				g.fillArc(x0, y0 + h - d, d, d, 0, 360);
+			}
         }
         
         // draw beautiful(isn't it?) pause screen
@@ -1095,6 +1108,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             worldgen.resume();
         }
     }
+
+	public void onPosReset() {
+		posResetIndicator = 255;
+	}
 
     // also used as pause
     public void onHide() {

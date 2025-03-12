@@ -49,6 +49,7 @@ public class WorldGen implements Runnable {
     private boolean gameTrLockedByAdding = false;
     
     private final Random rand;
+    private GameplayCanvas game;
     private final GraphicsWorld w;
     private final Landscape landscape;
     private StructLog structLogger;
@@ -62,11 +63,12 @@ public class WorldGen implements Runnable {
     public static final int STEP_CLEAN_SGS = 3;
     
     
-    public WorldGen(GraphicsWorld w) {
+    public WorldGen(GameplayCanvas game, GraphicsWorld w) {
         lock = 0;
         w.lowestY = 2000;
         Logger.log("wg:starting");
         lockGameThread("init");
+        this.game = game;
         this.w = w;
         landscape = w.getLandscape();
         Logger.log("wg:start()");
@@ -371,6 +373,7 @@ public class WorldGen implements Runnable {
 
         isResettingPosition = false;
         unlockGameThread("rsPos");
+        game.onPosReset();
     }
     
     private void moveLandscape(int dx) {
