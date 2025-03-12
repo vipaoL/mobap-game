@@ -339,17 +339,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	
 	                    // Tick and draw
 	                    isBusy = true;
-	                    setSimulationArea();
+						Contact[][] carContacts;
+						synchronized (world) {
+							setSimulationArea();
 
-						// Check if the car contacts with the ground or with something else
-						Contact[][] carContacts = getCarContacts();
-						for (int i = 0; i < physicsIterations; i++) {
-							world.tick();
-							// Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
-							tickCustomBodyInteractions(carContacts);
-							ticksFromLastTPSMeasure++;
+							// Check if the car contacts with the ground or with something else
+                            carContacts = getCarContacts();
+                            for (int i = 0; i < physicsIterations; i++) {
+								world.tick();
+								// Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
+								tickCustomBodyInteractions(carContacts);
+								ticksFromLastTPSMeasure++;
+							}
+							paint();
 						}
-	                    paint();
 	                    isBusy = false;
 
                         boolean leftWheelContacts = carContacts[0][0] != null;

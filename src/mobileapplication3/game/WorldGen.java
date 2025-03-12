@@ -357,22 +357,24 @@ public class WorldGen implements Runnable {
     private void resetPosition() { // world cycling
         lockGameThread("rsPos");
         isResettingPosition = true;
-        
-        int dx = -3000 - w.carbody.positionFX().xAsInt();
-        lastX = lastX + dx;
-        
-        Logger.log("resetting pos");
-        
-        moveLandscape(dx);
-        moveBodies(dx);
-        structLogger.moveXAllElements(dx);
-        w.barrierX += dx;
-        w.moveBg(dx);
-        
-        nextPointsCounterTargetX += dx;
 
-        isResettingPosition = false;
-        unlockGameThread("rsPos");
+        synchronized (w) {
+            int dx = -3000 - w.carbody.positionFX().xAsInt();
+            lastX = lastX + dx;
+
+            Logger.log("resetting pos");
+
+            moveLandscape(dx);
+            moveBodies(dx);
+            structLogger.moveXAllElements(dx);
+            w.barrierX += dx;
+            w.moveBg(dx);
+
+            nextPointsCounterTargetX += dx;
+
+            isResettingPosition = false;
+            unlockGameThread("rsPos");
+        }
         game.onPosReset();
     }
     
