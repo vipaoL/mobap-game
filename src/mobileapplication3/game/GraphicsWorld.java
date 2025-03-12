@@ -26,13 +26,12 @@ import utils.MobappGameSettings;
  */
 public class GraphicsWorld extends World {
 	
-	private static final int BIGSCREEN_SIDE = 480;
+	private static final int BIG_SCREEN_SIDE = 480;
 	private static final int CAR_COLLISION_LAYER = 1;
 
     public int colBg = 0x000000;
     public int colLandscape = 0x4444ff;
     int colBodies = 0xffffff;
-    int colFunctionalObjects = 0xff5500;
     int currColBg;
     int currColWheel;
     int currColLandscape = colLandscape;
@@ -59,16 +58,17 @@ public class GraphicsWorld extends World {
     
     public int carX = 0;
     public int carY = 0;
+    private GameplayCanvas game = null;
     public Body carbody;
-    public Body leftwheel;
-    public Body rightwheel;
+    public Body leftWheel;
+    public Body rightWheel;
     private Joint leftjoint;
 	private Joint rightjoint;
-    Random random = new Random();
+    private final Random random = new Random();
     
     // list of all bodies car touched (for falling platforms)
-    Vector waitingForDynamic = new Vector();
-    Vector waitingTime = new Vector();
+    public Vector waitingForDynamic = new Vector();
+    public Vector waitingTime = new Vector();
     long prevBodyTickTime = System.currentTimeMillis();
     public int barrierX = Integer.MIN_VALUE;
     public int lowestY;
@@ -83,17 +83,6 @@ public class GraphicsWorld extends World {
     }
 
     private void init() {
-    	bg = bgOverride;
-        
-        try {
-        	bg = bg || MobappGameSettings.isBGEnabled(false);
-        } catch (Throwable ex) {
-        	ex.printStackTrace();
-        }
-    	if (bg) {
-    		colBg = 0x150031;
-    	}
-        
         if (DebugMenu.whatTheGame) {
             currColWheel = 0x888888;
             colBg = 0x001155;
@@ -104,15 +93,18 @@ public class GraphicsWorld extends World {
         currColBodies = colBodies;
     }
 
+    public void setGame(GameplayCanvas game) {
+        this.game = game;
+    }
+
     public void removeBody(Body body) {
-        if (body != carbody && body != leftwheel && body != rightwheel) {
+        if (body != carbody && body != leftWheel && body != rightWheel) {
             super.removeBody(body);
         } else {
             try {
                 throw new IllegalArgumentException("Trying to remove a part of the car. Please report this bug");
             } catch (IllegalArgumentException ex) {
-                Logger.log(ex.getMessage());
-                ex.printStackTrace();
+                Logger.log(ex);
             }
         }
     }
@@ -120,13 +112,13 @@ public class GraphicsWorld extends World {
     public void addCar(int spawnX, int spawnY, int ang2FX) {
         carX = spawnX;
         carY = spawnY;
-        int carbodyLength = 240;
-        int carbodyHeight = 40;
+        int carBodyLength = 240;
+        int carBodyHeight = 40;
         int wheelRadius = 40;
         Shape carbodyShape;
         Shape wheelShape;
 
-        carbodyShape = Shape.createRectangle(carbodyLength, carbodyHeight);
+        carbodyShape = Shape.createRectangle(carBodyLength, carBodyHeight);
         carbodyShape.setMass(1);
         carbodyShape.setFriction(0);
         carbodyShape.setElasticity(100);
@@ -134,34 +126,33 @@ public class GraphicsWorld extends World {
         carbody = new Body(spawnX, spawnY, carbodyShape, true);
         carbody.setRotation2FX(ang2FX);
 
-        long longAng2FX = ang2FX;
-        int ang = (int) (longAng2FX * 360 / FXUtil.TWO_PI_2FX) + 1;
+        int ang = (int) (ang2FX * 360L / FXUtil.TWO_PI_2FX) + 1;
 
         wheelShape = Shape.createCircle(wheelRadius);
         wheelShape.setElasticity(100);
         wheelShape.setFriction(0);
         wheelShape.setMass(2);
         wheelShape.correctCentroid();
-        int lwX = spawnX - (carbodyLength / 2 - wheelRadius - 2) * Mathh.cos(ang) / 1000;
-        int lwY = spawnY + wheelRadius / 2 - (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
-        int rwX = spawnX + (carbodyLength / 2 - wheelRadius + 2) * Mathh.cos(ang) / 1000;
-        int rwY = spawnY + wheelRadius / 2 + (carbodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
-        leftwheel = new Body(lwX, lwY, wheelShape, true);
-        rightwheel = new Body(rwX, rwY, wheelShape, true);
+        int lwX = spawnX - (carBodyLength / 2 - wheelRadius - 2) * Mathh.cos(ang) / 1000;
+        int lwY = spawnY + wheelRadius / 2 - (carBodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
+        int rwX = spawnX + (carBodyLength / 2 - wheelRadius + 2) * Mathh.cos(ang) / 1000;
+        int rwY = spawnY + wheelRadius / 2 + (carBodyLength / 2 - wheelRadius) * Mathh.sin(ang) / 1000;
+        leftWheel = new Body(lwX, lwY, wheelShape, true);
+        rightWheel = new Body(rwX, rwY, wheelShape, true);
 
         super.removeBody(carbody);
-        super.removeBody(leftwheel);
-        super.removeBody(rightwheel);
+        super.removeBody(leftWheel);
+        super.removeBody(rightWheel);
 
         addBody(carbody);
         carbody.addCollisionLayer(CAR_COLLISION_LAYER);
-        addBody(leftwheel);
-        leftwheel.addCollisionLayer(CAR_COLLISION_LAYER);
-        addBody(rightwheel);
-        rightwheel.addCollisionLayer(CAR_COLLISION_LAYER);
+        addBody(leftWheel);
+        leftWheel.addCollisionLayer(CAR_COLLISION_LAYER);
+        addBody(rightWheel);
+        rightWheel.addCollisionLayer(CAR_COLLISION_LAYER);
 
-        leftjoint = new Joint(carbody, leftwheel, FXVector.newVector(-carbodyLength / 2 + wheelRadius - 2, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
-        rightjoint = new Joint(carbody, rightwheel, FXVector.newVector(carbodyLength / 2 - wheelRadius + 2, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
+        leftjoint = new Joint(carbody, leftWheel, FXVector.newVector(-carBodyLength / 2 + wheelRadius - 2, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
+        rightjoint = new Joint(carbody, rightWheel, FXVector.newVector(carBodyLength / 2 - wheelRadius + 2, wheelRadius * 2 / 3), FXVector.newVector(0, 0), false);
         addConstraint(leftjoint);
         addConstraint(rightjoint);
         
@@ -171,13 +162,13 @@ public class GraphicsWorld extends World {
     public void destroyCar() {
     	removeConstraint(leftjoint);
     	removeConstraint(rightjoint);
-    	leftwheel.removeCollisionLayer(CAR_COLLISION_LAYER);
+    	leftWheel.removeCollisionLayer(CAR_COLLISION_LAYER);
     	carbody.removeCollisionLayer(CAR_COLLISION_LAYER);
-    	rightwheel.removeCollisionLayer(CAR_COLLISION_LAYER);
+    	rightWheel.removeCollisionLayer(CAR_COLLISION_LAYER);
     	int forceFX = -FXUtil.ONE_FX * 500;
-    	leftwheel.applyMomentum(new FXVector(-forceFX, forceFX));
-    	rightwheel.applyMomentum(new FXVector(forceFX, forceFX));
-    	leftwheel.shape().setElasticity(100);
+    	leftWheel.applyMomentum(new FXVector(-forceFX, forceFX));
+    	rightWheel.applyMomentum(new FXVector(forceFX, forceFX));
+    	leftWheel.shape().setElasticity(100);
     	carbody.shape().setElasticity(100);
     	getLandscape().getShape().setElasticity(200);
     }
@@ -210,7 +201,7 @@ public class GraphicsWorld extends World {
                 Body[] bodies = getBodies();
                 Body body = bodies[i];
                 if (body.positionFX().xAsInt() < barrierX || body.positionFX().yAsInt() > lowestY + 2000) {
-                    if (body != carbody && body != leftwheel && body != rightwheel) {
+                    if (body != carbody && body != leftWheel && body != rightWheel) {
                         removeBody(body);
                     }
                 }
@@ -239,7 +230,9 @@ public class GraphicsWorld extends World {
             if (structuresData != null) {
                 try {
                     drawLandscape(g, structuresData, structureRingBufferOffset, structureCount);
-                } catch (Exception ex) { }
+                } catch (Exception ex) {
+                    Logger.log(ex);
+                }
             } else {
                 drawLandscape(g);
             }
@@ -251,17 +244,17 @@ public class GraphicsWorld extends World {
             int h = scHeight / 24;
             g.drawRect(scWidth / 2 - l / 2, scHeight * 2 / 3, l, h);
             g.fillRect(scWidth / 2 - l / 2, scHeight * 2 / 3, l/5, h);
-            ex.printStackTrace();
+            Logger.log(ex);
         }
         //g.fillTriangle(xToPX(carX+viewField/2-10), 0, xToPX(carX+viewField/2), scHeight, xToPX(carX+viewField/2+10), 0);
     }
     
     private void drawBg(Graphics g) {
     	// some very boring code
-        if (GameplayCanvas.points == 292) {
+        if (game.points == 292) {
             currColBg = 0x2f92ff;
             currColLandscape = 0xffffff;
-        } else if (GameplayCanvas.points == 293) {
+        } else if (game.points == 293) {
             currColBg = colBg;
             currColLandscape = colLandscape;
         }
@@ -314,7 +307,7 @@ public class GraphicsWorld extends World {
         Body[] bodies = getBodies();
         int bodyCount = getBodyCount();
         for (int i = 0; i < bodyCount; i++) {
-            if (bodies[i] != leftwheel && bodies[i] != rightwheel) {
+            if (bodies[i] != leftWheel && bodies[i] != rightWheel) {
                 UserData userData = bodies[i].getUserData();
                 if (userData instanceof MUserData) {
                     MUserData mUserData = (MUserData) userData;
@@ -406,8 +399,8 @@ public class GraphicsWorld extends World {
     }
 
     private void drawCar(Graphics g) {
-        drawWheel(g, leftwheel);
-        drawWheel(g, rightwheel);
+        drawWheel(g, leftWheel);
+        drawWheel(g, rightWheel);
     }
 
     private void drawLandscape(Graphics g) {
@@ -562,7 +555,7 @@ public class GraphicsWorld extends World {
 
     private void drawWheel(Graphics g, Body b) {
         int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
-        if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] == null) {
+        if (game.currentEffects[GameplayCanvas.EFFECT_SPEED] == null) {
             currColWheel = currColBg;
             if (DebugMenu.discoMode) {
                 currColWheel = random.nextInt(16777216);
@@ -665,11 +658,16 @@ public class GraphicsWorld extends World {
         zoomBase = 6000 * 240 / scMinSide;
         calcZoomOut();
         bgLineThickness = Math.max(w, h)/250;
+
+        bg = bgOverride;
         try {
-        	betterGraphics = MobappGameSettings.isBetterGraphicsEnabled(Math.max(scWidth, scHeight) >= BIGSCREEN_SIDE);
-        	bg = bg || MobappGameSettings.isBGEnabled(false);
+            betterGraphics = MobappGameSettings.isBetterGraphicsEnabled(Math.max(scWidth, scHeight) >= BIG_SCREEN_SIDE);
+            bg = bg || MobappGameSettings.isBGEnabled(false);
         } catch (Throwable ex) {
-        	ex.printStackTrace();
+            Logger.log(ex);
+        }
+        if (bg) {
+            colBg = 0x150031;
         }
     }
 
@@ -679,10 +677,10 @@ public class GraphicsWorld extends World {
         } else {
             zoomOut = (1000 * carY / scMinSide - 1000);
             int zoomBase = this.zoomBase;
-            if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED] != null) {
-                if (GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][0] > 0) {
-                    zoomOut = zoomOut * GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
-                    zoomBase = zoomBase * GameplayCanvas.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
+            if (game.currentEffects[GameplayCanvas.EFFECT_SPEED] != null) {
+                if (game.currentEffects[GameplayCanvas.EFFECT_SPEED][0] > 0) {
+                    zoomOut = zoomOut * game.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
+                    zoomBase = zoomBase * game.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
                 }
             }
             if (zoomOut < 1) {

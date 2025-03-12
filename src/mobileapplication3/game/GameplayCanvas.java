@@ -36,27 +36,25 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
 	private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2;
+	private static final int GAME_OVER_DAMAGE = 8;
     
     // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
     private int pauseDelay = PAUSE_DELAY;
-    private boolean previousPauseState = false;
+    private boolean wasPaused = false;
     
     // state and mode
 	private int gameMode = GAME_MODE_ENDLESS;
-    private static boolean isFirstStart = true; // for displaying hints only on first start
-    public static boolean isBusy = false;
-    public static boolean uninterestingDebug = false;
-    public static boolean shouldWait = false;
-    public static boolean isWaiting = false;
+    private static boolean isFirstStart = true; // show hints only on first start
+    public boolean uninterestingDebug = false;
+    public boolean shouldWait = false;
+    public boolean isWaiting = false;
     private boolean isWorldLoaded = false;
     private int hintVisibleTimer = 120; // in ticks
-    private boolean limitFPS = false;
     private boolean showFPS = false;
     private boolean battIndicator = false;
     private int batLevel;
-    private int physicsIterations;
-    
+
     private boolean paused = false;
     private boolean stopped = false;
     private boolean isStopping = false;
@@ -67,6 +65,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int scW, scH;
     private int maxScSide;
 
+	// car state
     private int carVelocitySqr;
     private int carAngle = 0;
 	public int carSpawnX = 100;
@@ -83,6 +82,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int fps;
     private int tps;
     private String statusMessage = null;
+
+	// debug
+	private int debugTextOffset;
     
     // touchscreen
     private int pointerX = 0, pointerY = 0;
@@ -90,23 +92,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private boolean menuTouched = false;
     
     // counters
-    public static int points = 0;
-    private int gameoverCountdown;
-    private static final int GAME_OVER_COUNTDOWN_STEPS = 8;
-    public static int timeFlying = 10;
+    public int points = 0;
+    private int damage;
+    public int timeFlying = 10;
     private int ticksMotorTurnedOff = 50;
     private long lastBigTickTime;
     private int bgTick = 0;
     private int framesFromLastFPSMeasure = 0;
     private int ticksFromLastTPSMeasure = 0;
     
-    public static short[][] currentEffects = new short[1][];
-    
+    public short[][] currentEffects = new short[1][];
+
     // fonts
     private static final Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-    private static final int sFontH = smallfont.getHeight();
     private static final Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    //private static final int lFontH = largefont.getHeight();
     private Font currentFont = largefont;
     private int currentFontH = currentFont.getHeight();
     
@@ -129,12 +128,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public GameplayCanvas(GraphicsWorld w) {
     	this();
         world = w;
+		world.setGame(this);
     }
 
 	public GameplayCanvas(IUIComponent prevScreen) {
 		this();
 		this.prevScreen = prevScreen;
 		world = new GraphicsWorld();
+		world.setGame(this);
 	}
 
 	public GameplayCanvas addDeferredStructure(short[][] structureData) {
@@ -166,10 +167,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         gameThread.start();
     }
     
-    void reset() {
+    private void reset() {
         log("resetting the world");
         points = 0;
-        gameoverCountdown = 0;
+        damage = 0;
 		WorldGen.isEnabled = gameMode == GAME_MODE_ENDLESS;
         if (WorldGen.isEnabled) {
         	log("starting wg");
@@ -209,6 +210,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         log("creating world");
         // there siemens c65 stucks if obfuscation is enabled
         world = new GraphicsWorld();
+		world.setGame(this);
 
         setLoadingProgress(30);
         log("setting the world");
@@ -220,7 +222,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         try {
             log("game thread started");
 
-            isBusy = false;
             shouldWait = false;
             isWaiting = false;
             timeFlying = 10;
@@ -239,11 +240,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     	        showFPS = MobappGameSettings.isFPSShown(showFPS);
     	        battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
             } catch (Throwable ex) {
-    			ex.printStackTrace();
+    			Platform.showError("Can't read settings", ex);
     		}
 			dynamicPhysicsPrecision = physicsIterationsSetting == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
 			lockPhysicsPrecision = !dynamicPhysicsPrecision && physicsIterationsSetting != MobappGameSettings.AUTO_PHYSICS_PRECISION;
-			physicsIterations = physicsIterationsSetting;
+            int physicsIterations = physicsIterationsSetting;
 			if (physicsIterations <= 0) {
 				physicsIterations = 2;
 			}
@@ -275,9 +276,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             }
             
             if (DebugMenu.simulationMode) {
-                world.rightwheel.setDynamic(false);
+                world.rightWheel.setDynamic(false);
                 world.carbody.setDynamic(false);
-                world.leftwheel.setDynamic(false);
+                world.leftWheel.setDynamic(false);
             }
 
             setLoadingProgress(100);
@@ -327,10 +328,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                         // Adjust physics engine tick time to current TPS
 	                    if (!wasPaused) {
 	                        tickTime = (int) (System.currentTimeMillis() - start);
-	                        if (!limitFPS) {
-	                            world.setTimestepFX(Math.max(1, baseTimestepFX * Math.min((tickTime + prevTickTime + 1) / 2, 100) / 50 / physicsIterations));
-	                        }
-	                    } else {
+                            world.setTimestepFX(Math.max(1, baseTimestepFX * Math.min((tickTime + prevTickTime + 1) / 2, 100) / 50 / physicsIterations));
+                        } else {
 	                        wasPaused = false;
 	                    }
 
@@ -338,9 +337,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                    start = System.currentTimeMillis();
 	
 	                    // Tick and draw
-	                    isBusy = true;
 						Contact[][] carContacts;
-						synchronized (world) {
+						synchronized (worldgen.lock) {
 							setSimulationArea();
 
 							// Check if the car contacts with the ground or with something else
@@ -353,14 +351,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 							}
 							paint();
 						}
-	                    isBusy = false;
 
                         boolean leftWheelContacts = carContacts[0][0] != null;
                         boolean rightWheelContacts = carContacts[1][0] != null;
                         boolean carBodyContacts = carContacts[2][0] != null;
 	                    
 	                    // some things should be performed once at a fixed interval (50ms, or 20 times per second)
-	                    boolean bigTick = limitFPS || start - lastBigTickTime > TICK_DURATION;
+	                    boolean bigTick = start - lastBigTickTime > TICK_DURATION;
 	                    if (bigTick) {
 		                    if ((!leftWheelContacts && !rightWheelContacts)) {
 		                        timeFlying += 1;
@@ -400,8 +397,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                        // move the car to the right in the simulation mode
 	                        if (DebugMenu.simulationMode) {
 	                            world.carbody.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-	                            world.leftwheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-	                            world.rightwheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+	                            world.leftWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+	                            world.rightWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
 	                        }
 	
 	                        // tick effect timers (speed, slowness, ...)
@@ -417,7 +414,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                                 bigTickN++;
                             } else {
 	                            bigTickN = 0;
-	                            tickGameOverCheck();
+	                            tickDamage();
 	                            if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD) {
 	                            	batLevel = Battery.getBatteryLevel();
 	                            	lastBattUpdateTime = System.currentTimeMillis();
@@ -511,7 +508,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 										}
 	                                }
 	                            } catch (NullPointerException ex) {
-	                                ex.printStackTrace();
+	                                Logger.log(ex);
 	                            }
 	                        }
 	                    }
@@ -522,7 +519,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                        try {
 	                            Thread.sleep(1);
 	                        } catch (InterruptedException ex) {
-	                            ex.printStackTrace();
+	                            Logger.log(ex);
 	                        }
 	                    }
 	
@@ -553,44 +550,42 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                    	}
 	                    }
 	                } catch (InterruptedException e) {
-	                    e.printStackTrace();
+	                    Logger.log(e);
 	                }
             	} catch (Exception ex) {
             		Logger.log(ex);
             	}
             }
         } catch (NullPointerException ex) {
-            log(ex.toString());
-            ex.printStackTrace();
+			Platform.showError(ex);
         }
         Logger.log("game thread stopped");
     }
 
-	private void tickGameOverCheck() {
-		// start the final countdown and open main menu if the car
-		// lies upside down or fell out of the world
+	private void tickDamage() {
+		// add damage if the car lies upside down or fell out of the world
 		int lowestY = getLowestSafeY();
 		feltUnderTheWorld = world.carY > 2000 + lowestY;
 		if (feltUnderTheWorld || (carAngle > 140 && carAngle < 220 && world.carbody.getContacts()[0] != null) || gameOver) {
 		    if (uninterestingDebug) {
-		        gameoverCountdown = 0;
+		        damage = 0;
 		    }
-		    if (gameoverCountdown < GAME_OVER_COUNTDOWN_STEPS) {
-		        gameoverCountdown++;
+		    if (damage < GAME_OVER_DAMAGE) {
+		        damage++;
 		    } else {
 		    	gameOver();
 		    }
 		} else {
-		    if (gameoverCountdown > 0) {
-		        gameoverCountdown--;
+		    if (damage > 0) {
+		        damage--;
 		    } else {
-		        gameoverCountdown = 0;
+		        damage = 0;
 		    }
 		}
 	}
     
     private int convertByTimestep(int valueInDefaultTimestep) {
-    	return limitFPS ? valueInDefaultTimestep : valueInDefaultTimestep / TICK_DURATION * tickTime;
+    	return valueInDefaultTimestep / TICK_DURATION * tickTime;
     }
 
 	private int getLowestSafeY() {
@@ -604,12 +599,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     
     private Contact[][] getCarContacts() {
 		return new Contact[][] {
-			world.getContactsForBody(world.leftwheel),
-			world.getContactsForBody(world.rightwheel),
+			world.getContactsForBody(world.leftWheel),
+			world.getContactsForBody(world.rightWheel),
 			world.getContactsForBody(world.carbody)};
 	}
 
-	protected void tickCustomBodyInteractions(Contact[][] carContacts) {
+	private void tickCustomBodyInteractions(Contact[][] carContacts) {
     	// if touched an interactive object (falling platform, effect plate)
         for (int j = 0; j < carContacts.length; j++) {
             for (int i = 0; i < carContacts[j].length; i++) {
@@ -656,7 +651,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
     
-    protected void tickEffects() {
+    private void tickEffects() {
     	for (int i = 0; i < currentEffects.length; i++) {
             if (currentEffects[i] != null) {
                 if (currentEffects[i][0] > 0) {
@@ -682,7 +677,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 			world.tick();
 		}
     	tickCustomBodyInteractions(getCarContacts());
-    	tickGameOverCheck();
+    	tickDamage();
     	if (worldgen != null) {
     		worldgen.tick();
     	}
@@ -704,12 +699,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     	return true;
     }
     
-    public void drawBg(Graphics g) {
+    private void drawBg(Graphics g) {
     	g.setColor(0, 0, 0);
         g.fillRect(0, 0, maxScSide, maxScSide);
     }
     
-    public void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
+    protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
     	drawBg(g);
         if (loadingProgress < 100) {
             drawLoading(g);
@@ -724,7 +719,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
 
-    public synchronized void paint() {
+    private synchronized void paint() {
     	if (!gameOver) {
 	    	try {
 	    		Graphics g = getUGraphics();
@@ -740,11 +735,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             return " ";
         } else if (body == world.getLandscape().getBody()) {
             return "GND";
-        } else if (body == world.leftwheel) {
+        } else if (body == world.leftWheel) {
             return "Lw";
         } else if (body == world.carbody) {
             return "Cb";
-        } else if (body == world.rightwheel) {
+        } else if (body == world.rightWheel) {
             return "Rw";
         } else {
             return "?";
@@ -752,16 +747,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private String contactsToString(Contact[] contacts) {
-        String ret = " ";
+        StringBuilder ret = new StringBuilder(" ");
         for (int i = 0; i < contacts.length; i++) {
             if (contacts[i] != null) {
-                ret += nameBody(contacts[i].body1());
-                ret += "-";
-                ret += nameBody(contacts[i].body2());
+                ret.append(nameBody(contacts[i].body1()));
+                ret.append("-");
+                ret.append(nameBody(contacts[i].body2()));
             }
-            ret += " ";
+            ret.append(" ");
         }
-        return ret;
+        return ret.toString();
     }
     
     // point counter, very beautiful pause menu,
@@ -771,27 +766,24 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         if (isFirstStart && hintVisibleTimer > 0) {
             int color = 255 * hintVisibleTimer / 120;
             g.setColor(color/4, color/2, color/4);
-            if (Logger.isOnScreenLogEnabled()) {
-                //g.setColor(color/2, color/2, color/2);
-            }
 			int btnW = scW/3;
 			int btnH = scH/6;
 			int btnRoundingD = Math.min(btnW, btnH) / 4;
             g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
             g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
             g.setColor(color/4, color/4, color);
-            g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL));
+            setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL), g);
             for (int i = 0; i < MENU_HINT.length; i++) {
-                g.drawString(MENU_HINT[i], scW/6, i * sFontH + scH / 12 - sFontH*MENU_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
+                g.drawString(MENU_HINT[i], scW/6, i * currentFontH + scH / 12 - currentFontH*MENU_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
             }
             for (int i = 0; i < PAUSE_HINT.length; i++) {
-                g.drawString(PAUSE_HINT[i], scW*5/6, i * sFontH + scH / 12 - sFontH*PAUSE_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
+                g.drawString(PAUSE_HINT[i], scW*5/6, i * currentFontH + scH / 12 - currentFontH*PAUSE_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
             }
         }
         
         // draw some debug info if debug is enabled
         setFont(smallfont, g);
-        int hudLeftTextOffset = 0;
+        debugTextOffset = 0;
         if (battIndicator) {
         	if (batLevel < 30) {
         		g.setColor(0xffff00);
@@ -802,22 +794,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         	} else {
         		g.setColor(0x00ff00);
         	}
-        	
-            g.drawString("BAT: " + batLevel + "%", 0, hudLeftTextOffset, 0);
-            hudLeftTextOffset += currentFontH;
-        }
+
+			drawDebugText(g, "BAT: " + batLevel + "%");
+		}
 
         g.setColor(0xffffff);
         if (DebugMenu.showContacts) {
             Contact[][] contacts = {
-                    world.getContactsForBody(world.leftwheel),
+                    world.getContactsForBody(world.leftWheel),
                     world.getContactsForBody(world.carbody),
-                    world.getContactsForBody(world.rightwheel)};
+                    world.getContactsForBody(world.rightWheel)};
             String[] names = {"LW", "CB", "RW"};
             for (int i = 0; i < contacts.length; i++) {
-                g.drawString(names[i] + contactsToString(contacts[i]), 0, hudLeftTextOffset, 0);
-                hudLeftTextOffset += currentFontH;
-            }
+				drawDebugText(g, names[i] + contactsToString(contacts[i]));
+			}
         }
         if (DebugMenu.isDebugEnabled) {
             // speedometer
@@ -833,11 +823,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                         g.setColor(255, 0, 0);
                         break;
                 }
-                g.fillRect(0, hudLeftTextOffset, currentFontH * 5, currentFontH);
+                g.fillRect(0, debugTextOffset, currentFontH * 5, currentFontH);
                 g.setColor(255, 255, 255);
-                g.drawString(String.valueOf(carVelocitySqr), 0, hudLeftTextOffset, 0);
-                hudLeftTextOffset += currentFontH;
-            }
+				drawDebugText(g, String.valueOf(carVelocitySqr));
+			}
             // car angle
             if (DebugMenu.showAngle) {
                 if (timeFlying > 0) {
@@ -845,16 +834,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 } else {
                     g.setColor(255, 255, 255);
                 }
-                g.drawString(String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())), 0, hudLeftTextOffset, 0);
-                hudLeftTextOffset += currentFontH;
-            }
+				drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
+			}
         }
         // show coordinates of car if enabled
         if (DebugMenu.coordinates) {
             g.setColor(127, 127, 127);
-            g.drawString(world.carX + " " + world.carY, 0, hudLeftTextOffset, 0); 
-            hudLeftTextOffset += currentFontH;
-        }
+			drawDebugText(g, world.carX + " " + world.carY);
+		}
 
         if (showFPS) {
             g.setColor(0, 255, 0);
@@ -864,50 +851,40 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     g.setColor(255, 0, 0);
                 }
             }
-            g.drawString("FPS:" + fps + " TPS:" + tps, 0, hudLeftTextOffset, 0);
-            hudLeftTextOffset += currentFontH;
-        }
+			drawDebugText(g, "FPS:" + fps + " TPS:" + tps);
+		}
 
         try {
             if (DebugMenu.isDebugEnabled) {
-                switch (WorldGen.currStep) {
-                    case 0:
+                switch (worldgen.currStep) {
+					case WorldGen.STEP_IDLE:
                         g.setColor(0, 255, 0);
                         break;
-                    case 1:
+					case WorldGen.STEP_ADD:
                         g.setColor(127, 127, 255);
                         break;
-                    case 2:
-                        g.setColor(127, 127, 0);
-                        break;
-                    case 3:
+					case WorldGen.STEP_RES_POS:
                         g.setColor(255, 0, 0);
                         break;
-                    case 4:
-                        g.setColor(127, 0, 191);
-                        break;
-                    case 5:
-                        g.setColor(127, 63, 0);
+					case WorldGen.STEP_CLEAN_SGS:
+                        g.setColor(127, 127, 0);
                         break;
                     default:
                         break;
                 }
-                g.drawString("wg: mspt" + WorldGen.mspt + " step:" + WorldGen.currStep, 0, hudLeftTextOffset, 0);
-                hudLeftTextOffset += currentFontH;
-                
-                g.drawString("sgs" + worldgen.getSegmentCount() + " bds" + world.getBodyCount(), 0, hudLeftTextOffset, 0);
-                hudLeftTextOffset += currentFontH;
-            }
-        } catch(NullPointerException ex) { }
+				drawDebugText(g, "wg: mspt" + worldgen.mspt + " step:" + worldgen.currStep);
+				drawDebugText(g, "sgs" + worldgen.getSegmentCount() + " bds" + world.getBodyCount());
+			}
+        } catch (NullPointerException ignored) { }
 
         // game over screen
-        if (gameoverCountdown > 1 && !gameOver) {
+        if (damage > 1 && !gameOver) {
             g.setFont(largefont);
             g.setColor(255, 0, 0);
             g.drawString("!", scW / 2, scH / 3 + currentFontH / 2, Graphics.HCENTER | Graphics.TOP);
-            g.setColor(0, 0, Math.min(127 * (GAME_OVER_COUNTDOWN_STEPS - gameoverCountdown) / GAME_OVER_COUNTDOWN_STEPS, 255));
-            g.fillRect(0, 0, scW, scH*gameoverCountdown/GAME_OVER_COUNTDOWN_STEPS/2 + 1);
-            g.fillRect(0, scH - scH*gameoverCountdown/GAME_OVER_COUNTDOWN_STEPS/2, scW, scH - 1);
+            g.setColor(0, 0, Math.min(127 * (GAME_OVER_DAMAGE - damage) / GAME_OVER_DAMAGE, 255));
+            g.fillRect(0, 0, scW, scH* damage / GAME_OVER_DAMAGE /2 + 1);
+            g.fillRect(0, scH - scH* damage / GAME_OVER_DAMAGE /2, scW, scH - 1);
         }
         
         // score counter and debug posReset indicator
@@ -949,8 +926,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             g.drawString("PAUSED", scW / 2, scH / 3 + currentFontH / 2, Graphics.HCENTER | Graphics.TOP);
         }
     }
-    
-    private void drawLoading(Graphics g) {
+
+	private void drawDebugText(Graphics g, String str) {
+		g.drawString(str, 0, debugTextOffset, 0);
+		debugTextOffset += currentFontH;
+	}
+
+	private void drawLoading(Graphics g) {
         g.setColor(255, 255, 255);
         int l = scW * 2 / 3;
         int h = scH / 24;
@@ -960,7 +942,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         	g.drawString(statusMessage, this.w/2, this.h, HCENTER | BOTTOM);
         }
     }
-    public void setLoadingProgress(int percents) {
+    private void setLoadingProgress(int percents) {
         loadingProgress = percents;
         Logger.log(percents + "%");
         paint();
@@ -981,7 +963,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
     
-    public void giveEffect(short[] data) {
+    private void giveEffect(short[] data) {
         int id = data[0];
         int dataLength = data.length - 1;
         currentEffects[id] = new short[dataLength];
@@ -990,7 +972,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
     
-    public void gameOver() {
+    private void gameOver() {
     	if (gameOver) {
     		return;
     	}
@@ -1027,15 +1009,15 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     	return (r << 16) + (g << 8) + b;
     }
     
-    public int getColorRedComponent(int color) {
+    private int getColorRedComponent(int color) {
     	return (color >> 16) & 0xff;
     }
     
-    public int getColorGreenComponent(int color) {
+    private int getColorGreenComponent(int color) {
     	return (color >> 8) & 0xff;
     }
     
-    public int getColorBlueComponent(int color) {
+    private int getColorBlueComponent(int color) {
     	return color & 0xff;
     }
 
@@ -1056,13 +1038,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 					try {
 						Thread.sleep(delay);
 					} catch (InterruptedException ex) {
+						Logger.log(ex);
 					}
 				}
 
 				isStopping = true;
 				stopped = true;
 				isFirstStart = false;
-				uninterestingDebug = false;
 
 				if (gameMode == GAME_MODE_ENDLESS && !(DebugMenu.isDebugEnabled || DebugMenu.simulationMode)) {
 					new Thread(new Runnable() {
@@ -1083,8 +1065,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     try {
                         gameThread.join();
                         successed = true;
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    } catch (InterruptedException ex) {
+						Logger.log(ex);
                     }
                 }
                 log("game: stopped");
@@ -1105,7 +1087,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
     
-    void resume() {
+    private void resume() {
         paused = false;
         if (worldgen != null) {
             worldgen.resume();
@@ -1116,27 +1098,26 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 		posResetIndicator = 255;
 	}
 
-    // also used as pause
     public void onHide() {
-        log("hideNotify");
+        log("onHide");
         paused = true;
         if (worldgen != null) {
             worldgen.pause();
         }
         // to prevent siemens' bug that calls hideNotify right after showing canvas
         if (pauseDelay > 0) {
-            if (previousPauseState == false) {
+            if (!wasPaused) {
                 resume();
             }
         }
     }
-    
+
     public void onShow() {
-        log("showNotify");
+        log("onShow");
         
         // to prevent siemens' bug that calls hideNotify right after showing canvas
         pauseDelay = PAUSE_DELAY;
-        previousPauseState = paused;
+        wasPaused = paused;
     }
     
     protected void onSetBounds(int x0, int y0, int w, int h) {
@@ -1184,17 +1165,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 			pauseButtonPressed();
 		} else if (keyCode == Keys.KEY_STAR || gameAction == Keys.GAME_B) {
 			pauseButtonPressed();
-			// no cheats. only pause
-			/*if (DebugMenu.isDebugEnabled && DebugMenu.cheat) {
-				FXVector pos = w.carbody.positionFX();
-				int carX = pos.xAsInt();
-				int carY = pos.yAsInt();
-				worldgen.line(carX - 200, carY + 200, carX + 2000, carY + 0);
-			}*/
 		} else if (keyCode == Keys.KEY_NUM6) {
 			world.destroyCar();
 		} else {
-			// if not an action button, turn on the motor
+			// any other button turns the motor on
 			motorTurnedOn = true;
 		}
 
@@ -1225,8 +1199,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
         if (pauseTouched || menuTouched) {
             if (x - pointerX > 3 || y - pointerY > 3) {
-                log((x - pointerX) + "dx/dy" + (y - pointerY));
-                log("btnPress cancelled:dragged");
                 pauseTouched = false;
                 menuTouched = false;
             }
@@ -1253,7 +1225,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 		return true;
 	}
 
-    class FlipCounter {
+    private class FlipCounter {
         int step = 0;
         boolean flipDirection = false;
         boolean prevFlipDirection = false;
@@ -1263,7 +1235,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 return;
             }
             flipDirection = world.carbody.rotationVelocity2FX() >= 0;
-            if (flipDirection != prevFlipDirection || GameplayCanvas.timeFlying < 1 && !GameplayCanvas.uninterestingDebug) {
+            if (flipDirection != prevFlipDirection || timeFlying < 1 && !uninterestingDebug) {
                 step = 0;
             }
             prevFlipDirection = flipDirection;
@@ -1275,10 +1247,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 if (step > 1) {
                     if (flipDirection) {
                         if ((step - 1) % 4 == 0) {
-                            onFlipDone();
+                            afterFlip();
                         }
                     } else {
-                        onFlipDone();
+                        afterFlip();
                     }
                 }
             } else if (!isInNormalPos && step % 2 != 0) {
@@ -1286,8 +1258,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             }
         }
 
-        // blink point counter on flip and increment the score
-        public void onFlipDone() {
+        // blink point counter after flip and increment the score
+        public void afterFlip() {
             flipIndicator = 0;
             points++;
         }

@@ -16,8 +16,6 @@ import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
-import mobileapplication3.platform.Utils;
-import mobileapplication3.platform.ui.Graphics;
 import utils.MgStruct;
 
 /**
@@ -25,11 +23,12 @@ import utils.MgStruct;
  * @author vipaol
  */
 public class WorldGen implements Runnable {
+    private static final int BUILTIN_STRUCTS_NUMBER = 6;
+    private static final int FLOOR_RANDOM_WEIGHT = 4;
+
+    public final Object lock = new Object();
 
     public static boolean isEnabled = false;
-    
-    int stdStructsNumber = 6;
-    int floorWeightInRandom = 4;
     
     private int prevStructRandomId;
     private int nextStructRandomId;
@@ -41,22 +40,20 @@ public class WorldGen implements Runnable {
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX;
     int tick = 0;
-    public static int mspt;
+    public int mspt;
     
     private boolean paused = false;
     private boolean needSpeed = true;
-    private int lock;
-    private boolean gameTrLockedByAdding = false;
     
     private final Random rand;
-    private GameplayCanvas game;
+    private final GameplayCanvas game;
     private final GraphicsWorld w;
     private final Landscape landscape;
     private StructLog structLogger;
     private Thread wgThread = null;
     
     // wg activity indicator
-    public static int currStep;
+    public int currStep;
     public static final int STEP_IDLE = 0;
     public static final int STEP_ADD = 1;
     public static final int STEP_RES_POS = 2;
@@ -64,10 +61,8 @@ public class WorldGen implements Runnable {
     
     
     public WorldGen(GameplayCanvas game, GraphicsWorld w) {
-        lock = 0;
         w.lowestY = 2000;
         Logger.log("wg:starting");
-        lockGameThread("init");
         this.game = game;
         this.w = w;
         landscape = w.getLandscape();
@@ -76,7 +71,6 @@ public class WorldGen implements Runnable {
         Logger.log("wg:loading mgstruct");
         new MgStruct();
         reset();
-        unlockGameThread("init");
         wgThread = new Thread(this, "wg");
         wgThread.start();
     }
@@ -108,21 +102,15 @@ public class WorldGen implements Runnable {
             if ((w.carX + w.viewField*2 > lastX)) {
                 if ((w.carX + w.viewField > lastX)) {
                     needSpeed = true;
-                    if (!gameTrLockedByAdding) {
-                        lockGameThread("addSt");
-                    }
-                    gameTrLockedByAdding = true;
-                    Logger.log("wg can't keep up, locking game thread;");
+                    game.shouldWait = true;
+                    Logger.log("wg can't keep up, locking game thread...");
                 }
                 currStep = STEP_ADD;
                 placeNext();
             } else {
-                if (gameTrLockedByAdding) {
-                    gameTrLockedByAdding = false;
-                    unlockGameThread("addSt");
-                }
                 if (!structLogger.shouldRmFirstStruct()) {
                     needSpeed = false;
+                    game.shouldWait = false;
                 }
             }
             
@@ -132,14 +120,14 @@ public class WorldGen implements Runnable {
                 * The larger the coordinates, the weirder the physics engine behaves.
                 * So we need to move all structures and bodies to the left from time to time.
                 */
-                if (w.carX > 3000 && (GameplayCanvas.timeFlying > -1 || GameplayCanvas.uninterestingDebug)) {
+                if (w.carX > 3000 && (game.timeFlying > -1 || game.uninterestingDebug)) {
                     resetPosition();
                 }
 
                 w.refreshCarPos();
                 if (w.carX > nextPointsCounterTargetX) {
                     nextPointsCounterTargetX += POINTS_DIVIDER;
-                    GameplayCanvas.points++;
+                    game.points++;
                 }
             }
 
@@ -165,7 +153,7 @@ public class WorldGen implements Runnable {
         if (DebugMenu.mgstructOnly) {
             idsCount = MgStruct.loadedStructsNumber;
         } else {
-            idsCount = stdStructsNumber + floorWeightInRandom + MgStruct.loadedStructsNumber;
+            idsCount = BUILTIN_STRUCTS_NUMBER + FLOOR_RANDOM_WEIGHT + MgStruct.loadedStructsNumber;
         }
         while (nextStructRandomId == prevStructRandomId
                 || (DebugMenu.whatTheGame && (nextStructRandomId < 6 || nextStructRandomId > 9))) {
@@ -174,7 +162,7 @@ public class WorldGen implements Runnable {
         //nextStructRandomId = 21;
         prevStructRandomId = nextStructRandomId;
         if (DebugMenu.mgstructOnly) {
-            nextStructRandomId+=stdStructsNumber + floorWeightInRandom;
+            nextStructRandomId+= BUILTIN_STRUCTS_NUMBER + FLOOR_RANDOM_WEIGHT;
         }
 
         int[] structData; // [endX, endY, lineCount]
@@ -219,7 +207,7 @@ public class WorldGen implements Runnable {
                         structData = StructurePlacer.slantedDottedLine(w, isResettingPosition, lastX, lastY, n);
                         break;
                     default:
-                        if (Mathh.strictIneq(stdStructsNumber - 1,/*<*/ nextStructRandomId,/*<*/ stdStructsNumber + floorWeightInRandom)) {
+                        if (Mathh.strictIneq(BUILTIN_STRUCTS_NUMBER - 1,/*<*/ nextStructRandomId,/*<*/ BUILTIN_STRUCTS_NUMBER + FLOOR_RANDOM_WEIGHT)) {
                             structData = StructurePlacer.floor(w, isResettingPosition, lastX, lastY, 400 + rand.nextInt(10) * 100, (rand.nextInt(7) - 3) * 100);
                         } else {
                             structData = placeMGStructByRelativeID(nextStructRandomId);
@@ -284,46 +272,16 @@ public class WorldGen implements Runnable {
         structLogger.add(concatArrays(new int[] {lastX, lastY, elementPlacer.getLineCount(), -1}, elementPlacer.getDrawingData()));
     }
     private void cleanWorld() {
-        lockGameThread("clnW");
         Constraint[] constraints = w.getConstraints();
         while (w.getConstraintCount() > 0) {
             w.removeConstraint(constraints[0]);
         }
         rmAllBodies();
         rmLandscapeSegments();
-        unlockGameThread("clnW");
     }
     private void rmLandscapeSegments() {
         while (landscape.segmentCount() > 0) {
             landscape.removeSegment(0);
-        }
-    }
-    
-    public void lockGameThread(String where) {
-        String msg = "locking by " + where;
-        Logger.log(msg);
-        lock++;
-        GameplayCanvas.shouldWait = true;
-        if (GameplayCanvas.isBusy) {
-            while (!GameplayCanvas.isWaiting && GameplayCanvas.isBusy) {
-                try {
-                    Thread.yield();
-                    Thread.sleep(0);
-                } catch (InterruptedException ex) {
-                    Logger.log(ex);
-                }
-            }
-        }
-        Logger.logReplaceLast(msg, "locked by " + where);
-    }
-    
-    public void unlockGameThread(String where) {
-        Logger.log("unlocking by " + where);
-        lock--;
-        if (lock <= 0) {
-            GameplayCanvas.shouldWait = false;
-        } else {
-            Logger.log("not unlocking: " + lock);
         }
     }
     
@@ -355,10 +313,9 @@ public class WorldGen implements Runnable {
     }
     
     private void resetPosition() { // world cycling
-        lockGameThread("rsPos");
         isResettingPosition = true;
 
-        synchronized (w) {
+        synchronized (lock) {
             int dx = -3000 - w.carbody.positionFX().xAsInt();
             lastX = lastX + dx;
 
@@ -373,7 +330,6 @@ public class WorldGen implements Runnable {
             nextPointsCounterTargetX += dx;
 
             isResettingPosition = false;
-            unlockGameThread("rsPos");
         }
         game.onPosReset();
     }
@@ -402,7 +358,7 @@ public class WorldGen implements Runnable {
     }
 
     private int[] placeMGStructByRelativeID(int relID) {
-        int id = relID - floorWeightInRandom - stdStructsNumber;
+        int id = relID - FLOOR_RANDOM_WEIGHT - BUILTIN_STRUCTS_NUMBER;
         return placeMGStructByID(id);
     }
 
@@ -414,7 +370,7 @@ public class WorldGen implements Runnable {
         }
         Logger.log("+mgs", id);
         int[] structureData = StructurePlacer.place(w, isResettingPosition, data, lastX, lastY);
-        structureData[3] = stdStructsNumber + id;
+        structureData[3] = BUILTIN_STRUCTS_NUMBER + id;
         return structureData;
     }
 

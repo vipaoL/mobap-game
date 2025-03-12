@@ -222,7 +222,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
                 GraphicsWorld.bgOverride = true;
                 GraphicsWorld test2 = new GraphicsWorld(test3);
                 GameplayCanvas test = new GameplayCanvas(test2);
-                GameplayCanvas.uninterestingDebug = true;
+                test.uninterestingDebug = true;
                 RootContainer.setRootUIComponent(test);
             }
         }
