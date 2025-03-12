@@ -306,15 +306,19 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 						if (!lockPhysicsPrecision) {
 							if (framesFromLastFPSMeasure == 0) {
 								int prevValue = physicsIterations;
-								physicsIterations = Math.max(1, 140 / fps + 1);
-								if (physicsIterations == prevValue) {
-									physicsIterationsUnalteredCount++;
+								if (fps != 0) {
+									physicsIterations = Math.max(1, 140 / fps + 1);
+									if (physicsIterations == prevValue) {
+										physicsIterationsUnalteredCount++;
+										if (!dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
+											Logger.log("locking precision multiplier: ", physicsIterations);
+											lockPhysicsPrecision = true;
+										}
+									} else {
+										physicsIterationsUnalteredCount = 0;
+									}
 								} else {
 									physicsIterationsUnalteredCount = 0;
-								}
-								if (!dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
-									Logger.log("locking precision multiplier: ", physicsIterations);
-									lockPhysicsPrecision = true;
 								}
 							}
 						}
