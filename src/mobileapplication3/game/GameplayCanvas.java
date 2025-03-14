@@ -747,7 +747,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private String contactsToString(Contact[] contacts) {
-        StringBuilder ret = new StringBuilder(" ");
+        StringBuffer ret = new StringBuffer(" ");
         for (int i = 0; i < contacts.length; i++) {
             if (contacts[i] != null) {
                 ret.append(nameBody(contacts[i].body1()));
