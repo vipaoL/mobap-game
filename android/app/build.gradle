@@ -56,7 +56,7 @@ android {
     sourceSets {
         main.java.srcDirs += '../../src'
         main.java.srcDirs += '../../lib/mobapp-platform-android/src'
-        main.java.srcDirs += '../../lib/mobapp-ui/src'
+        main.java.srcDirs += '../../lib/mobapp-framework/src'
     }
 }
 dependencies {

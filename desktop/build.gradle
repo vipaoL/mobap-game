@@ -32,7 +32,7 @@ sourceSets {
         java {
             srcDirs += '../src'
             srcDirs += '../lib/mobapp-platform-desktop/src'
-            srcDirs += '../lib/mobapp-ui/src'
+            srcDirs += '../lib/mobapp-framework/src'
         }
     }
 }

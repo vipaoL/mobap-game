@@ -2,9 +2,9 @@
 	path = lib/mobapp-platform-j2me
 	url = https://github.com/vipaoL/mobapp-platform.git
 	branch = j2me
-[submodule "lib/mobapp-ui"]
-	path = lib/mobapp-ui
-	url = https://github.com/vipaoL/mobapp-ui.git
+[submodule "lib/mobapp-framework"]
+	path = lib/mobapp-framework
+	url = https://github.com/vipaoL/mobapp-framework.git
 [submodule "lib/mobapp-platform-android"]
 	path = lib/mobapp-platform-android
 	url = https://github.com/vipaoL/mobapp-platform.git
