@@ -360,8 +360,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 						}
 
                         boolean leftWheelContacts = carContacts[0][0] != null;
-                        boolean rightWheelContacts = carContacts[1][0] != null;
-                        boolean carBodyContacts = carContacts[2][0] != null;
+                        boolean carBodyContacts = carContacts[1][0] != null;
+                        boolean rightWheelContacts = carContacts[2][0] != null;
 	                    
 	                    // some things should be performed once at a fixed interval (50ms, or 20 times per second)
 	                    boolean bigTick = start - lastBigTickTime > TICK_DURATION;
@@ -607,8 +607,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private Contact[][] getCarContacts() {
 		return new Contact[][] {
 			world.getContactsForBody(world.leftWheel),
-			world.getContactsForBody(world.rightWheel),
-			world.getContactsForBody(world.carbody)};
+			world.getContactsForBody(world.carbody),
+			world.getContactsForBody(world.rightWheel)};
 	}
 
 	private void tickCustomBodyInteractions(Contact[][] carContacts) {
@@ -617,6 +617,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             for (int i = 0; i < carContacts[j].length; i++) {
                 if (carContacts[j][i] != null) {
                     Body body = carContacts[j][i].body1();
+                    if (body == world.leftWheel || body == world.carbody || body == world.rightWheel) {
+                    	body = carContacts[j][i].body2();
+                    }
                     if (body == null) {
                         continue;
                     }
@@ -807,10 +810,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         g.setColor(0xffffff);
         if (DebugMenu.showContacts) {
-            Contact[][] contacts = {
-                    world.getContactsForBody(world.leftWheel),
-                    world.getContactsForBody(world.carbody),
-                    world.getContactsForBody(world.rightWheel)};
+            Contact[][] contacts = getCarContacts();
             String[] names = {"LW", "CB", "RW"};
             for (int i = 0; i < contacts.length; i++) {
 				drawDebugText(g, names[i] + contactsToString(contacts[i]));
