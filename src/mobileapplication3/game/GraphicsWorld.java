@@ -455,7 +455,7 @@ public class GraphicsWorld extends World {
             int color = currColLandscape;
             if (DebugMenu.isDebugEnabled) {
                 Random random = new Random(structureID);
-                g.setColor(128 + random.nextInt() % 128, 128 + random.nextInt() % 128, 128 + random.nextInt() % 128);
+                g.setColor(64 + random.nextInt(192), 64 + random.nextInt(192), 64 + random.nextInt(192));
                 color = g.getColor();
             } else {
                 g.setColor(currColLandscape);
