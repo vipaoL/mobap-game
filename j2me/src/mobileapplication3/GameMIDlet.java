@@ -31,23 +31,27 @@ public class GameMIDlet extends MobappMIDlet {
         MenuCanvas menuCanvas = new MenuCanvas();
         RootContainer.setRootUIComponent(menuCanvas);
 
-        // ------- migrate records to use a unified way to storing them
-        try {
-            try {
-            	// try to read from the new storage
-            	int[] records = Records.getRecords();
-            	// if the new storage is empty...
-            	if (records == null || records.length == 0) {
-            		// old format and old storage
-                	tryMigrateRecordsFrom("Records");
-            	}
-            } catch (NumberFormatException ex) {
-            	// old format, but already moved to the new storage
-            	tryMigrateRecordsFrom("records");
-            }
-        } catch (Exception ex) {
-            Platform.showError("Can't migrate records!", ex);
-        }
+        // ------- migrate records to use a unified way to store them
+        new Thread(new Runnable() {	
+			public void run() {
+		        try {
+		            try {
+		            	// try to read from the new storage
+		            	int[] records = Records.getRecords();
+		            	// if the new storage is empty...
+		            	if (records == null || records.length == 0) {
+		            		// old format and old place
+		                	tryMigrateRecordsFrom("Records");
+		            	}
+		            } catch (NumberFormatException ex) {
+		            	// old format, but already moved to the new place
+		            	tryMigrateRecordsFrom("records");
+		            }
+		        } catch (Exception ex) {
+		            Platform.showError("Can't migrate records!", ex);
+		        }
+			}
+		}).start();
         // -------
     }
 
@@ -63,24 +67,21 @@ public class GameMIDlet extends MobappMIDlet {
 			}
 
 			if (numRecords > 0) {
-				int[] records = new int[numRecords];
-			    for (int i = 0; i < numRecords; i++) {
-				    records[i] = byteArrayToInt(oldStore.getRecord(i + 1));
+				// save to the new place
+			    StringBuffer recordsStr = new StringBuffer();
+				for (int i = 0; i < numRecords; i++) {
+			    	recordsStr.append(byteArrayToInt(oldStore.getRecord(i + 1)));
+		            recordsStr.append(" ");
 			    }
 			    oldStore.closeRecordStore();
-				RecordStore.deleteRecordStore(oldStoreName);
-
-			    for (int i = 0; i < numRecords; i++) {
-					 // save to the new place
-					Records.saveRecord(records[i], numRecords);
-			    }
+		        Platform.storeString(recordsStr.toString(), "records");
 			}
 		} catch (Exception ex) {
 	        Platform.showError("Can't migrate records!", ex);
 	    }
 	}
 
-    public static int byteArrayToInt(byte[] bytes) {
+    private int byteArrayToInt(byte[] bytes) {
         return (bytes[0] << 24) | ((bytes[1] & 0xFF) << 16) | ((bytes[2] & 0xFF) << 8) | (bytes[3] & 0xFF);
     }
     
