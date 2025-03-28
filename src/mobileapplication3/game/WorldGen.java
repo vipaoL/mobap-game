@@ -452,7 +452,6 @@ public class WorldGen implements Runnable {
         }
         
         public void rmFirstElement() {
-            structLog[ringLogStart] = null;
             ringLogStart = (ringLogStart + 1) % structLog.length;
             numberOfLoggedStructs--;
         }
