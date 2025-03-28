@@ -291,6 +291,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             long lastBattUpdateTime = 0;
 			int physicsIterationsUnalteredCount = 0;
 
+			Object wgLock;
+			if (worldgen != null) {
+				wgLock = worldgen.lock;
+			} else {
+				wgLock = new Object();
+			}
+
             // Main game cycle
             while (!stopped) {
             	try {
@@ -338,7 +345,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	
 	                    // Tick and draw
 						Contact[][] carContacts;
-						synchronized (worldgen.lock) {
+						synchronized (wgLock) {
 							setSimulationArea();
 
 							// Check if the car contacts with the ground or with something else
