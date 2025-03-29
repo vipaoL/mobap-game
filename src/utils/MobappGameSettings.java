@@ -10,6 +10,7 @@ public class MobappGameSettings {
 		    IS_SETUP_WIZARD_COMPLETED = "wizardCompleted",
 			MGSTRUCTS_FOLDER_PATH = "mgPath",
 		    IS_BETTER_GRAPHICS_ENABLED = "btrGr",
+            LEGACY_DRAWING_METHOD = "oldDrawing",
             PHYSICS_PRECISION = "PhyPrecision",
             DETAIL_LEVEL = "DetailLvl",
             FRAME_TIME = "FrameTime",
@@ -37,6 +38,7 @@ public class MobappGameSettings {
     	            IS_SETUP_WIZARD_COMPLETED,
     	            MGSTRUCTS_FOLDER_PATH,
     	            IS_BETTER_GRAPHICS_ENABLED,
+                    LEGACY_DRAWING_METHOD,
                     PHYSICS_PRECISION,
                     DETAIL_LEVEL,
                     FRAME_TIME,
@@ -180,4 +182,24 @@ public class MobappGameSettings {
     public static void setFrameTime(int valueMs) {
         getSettingsInst().set(FRAME_TIME, String.valueOf(Mathh.constrain(1, valueMs, MAX_FRAME_TIME)));
     }
+
+    ///
+
+    public static boolean isLegacyDrawingMethodEnabled() {
+        return getSettingsInst().getBool(LEGACY_DRAWING_METHOD);
+    }
+
+    public static boolean isLegacyDrawingMethodEnabled(boolean defaultValue) {
+        return getSettingsInst().getBool(LEGACY_DRAWING_METHOD, defaultValue);
+    }
+
+    public static void setLegacyDrawingMethodEnabled(boolean b) {
+        getSettingsInst().set(LEGACY_DRAWING_METHOD, b);
+    }
+
+    public static boolean toggleLegacyDrawingMethod() {
+        return getSettingsInst().toggleBool(LEGACY_DRAWING_METHOD);
+    }
+
+    ///
 }

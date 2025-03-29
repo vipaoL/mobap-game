@@ -43,8 +43,7 @@ public class GraphicsWorld extends World {
     private int scMinSide = Math.min(scWidth, scHeight);
 
     public boolean removeBodies = true;
-    private boolean betterGraphics;
-    private boolean bg;
+    private boolean betterGraphics, bg, legacyDrawingMethod;
     public static boolean bgOverride = false;
     private int bgLineStep = scMinSide / 3;
     private int bgLineThickness;
@@ -227,7 +226,7 @@ public class GraphicsWorld extends World {
             calcOffset();
 
             drawBg(g);
-            if (structuresData != null) {
+            if (structuresData != null && !legacyDrawingMethod) {
                 try {
                     drawLandscape(g, structuresData, structureRingBufferOffset, structureCount);
                 } catch (Exception ex) {
@@ -663,6 +662,7 @@ public class GraphicsWorld extends World {
         try {
             betterGraphics = MobappGameSettings.isBetterGraphicsEnabled(Math.max(scWidth, scHeight) >= BIG_SCREEN_SIDE);
             bg = bg || MobappGameSettings.isBGEnabled(false);
+            legacyDrawingMethod = MobappGameSettings.isLegacyDrawingMethodEnabled(false);
         } catch (Throwable ex) {
             Logger.log(ex);
         }

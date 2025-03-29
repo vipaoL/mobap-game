@@ -8,7 +8,7 @@ import utils.MobappGameSettings;
 public class SettingsScreen extends GenericMenu implements Runnable {
     private static final int
             PHYSICS_PRECISION = 0,
-            DETAIL_LEVEL = 1,
+            LEGACY_DRAWING_METHOD = 1,
             FRAME_TIME = 2,
             HI_RES_GRAPHICS = 3,
             SHOW_FPS = 4,
@@ -84,8 +84,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                     }
                     MobappGameSettings.setPhysicsPrecision(value);
                     break;
-                case DETAIL_LEVEL:
-                    MobappGameSettings.setDetailLevel(MobappGameSettings.getDetailLevel() % MobappGameSettings.MAX_DETAIL_LEVEL + 1);
+                case LEGACY_DRAWING_METHOD:
+                    MobappGameSettings.toggleLegacyDrawingMethod();
                     break;
                 case FRAME_TIME:
                     value = MobappGameSettings.getFrameTime();
@@ -160,7 +160,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             } else {
                 menuOpts[PHYSICS_PRECISION] += String.valueOf(physicsPrecision);
             }
-            menuOpts[DETAIL_LEVEL] = "Detail level: " + detailLvl;
+            menuOpts[LEGACY_DRAWING_METHOD] = "Legacy drawing method";
             menuOpts[FRAME_TIME] = "FPS: " + round(1000f / frameTime) + " (" + frameTime + "ms/frame)";
             menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
             menuOpts[SHOW_FPS] = "Show FPS";
@@ -170,7 +170,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             menuOpts[ABOUT] = "About";
             menuOpts[BACK] = "Back";
             setEnabledFor(physicsPrecision != MobappGameSettings.DEFAULT_PHYSICS_PRECISION, PHYSICS_PRECISION);
-            setEnabledFor(detailLvl != MobappGameSettings.DEFAULT_DETAIL_LEVEL, DETAIL_LEVEL);
+            setEnabledFor(MobappGameSettings.isLegacyDrawingMethodEnabled(), LEGACY_DRAWING_METHOD);
         	setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), HI_RES_GRAPHICS);
         	setEnabledFor(MobappGameSettings.isFPSShown(), SHOW_FPS);
         	setEnabledFor(MobappGameSettings.isBGEnabled(), BG);
