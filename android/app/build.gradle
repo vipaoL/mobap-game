@@ -36,7 +36,7 @@ android {
 
     defaultConfig {
         applicationId 'com.vipaol.mobapp.game.android'
-        minSdk 2
+        minSdk 1
         targetSdk 35
         versionCode getVersionCode()
         versionName getVersionName()
