@@ -520,6 +520,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                        }
 	                    }
 
+						if ((world.carX + world.viewField > worldgen.lastX)) {
+							shouldWait = true;
+							Logger.log("wg can't keep up, locking game thread...");
+						}
+
 	                    while (shouldWait) {
 	                        isWaiting = true;
 	                        Thread.yield();
@@ -531,7 +536,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                    }
 	
 	                    isWaiting = false;
-	                    
+
 	                    Thread.yield();
 	                    sleep = maxFrameTime - (System.currentTimeMillis() - start);
 	                    sleep = Math.max(sleep, 0);

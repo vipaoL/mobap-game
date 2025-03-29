@@ -35,8 +35,7 @@ public class WorldGen implements Runnable {
     private boolean isResettingPosition = false;
     private Vector deferredStructures = null;
     
-    private int lastX;
-    private int lastY;
+    public int lastX, lastY;
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX;
     int tick = 0;
@@ -100,18 +99,13 @@ public class WorldGen implements Runnable {
             w.refreshCarPos();
             
             if ((w.carX + w.viewField*2 > lastX)) {
-                if ((w.carX + w.viewField > lastX)) {
-                    needSpeed = true;
-                    game.shouldWait = true;
-                    Logger.log("wg can't keep up, locking game thread...");
-                }
                 currStep = STEP_ADD;
                 placeNext();
             } else {
                 if (!structLogger.shouldRmFirstStruct()) {
                     needSpeed = false;
-                    game.shouldWait = false;
                 }
+                game.shouldWait = false;
             }
             
             if (tick == 0) {
