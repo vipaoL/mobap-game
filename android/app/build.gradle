@@ -32,7 +32,7 @@ def getVersionName = { ->
 
 android {
     namespace 'com.vipaol.mobapp.android'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId 'com.vipaol.mobapp.game.android'
