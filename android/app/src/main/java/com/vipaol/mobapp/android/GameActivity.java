@@ -2,6 +2,7 @@ package com.vipaol.mobapp.android;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 
 import mobileapplication3.game.MenuCanvas;
@@ -9,6 +10,7 @@ import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.MobappActivity;
 import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.UISettings;
+import utils.MobappGameSettings;
 
 public class GameActivity extends MobappActivity {
 
@@ -32,6 +34,12 @@ public class GameActivity extends MobappActivity {
             Platform.showError("Can't migrate records!", ex);
         }
         // -------
+
+        // Older Android versions don't support drawing arcs
+        if (Platform.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            // Enable legacy drawing method by default
+            MobappGameSettings.isLegacyDrawingMethodEnabled(true);
+        }
     }
 
     @Override
