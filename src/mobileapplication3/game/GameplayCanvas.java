@@ -422,7 +422,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                             } else {
 	                            bigTickN = 0;
 	                            tickDamage();
-	                            if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD) {
+	                            if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD && battIndicator) {
 	                            	batLevel = Battery.getBatteryLevel();
 	                            	lastBattUpdateTime = System.currentTimeMillis();
 	                            }
