@@ -25,8 +25,9 @@ public class ElementPlacer {
 
     public static final int DRAWING_DATA_ID_LINE = 1, DRAWING_DATA_ID_PATH = 2, DRAWING_DATA_ID_CIRCLE = 3, DRAWING_DATA_ID_ARC = 4;
 
+    private final static int DETAIL_LEVEL = readDetailLevelSetting();
+
     private int lineCount;
-    private int detailLevel;
     private final GraphicsWorld w;
     private final Landscape landscape;
     private final boolean dontPlaceBodies;
@@ -38,14 +39,6 @@ public class ElementPlacer {
         landscape = world.getLandscape();
         this.dontPlaceBodies = dontPlaceBodies;
         drawingData = null;
-
-        detailLevel = MobappGameSettings.DEFAULT_DETAIL_LEVEL;
-        try {
-            Logger.log("placer: reading settings");
-            detailLevel = MobappGameSettings.getDetailLevel();
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
     }
 
     public int getLineCount() {
@@ -199,7 +192,7 @@ public class ElementPlacer {
         if (amp == 0) {
             line(x, y, x + l, y);
         } else {
-            int step = 30 / detailLevel;
+            int step = 30 / DETAIL_LEVEL;
             int endAngle = startAngle + halfPeriods * 180;
             int a = endAngle - startAngle;
 
@@ -249,10 +242,10 @@ public class ElementPlacer {
     public void arc(int x, int y, int r, int angle, int startAngle, int kx, int ky) { //k: 10 = 1.0
         // calculated formula. r=20: sn=5,step=72; r=1000: sn=36,step=10
         int step = 10000/(140+r);
-        if ((step = step / detailLevel) <= 2) {
+        if ((step = step / DETAIL_LEVEL) <= 2) {
             arcSmooth(x, y, r, angle, startAngle, kx, ky);
         }
-        step = Mathh.constrain( 10 / detailLevel, step, 72 / detailLevel);
+        step = Mathh.constrain( 10 / DETAIL_LEVEL, step, 72 / DETAIL_LEVEL);
 
         while (startAngle < 0) {
             startAngle += 360;
@@ -287,8 +280,8 @@ public class ElementPlacer {
         double angleD = Math.PI * angle / 180;
         double startAngleD = Math.PI * startAngle / 180;
         // calculated formula. r=20: sn=5,step=72; r=1000: sn=36,step=10
-        double step = Math.PI * 10f/(140+r) / 180 / detailLevel;
-        step = Mathh.constrain( Math.PI * 10f / 180 / detailLevel, step, Math.PI * 72f / 180 / detailLevel);
+        double step = Math.PI * 10f/(140+r) / 180 / DETAIL_LEVEL;
+        step = Mathh.constrain( Math.PI * 10f / 180 / DETAIL_LEVEL, step, Math.PI * 72f / 180 / DETAIL_LEVEL);
 
         while (startAngleD < 0) {
             startAngleD += Math.PI;
@@ -355,5 +348,15 @@ public class ElementPlacer {
 
     public int[] getDrawingData() {
         return drawingData;
+    }
+
+    private static int readDetailLevelSetting() {
+        try {
+            Logger.log("placer: reading settings");
+            return MobappGameSettings.getDetailLevel();
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+            return MobappGameSettings.DEFAULT_DETAIL_LEVEL;
+        }
     }
 }
