@@ -520,7 +520,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                        }
 	                    }
 
-						if ((world.carX + world.viewField > worldgen.lastX)) {
+						if (worldgen != null && world.carX + world.viewField > worldgen.lastX) {
 							shouldWait = true;
 							Logger.log("wg can't keep up, locking game thread...");
 						}
