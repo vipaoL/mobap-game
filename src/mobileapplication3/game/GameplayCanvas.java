@@ -344,15 +344,15 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                    start = System.currentTimeMillis();
 	
 	                    // Tick and draw
-						Contact[][] carContacts;
+						Contact[][] carContacts = getCarContacts();
 						synchronized (wgLock) {
 							setSimulationArea();
 
 							// Check if the car contacts with the ground or with something else
-                            carContacts = getCarContacts();
                             for (int i = 0; i < physicsIterations; i++) {
 								world.tick();
 								// Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
+								carContacts = getCarContacts();
 								tickCustomBodyInteractions(carContacts);
 								ticksFromLastTPSMeasure++;
 							}
