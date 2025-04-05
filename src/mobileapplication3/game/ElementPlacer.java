@@ -46,6 +46,7 @@ public class ElementPlacer {
     }
 
     public void place(short[] data, int originX, int originY) {
+        int prevLowestY = w.lowestY;
         short id = data[0];
         switch (id) {
             case LINE:
@@ -184,7 +185,9 @@ public class ElementPlacer {
                 break;
             }
         }
-        Logger.log("lowestY=", w.lowestY);
+        if (w.lowestY != prevLowestY) {
+            Logger.log("lowestY=", w.lowestY);
+        }
     }
 
     public void sin(int x, int y, int l, int halfPeriods, int startAngle, int amp) {    //3
