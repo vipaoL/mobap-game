@@ -21,6 +21,10 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
     private static void parseArgs(String[] args) {
         OptionParser parser = new OptionParser();
         OptionSpec<Void> debugOpt = parser.acceptsAll(Arrays.asList("debug", "d"), "Enable debug mode");
+        OptionSpec<String> workdirOpt = parser.accepts("workdir", "Directory for game settings, records and custom content")
+                .withRequiredArg()
+                .describedAs("directory")
+                .defaultsTo(FileUtils.getStoragePath());
         parser.acceptsAll(Arrays.asList("help", "h", "?"), "Show help").forHelp();
 
         try {
@@ -30,6 +34,7 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 System.exit(0);
             }
             DebugMenu.isDebugEnabled = options.has(debugOpt);
+            FileUtils.setStoragePath(options.valueOf(workdirOpt));
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             System.out.println();
