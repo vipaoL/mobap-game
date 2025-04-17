@@ -298,8 +298,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				wgLock = new Object();
 			}
 
+			try {
+				for (int i = 0; !hasParent() && i < 30; i++) {
+					Thread.sleep(100);
+				}
+			} catch (InterruptedException e) { }
+
             // Main game cycle
-            while (!stopped) {
+            while (!stopped && hasParent()) {
             	try {
 	                if (!paused) {
 	                	// FPS & TPS counter
