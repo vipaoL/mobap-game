@@ -452,12 +452,16 @@ public class GraphicsWorld extends World {
             int lineCount = structureData[c++];
             int structureID = structureData[c++];
             int color = currColLandscape;
-            if (DebugMenu.isDebugEnabled) {
+            if (DebugMenu.structureDebug) {
                 Random random = new Random(structureID);
                 g.setColor(64 + random.nextInt(192), 64 + random.nextInt(192), 64 + random.nextInt(192));
                 color = g.getColor();
             } else {
-                g.setColor(currColLandscape);
+                if (DebugMenu.isDebugEnabled) {
+                    g.setColor(0xffffff);
+                } else {
+                    g.setColor(currColLandscape);
+                }
             }
 
             if (xToPX(endX) < 0) {
@@ -500,7 +504,7 @@ public class GraphicsWorld extends World {
                         }
                         int kx = structureData[c++];
                         int ky = structureData[c++];
-                        if (DebugMenu.isDebugEnabled) {
+                        if (DebugMenu.structureDebug) {
                             if (!DebugMenu.simulationMode) {
                                 g.drawString("startAngle=" + startAngle, xToPX(x), yToPX(y), Graphics.BOTTOM | Graphics.HCENTER);
                                 g.drawString("arcAngle=" + arcAngle, xToPX(x), yToPX(y), Graphics.TOP | Graphics.HCENTER);
@@ -512,7 +516,7 @@ public class GraphicsWorld extends World {
                 }
             }
 
-            if (DebugMenu.isDebugEnabled) {
+            if (DebugMenu.structureDebug) {
                 if (prevStructureEndX == 0) {
                     prevStructureEndX = endX - 1000;
                     prevStructureEndY = endY - 100;

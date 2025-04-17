@@ -16,8 +16,9 @@ import mobileapplication3.platform.ui.RootContainer;
  */
 public class DebugMenu extends GenericMenu implements Runnable {
     private static final String[] MENU_OPTS = {
-        "Enable debug options",
+        "Enable debug",
         "Show log",
+        "Structure debug",
         "Simulation mode",
         "GAMING MODE",
         "What?",
@@ -42,6 +43,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean simulationMode = false;
     public static boolean whatTheGame = false;
     public static boolean showContacts = false;
+    public static boolean structureDebug = false;
     
     public DebugMenu() {
     	statemap[1] = GenericMenu.STATE_INACTIVE; // set "-----" separator as inactive button
@@ -97,16 +99,19 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 }
                 break;
             case 2:
-                simulationMode = !simulationMode;
+                structureDebug = !structureDebug;
                 break;
             case 3:
+                simulationMode = !simulationMode;
+                break;
+            case 4:
                 discoMode = !discoMode;
                 GraphicsWorld.bgOverride = discoMode;
                 break;
-            case 4:
+            case 5:
                 whatTheGame = !whatTheGame;
                 break;
-            case 5:
+            case 6:
                 music = !music;
                 if (music) {
                     Sound sound = new Sound();
@@ -126,10 +131,11 @@ public class DebugMenu extends GenericMenu implements Runnable {
         setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         if (DebugMenu.isDebugEnabled) {
             setEnabledFor(RootContainer.enableOnScreenLog, 1);
-            setEnabledFor(simulationMode, 2);
-            setEnabledFor(discoMode, 3);
-            setEnabledFor(whatTheGame, 4);
-            setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 5); // set "music" as inactive button. it's buggy
+            setEnabledFor(structureDebug, 2);
+            setEnabledFor(simulationMode, 3);
+            setEnabledFor(discoMode, 4);
+            setEnabledFor(whatTheGame, 5);
+            setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 6); // disable this option. it's not ready yet
         } else {
             for (int i = 2; i < MENU_OPTS.length - 1; i++) {
                 setStateFor(-1, i);
