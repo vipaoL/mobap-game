@@ -25,6 +25,7 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: '../lib/', include: ['*.jar'])
+    implementation 'net.sf.jopt-simple:jopt-simple:6.0-alpha-3'
 }
 
 sourceSets {

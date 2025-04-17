@@ -1,30 +1,45 @@
 package com.vipaol;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import mobileapplication3.game.DebugMenu;
 import mobileapplication3.game.MenuCanvas;
+import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.MobappDesktopMain;
 import mobileapplication3.platform.ui.RootContainer;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 public class MobappGameDesktopMain extends MobappDesktopMain {
     public static void main(String[] args) {
-        if (args != null) {
-            for (String arg : args) {
-                if (arg != null) {
-                    if (arg.startsWith("--")) {
-                        arg = arg.substring(2);
-                    }
-                    if (arg.startsWith("/")) {
-                        arg = arg.substring(1);
-                    }
-                    switch (arg) {
-                        case "debug":
-                            DebugMenu.isDebugEnabled = true;
-                            break;
-                    }
-                }
-            }
-        }
+        parseArgs(args);
         new MobappGameDesktopMain(args);
+    }
+
+    private static void parseArgs(String[] args) {
+        OptionParser parser = new OptionParser();
+        OptionSpec<Void> debugOpt = parser.acceptsAll(Arrays.asList("debug", "d"), "Enable debug mode");
+        parser.acceptsAll(Arrays.asList("help", "h", "?"), "Show help").forHelp();
+
+        try {
+            OptionSet options = parser.parse(args);
+            if (options.has("help")) {
+                parser.printHelpOn(System.out);
+                System.exit(0);
+            }
+            DebugMenu.isDebugEnabled = options.has(debugOpt);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            System.out.println();
+            try {
+                parser.printHelpOn(System.out);
+            } catch (IOException ex) {
+                System.err.println("Use --help for usage information.");
+            }
+            System.exit(1);
+        }
     }
 
     public MobappGameDesktopMain(String[] args) {
