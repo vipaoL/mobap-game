@@ -1171,7 +1171,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         int gameAction = RootContainer.getAction(keyCode);
         // menu
-        if (keyCode == Keys.KEY_SOFT_LEFT || keyCode == Keys.KEY_POUND || gameAction == Keys.GAME_D) {
+        if (keyCode == Keys.KEY_SOFT_LEFT || keyCode == Keys.KEY_POUND || keyCode == Keys.KEY_NUM0 || gameAction == Keys.GAME_D) {
             stop(true, false);
         } else if (keyCode == Keys.KEY_SOFT_RIGHT || keyCode == GenericMenu.SE_KEY_BACK) {
 			pauseButtonPressed();
