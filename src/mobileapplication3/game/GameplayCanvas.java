@@ -1173,7 +1173,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         // menu
         if (keyCode == Keys.KEY_SOFT_LEFT || keyCode == Keys.KEY_POUND || gameAction == Keys.GAME_D) {
             stop(true, false);
-        } else if (keyCode == Keys.KEY_SOFT_RIGHT/* || keyCode == GenericMenu.SIEMENS_KEYCODE_RIGHT_SOFT*/) {
+        } else if (keyCode == Keys.KEY_SOFT_RIGHT || keyCode == GenericMenu.SE_KEY_BACK) {
 			pauseButtonPressed();
 		} else if (keyCode == Keys.KEY_STAR || gameAction == Keys.GAME_B) {
 			pauseButtonPressed();
