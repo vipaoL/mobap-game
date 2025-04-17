@@ -81,6 +81,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int tickTime;
     private int fps;
     private int tps;
+	private int debugTickTime, debugPaintTime;
     private String statusMessage = null;
 
 	// debug
@@ -354,7 +355,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 						synchronized (wgLock) {
 							setSimulationArea();
 
-							// Check if the car contacts with the ground or with something else
+							long tickStart = System.currentTimeMillis();
                             for (int i = 0; i < physicsIterations; i++) {
 								world.tick();
 								// Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
@@ -362,7 +363,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 								tickCustomBodyInteractions(carContacts);
 								ticksFromLastTPSMeasure++;
 							}
-							paint();
+                            debugTickTime = (int) (System.currentTimeMillis() - tickStart);
+							long paintStart = System.currentTimeMillis();
+                            paint();
+							debugPaintTime = (int) (System.currentTimeMillis() - paintStart);
 						}
 
                         boolean leftWheelContacts = carContacts[0][0] != null;
@@ -854,6 +858,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 }
 				drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
 			}
+			drawDebugText(g, "physics: " + debugTickTime + ", paint: " + debugPaintTime);
         }
         // show coordinates of car if enabled
         if (DebugMenu.coordinates) {
@@ -946,8 +951,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
 	private void drawDebugText(Graphics g, String str) {
-		g.drawString(str, 0, debugTextOffset, 0);
-		debugTextOffset += currentFontH;
+		if (DebugMenu.isDebugEnabled) {
+			g.drawString(str, 0, debugTextOffset, 0);
+			debugTextOffset += currentFontH;
+		}
 	}
 
 	private void drawLoading(Graphics g) {
