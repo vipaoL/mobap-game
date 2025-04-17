@@ -129,17 +129,11 @@ public class DebugMenu extends GenericMenu implements Runnable {
     }
     void refreshStates() {
         setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
-        if (DebugMenu.isDebugEnabled) {
-            setEnabledFor(RootContainer.enableOnScreenLog, 1);
-            setEnabledFor(structureDebug, 2);
-            setEnabledFor(simulationMode, 3);
-            setEnabledFor(discoMode, 4);
-            setEnabledFor(whatTheGame, 5);
-            setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 6); // disable this option. it's not ready yet
-        } else {
-            for (int i = 2; i < MENU_OPTS.length - 1; i++) {
-                setStateFor(-1, i);
-            }
-        }
+        setEnabledFor(RootContainer.enableOnScreenLog, 1);
+        setEnabledFor(structureDebug, 2);
+        setEnabledFor(simulationMode, 3);
+        setEnabledFor(discoMode, 4);
+        setEnabledFor(whatTheGame, 5);
+        setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 6); // disable this option. it's not ready yet
     }
 }
