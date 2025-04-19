@@ -33,6 +33,8 @@ public class Levels extends GenericMenu implements Runnable {
 
     private int builtinLevelsCount = 0;
 
+    private boolean loadingLevel = false;
+
     public Levels() {
         Logger.log("Levels:constr");
         buttons = new String[2];
@@ -108,7 +110,12 @@ public class Levels extends GenericMenu implements Runnable {
         }
     }
 
-    private void openFromRes(String path) {
+    private synchronized void openFromRes(String path) {
+    	if (isStopped || loadingLevel) {
+    		return;
+    	}
+    	loadingLevel = true;
+
         InputStream is = null;
         try {
             is = Platform.getResource(path);
@@ -116,6 +123,7 @@ public class Levels extends GenericMenu implements Runnable {
             isStopped = true;
         } catch (Exception ex) {
             Platform.showError("Can't open level!", ex);
+            loadingLevel = false;
         } finally {
             try {
                 is.close();
@@ -134,19 +142,29 @@ public class Levels extends GenericMenu implements Runnable {
         return GameFileUtils.listFilesInAllPlaces(LEVELS_FOLDER_NAME);
     }
     
-    public void startLevel(final String path) {
+    public synchronized void openFromFS(final String path) {
+    	if (isStopped || loadingLevel) {
+    		return;
+    	}
+    	loadingLevel = true;
+
         (new Thread(new Runnable() {
             public void run() {
-                GameplayCanvas gameCanvas = null;
-                if (path.endsWith(".phy")) {
-                    gameCanvas = new GameplayCanvas(readWorldFile(path));
-                } else if (path.endsWith(".mglvl")) {
-                    gameCanvas = openLevel(path);
-                }
-                if (gameCanvas != null) {
-                    RootContainer.setRootUIComponent(gameCanvas);
-                    isStopped = true;
-                }
+            	try {
+	                GameplayCanvas gameCanvas = null;
+	                if (path.endsWith(".phy")) {
+	                    gameCanvas = new GameplayCanvas(readWorldFile(path));
+	                } else if (path.endsWith(".mglvl")) {
+	                    gameCanvas = openLevel(path);
+	                }
+	                if (gameCanvas != null) {
+	                    RootContainer.setRootUIComponent(gameCanvas);
+	                    isStopped = true;
+	                }
+            	} catch (Exception ex) {
+					Platform.showError(ex);
+					loadingLevel = false;
+				}
             }
         })).start();
     }
@@ -190,7 +208,7 @@ public class Levels extends GenericMenu implements Runnable {
                 }
             } else {
                 try {
-                    startLevel(levelPaths[selected - 1]);
+                    openFromFS(levelPaths[selected - 1]);
                 } catch (Exception ex) {
                     Platform.showError(ex);
                 }
