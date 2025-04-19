@@ -40,6 +40,8 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     private GameplayCanvas bg = null;
     
     private static boolean areExtStructsLoaded = false;
+
+	private Thread menuThread = null;
     
     public MenuCanvas(GameplayCanvas bg) {
     	this();
@@ -68,7 +70,10 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         	setStateFor(STATE_INACTIVE, 4);
         }
         isInited = true;
-        (new Thread(this, "menu canvas")).start();
+        if (menuThread == null) {
+	        menuThread = new Thread(this, "menu canvas");
+	        menuThread.start();
+        }
     }
     
     public void run() {
@@ -91,6 +96,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
                 e.printStackTrace();
             }
         }
+        menuThread = null;
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
@@ -114,7 +120,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     	}
     }
 
-    private void startGame() {
+    private synchronized void startGame() {
         if (isGameStarted) {
             return;
         }
@@ -122,17 +128,20 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         Logger.log("menu:startGame()");
         repaint();
         try {
-            stop();
+            stopBG();
             log("menu:new gCanvas");
             GameplayCanvas gameCanvas = new GameplayCanvas();
             log("menu:setting gCanvas displayable");
             RootContainer.setRootUIComponent(gameCanvas);
+            stop();
         } catch (Exception ex) {
             ex.printStackTrace();
+            Platform.showError(ex);
             Logger.enableOnScreenLog(h);
             Logger.log("ex in startGame():");
-            Logger.log(ex.toString());
+            Logger.log(ex);
             repaint();
+            isGameStarted = false;
         }
     }
     
@@ -151,7 +160,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     void selectPressed() { // Do something when pressed an option in the menu
         defaultSelected = selected;
         if (selected == 1) { // Play
-            stop();
             startGame();
         }
         if (selected == 2) { // Ext Structs / Reload
@@ -186,7 +194,11 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     
     private void stop() {
     	isStopped = true;
-        if (bg != null) {
+        stopBG();
+    }
+
+    private void stopBG() {
+    	if (bg != null) {
         	bg.stop(false, true);
         }
     }
