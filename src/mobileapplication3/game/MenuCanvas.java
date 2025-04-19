@@ -151,8 +151,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     void selectPressed() { // Do something when pressed an option in the menu
         defaultSelected = selected;
         if (selected == 1) { // Play
-            Logger.log("menu:selected == 1 -> gen = true");
-            WorldGen.isEnabled = true;
             stop();
             startGame();
         }
@@ -161,7 +159,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         }
         if (selected == 3) { // Levels
             stop();
-            WorldGen.isEnabled = false;
             RootContainer.setRootUIComponent(new Levels());
         }
         if (selected == 4) { // Editor
