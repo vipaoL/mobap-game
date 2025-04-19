@@ -120,6 +120,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
 	private Vector deferredStructures = null;
 
+	// a thread to stop the game and open menu after a delay
+	private Thread stopperThread;
+	private boolean openMenu;
+
     public GameplayCanvas() {
         loadingProgress = 5;
         log("gcanvas constructor");
@@ -1051,9 +1055,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	}
 
     public void stop(final boolean openMenu, final boolean blockUntilCompleted, final int delay) {
+		this.openMenu = openMenu;
     	log("stopping game thread");
         if (isStopping) {
         	return;
+        }
+
+        if (stopperThread != null) {
+			return;
         }
 
         final GameplayCanvas inst = this;
@@ -1095,7 +1104,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     }
                 }
                 log("game: stopped");
-                if (openMenu) {
+                if (GameplayCanvas.this.openMenu) {
 					if (prevScreen == null) {
 						RootContainer.setRootUIComponent(new MenuCanvas(inst));
 					} else {
@@ -1108,7 +1117,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         if (blockUntilCompleted) {
         	stopperRunnable.run();
         } else {
-        	new Thread(stopperRunnable).start();
+			stopperThread = new Thread(stopperRunnable);
+			stopperThread.start();
         }
     }
     
