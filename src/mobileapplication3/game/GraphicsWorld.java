@@ -49,7 +49,7 @@ public class GraphicsWorld extends World {
     private int bgLineThickness;
     public int bgXOffset = 0;
     
-    int zoomBase = 0;
+    int zoomOutBase = 0;
     int zoomOut = 100;
     int offsetX = 0;
     int offsetY = 0;
@@ -658,7 +658,7 @@ public class GraphicsWorld extends World {
         scHeight = h;
         scMinSide = Math.min(scWidth, scHeight);
         bgLineStep = scMinSide / 3;
-        zoomBase = 6000 * 240 / scMinSide;
+        zoomOutBase = 2000000 / scMinSide;
         calcZoomOut();
         bgLineThickness = Math.max(w, h)/250;
 
@@ -679,19 +679,19 @@ public class GraphicsWorld extends World {
         if (DebugMenu.simulationMode) {
             zoomOut = 50000;
         } else {
-            zoomOut = (1000 * carY / scMinSide - 1000);
-            int zoomBase = this.zoomBase;
+            zoomOut = (1000 * (carY - 1000) / scMinSide);
+            int zoomOutBase = this.zoomOutBase;
             if (game.currentEffects[GameplayCanvas.EFFECT_SPEED] != null) {
                 if (game.currentEffects[GameplayCanvas.EFFECT_SPEED][0] > 0) {
                     zoomOut = zoomOut * game.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
-                    zoomBase = zoomBase * game.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
+                    zoomOutBase = zoomOutBase * game.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
                 }
             }
             if (zoomOut < 1) {
                 zoomOut = -zoomOut;
                 zoomOut += 1;
             }
-            zoomOut += zoomBase;
+            zoomOut += zoomOutBase;
         }
         
         // for timely track generation and deleting waste objects
@@ -704,7 +704,7 @@ public class GraphicsWorld extends World {
     private void calcOffset() {
     	offsetX = -carX * 1000 / zoomOut + scWidth / 3;
         offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
-        offsetY += carY / 20;
+        offsetY += carY * scMinSide / 20000;
         offsetY = Mathh.constrain(-carY * 1000 / zoomOut + scHeight/16, offsetY, -carY * 1000 / zoomOut + scHeight*4/5);
     }
 
