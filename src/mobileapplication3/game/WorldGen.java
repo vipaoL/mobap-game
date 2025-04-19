@@ -160,8 +160,8 @@ public class WorldGen implements Runnable {
         }
 
         int[] structData; // [endX, endY, lineCount]
-        if (lastY > 1000 | lastY < -1000) { // will correct height if it is too high or too low
-            Logger.log("correcting height. lastY=", lastY);
+        if (lastY > 1000 | lastY < -1000) { // normalize height if it is too high or too low
+            Logger.log("normalizing height: (was " + lastY + ")");
             structData = StructurePlacer.floor(w, isResettingPosition, lastX, lastY, 1000 + rand.nextInt(4) * 100, (rand.nextInt(7) - 3) * 100);
         } else {
             Logger.log("+id", nextStructRandomId);
@@ -382,6 +382,7 @@ public class WorldGen implements Runnable {
     }
     
     private class StructLog {
+        private static final boolean DEBUG = false;
         public static final int MAX_DIST_TO_RM_STRUCT = 4000;
         public static final int MAX_DIST_TO_RM_STRUCT_IN_SIMULATION = 300;
         private int[][] structLog;
@@ -396,12 +397,12 @@ public class WorldGen implements Runnable {
         public void add(int[] structureData) {
             if (numberOfLoggedStructs >= structLog.length) {
                 int ns = structLog.length+1;
-                Logger.log("structLog len => " + ns);
+                logDebug("structLog len => " + ns);
                 increase(ns);
             }
 
             int nextID = (ringLogStart + numberOfLoggedStructs) % structLog.length;
-            Logger.log("logging struct to " + nextID);
+            logDebug("logging struct to " + nextID);
             structLog[nextID] = structureData;
             
             numberOfLoggedStructs++;
@@ -501,7 +502,7 @@ public class WorldGen implements Runnable {
                 // add a barrier to the left world border
                 if (!isLeftBarrierAdded) {
                     w.barrierX = structLog[getElementID(0)][0];
-                    Logger.log("+barrier at " + w.barrierX);
+                    logDebug("barrier: x=" + w.barrierX);
                     landscape.addSegment(FXVector.newVector(w.barrierX, -10000), FXVector.newVector(w.barrierX, 10000), (short) 1);
                     structLog[getElementID(1)][2] += 1;
                     isLeftBarrierAdded = true;
@@ -537,8 +538,14 @@ public class WorldGen implements Runnable {
             } catch(NullPointerException ex) {
                 Logger.enableOnScreenLog(GraphicsWorld.scHeight);
                 Logger.log(ex);
-                Logger.log("structLog:critical err");
+                Logger.logErr("structLog:critical err");
                 return false;
+            }
+        }
+
+        private void logDebug(String message) {
+            if (DEBUG) {
+                Logger.log(message);
             }
         }
     }
