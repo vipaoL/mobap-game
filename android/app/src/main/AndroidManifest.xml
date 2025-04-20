@@ -13,6 +13,18 @@
         tools:targetApi="35"
         android:appCategory="game">
 
+        <provider
+            android:name=".MobappDocumentsProvider"
+            android:authorities="mobapp.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS"
+            android:enabled="@bool/isAtLeastKitKat">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
         <activity
             android:name="GameActivity"
             android:exported="true"
