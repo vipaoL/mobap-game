@@ -9,6 +9,7 @@ import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.RootContainer;
+import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.Keys;
 import utils.MgStruct;
 
@@ -70,12 +71,15 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         	setStateFor(STATE_INACTIVE, 4);
         }
         isInited = true;
+    }
+
+    public void postInit() {
         if (menuThread == null) {
-	        menuThread = new Thread(this, "menu canvas");
-	        menuThread.start();
+            menuThread = new Thread(this, "menu canvas");
+            menuThread.start();
         }
     }
-    
+
     public void run() {
         long sleep = 0; // for FPS/TPS control
         long start = 0; //
