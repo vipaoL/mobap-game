@@ -26,8 +26,8 @@ import mobileapplication3.ui.UIComponent;
  * @author vipaol
  */
 public class About extends AbstractPopupPage {
-    private static final String LINK = "https://github.com/vipaoL/mobapp-editor";
-    private static final String LINK_PREVIEW = "vipaoL/mobapp-editor";
+    private static final String LINK = "https://github.com/vipaoL/mobap-game";
+    private static final String LINK_PREVIEW = "vipaoL/mobap-game";
     private static final String LINK2 = "https://t.me/mobapp_game";
     private static final String LINK2_PREVIEW = "@mobapp_game";
 
