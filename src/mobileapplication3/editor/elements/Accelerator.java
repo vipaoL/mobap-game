@@ -23,7 +23,7 @@ public class Accelerator extends AbstractRectBodyElement {
             blue = 50;
         }
         if (!drawAsSelected) {
-        	g.setColor(red, 0, blue);
+        	g.setColor(red, blue, blue);
         } else {
         	g.setColor(getSuitableColor(drawAsSelected));
         }
