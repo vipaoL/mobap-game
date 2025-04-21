@@ -90,7 +90,13 @@ public class BrokenLine extends Line {
         return super.getExtraEditingSteps();
     }
     
-    public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness) {
+    public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
+        if (!drawAsSelected) {
+            g.setColor(0xffffff);
+        } else {
+            g.setColor(getSuitableColor(true));
+        }
+
         int dx = x2 - x1;
         int dy = y2 - y1;
                 
@@ -113,7 +119,7 @@ public class BrokenLine extends Line {
                     true,
                     true,
                     false,
-                    true);
+                    false);
         }
     }
     
