@@ -464,7 +464,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                        	// set motor power according to car speed
 	                            // (start quickly and limit max speed)
 	                            if (currentEffects[EFFECT_SPEED] != null) {
-	                                if (currentEffects[EFFECT_SPEED][0] > 0) {
+	                                if (currentEffects[EFFECT_SPEED][0] > 0 && currentEffects[EFFECT_SPEED][2] != 0) {
 	                                    vX = vX * 100 / currentEffects[EFFECT_SPEED][2];
 	                                    vY = vY * 100 / currentEffects[EFFECT_SPEED][2];
 	                                }
