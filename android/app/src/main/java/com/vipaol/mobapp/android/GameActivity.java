@@ -9,6 +9,7 @@ import android.os.Bundle;
 import java.util.Objects;
 
 import mobileapplication3.game.MenuCanvas;
+import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.MobappActivity;
 import mobileapplication3.platform.ui.RootContainer;
@@ -18,6 +19,10 @@ import utils.MobappGameSettings;
 
 public class GameActivity extends MobappActivity {
     private IUIComponent root = new MenuCanvas();
+
+    public GameActivity() {
+        Logger.logToStdout(true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
