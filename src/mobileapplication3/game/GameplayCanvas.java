@@ -446,7 +446,18 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	
 	                    // getting car angle
 	                    carAngle = 360 - FXUtil.angleInDegrees2FX(world.carbody.rotation2FX());
-	
+
+						FXVector carVelocityFX = world.carbody.velocityFX();
+						int vX = carVelocityFX.xAsInt();
+						int vY = carVelocityFX.yAsInt();
+
+						if (WorldGen.isEnabled && vY < 0) {
+							int d = worldgen.lastY - world.carY - 7000;
+							if (d > 1) {
+								world.carbody.applyMomentum(new FXVector(0, FXUtil.divideFX(carVelocityFX.yFX, FXUtil.toFX(-Math.max(100000 / d, 1)))));
+							}
+						}
+
 	                    // Gas and brake
 						boolean isNotFlying = timeFlying <= 2;
 						if (motorTurnedOn) {
@@ -455,9 +466,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                        if (isNotFlying || uninterestingDebug) {
 	                        	// set motor power according to car speed
 	                            // (start quickly and limit max speed)
-	                            FXVector velFX = world.carbody.velocityFX();
-	                            int vX = velFX.xAsInt();
-	                            int vY = velFX.yAsInt();
 	                            if (currentEffects[EFFECT_SPEED] != null) {
 	                                if (currentEffects[EFFECT_SPEED][0] > 0) {
 	                                    vX = vX * 100 / currentEffects[EFFECT_SPEED][2];
