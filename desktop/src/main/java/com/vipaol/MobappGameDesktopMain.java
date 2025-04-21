@@ -6,6 +6,7 @@ import joptsimple.OptionSpec;
 import mobileapplication3.game.DebugMenu;
 import mobileapplication3.game.MenuCanvas;
 import mobileapplication3.platform.FileUtils;
+import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.MobappDesktopMain;
 import mobileapplication3.platform.PlatformSettings;
 import mobileapplication3.platform.ui.RootContainer;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 
 public class MobappGameDesktopMain extends MobappDesktopMain {
     public static void main(String[] args) {
+        Logger.logToStdout(true);
         parseArgs(args);
         new MobappGameDesktopMain(args);
     }
