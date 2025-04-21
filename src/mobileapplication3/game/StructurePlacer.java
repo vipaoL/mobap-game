@@ -21,7 +21,7 @@ public class StructurePlacer {
         return WorldGen.concatArrays(new int[] {x + data[0][1], y + data[0][2], elementPlacer.getLineCount(), STRUCTURE_ID_UNKNOWN}, elementPlacer.getDrawingData());
     }
 
-    public static int[] arc1(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int r, int va) { // id0
+    public static int[] arc1(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int r) { // id0
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
         int endX = x;
 
@@ -29,7 +29,7 @@ public class StructurePlacer {
         int r2 = r*3/2;
 
         elementPlacer.arc(x - r, y - r2, r2, 60, 30);
-        elementPlacer.arc(x+r/2, y-r*2, r, 300, va);
+        elementPlacer.arc(x+r/2, y-r*2, r, 300, 120);
         int ofs = (1000 - Mathh.cos(30))*2*r2/1000;
         elementPlacer.arc(x+r*2-ofs, y-r2, r2, 60, 90);
 

@@ -179,7 +179,7 @@ public class WorldGen implements Runnable {
             } else {
                 switch (nextStructRandomId) {
                     case StructurePlacer.STRUCTURE_ID_ARC1:
-                        structData = StructurePlacer.arc1(w, isResettingPosition, lastX, lastY, 200 + Math.abs(rand.nextInt()) % 400, 120);
+                        structData = StructurePlacer.arc1(w, isResettingPosition, lastX, lastY, 200 + Math.abs(rand.nextInt()) % 400);
                         break;
                     case StructurePlacer.STRUCTURE_ID_SIN:
                         int halfPeriods = 4 + rand.nextInt(8);
