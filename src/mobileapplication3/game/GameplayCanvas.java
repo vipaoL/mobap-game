@@ -677,7 +677,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 							break;
 						case MUserData.TYPE_LAVA:
 							world.destroyCar();
-							stop(true, false, 1000);
+							stop(true, false);
 							break;
                     }
                 }
