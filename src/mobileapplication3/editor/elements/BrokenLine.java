@@ -110,7 +110,7 @@ public class BrokenLine extends Line {
                     yToPX(y1 + (i + 1) * platfDy - spY, zoomOut, offsetY),
                     thickness,
                     zoomOut,
-                    drawThickness,
+                    true,
                     true,
                     false,
                     true);

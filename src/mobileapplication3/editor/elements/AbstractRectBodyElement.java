@@ -72,7 +72,7 @@ public abstract class AbstractRectBodyElement extends Element {
                 yToPX(y + dy/2, zoomOut, offsetY),
                 thickness,
                 zoomOut,
-                drawThickness,
+                true,
                 true,
                 false,
                 false);
