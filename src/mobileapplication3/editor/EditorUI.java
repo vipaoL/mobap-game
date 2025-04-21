@@ -15,7 +15,9 @@ import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
+import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.AbstractButtonSet;
+import mobileapplication3.ui.BackButton;
 import mobileapplication3.ui.Button;
 import mobileapplication3.ui.ButtonCol;
 import mobileapplication3.ui.ButtonComponent;
@@ -45,23 +47,18 @@ public class EditorUI extends Container {
 
     private boolean isAutoSaveEnabled = false;
     private final int mode;
+    private boolean viewMode = false;
 
     public EditorUI(int editorMode) {
     	mode = editorMode;
     	elementsBuffer = new StructureBuilder(mode) {
             public void onUpdate() {
-                initListPanel();
-                saveToAutoSave();
+                try {
+                    initListPanel();
+                    saveToAutoSave();
+                } catch (NullPointerException ignored) { }
             }
         };
-
-        initEditorCanvas();
-        initBottomPanel();
-        initStartPointWarning();
-        initPlacementPanel();
-        initListPanel();
-
-    	setComponents(new IUIComponent[]{editorCanvas, startPointWarning, placementButtonPanel, placedElementsList, bottomButtonPanel});
 	}
 
     public EditorUI(int editorMode, Element[] elements, String path) {
@@ -71,8 +68,16 @@ public class EditorUI extends Container {
 	}
 
     public void init() {
+        super.init();
+
     	isAutoSaveEnabled = EditorSettings.getAutoSaveEnabled(true);
-    	super.init();
+        initEditorCanvas();
+        initBottomPanel();
+        initStartPointWarning();
+        initPlacementPanel();
+        initListPanel();
+
+        setComponents(new IUIComponent[]{editorCanvas, startPointWarning, placementButtonPanel, placedElementsList, bottomButtonPanel});
     }
 
     public void onSetBounds(int x0, int y0, int w, int h) {
@@ -129,6 +134,11 @@ public class EditorUI extends Container {
 
     public int getMode() {
         return mode;
+    }
+
+    public EditorUI setViewMode(boolean viewMode) {
+        this.viewMode = viewMode;
+        return this;
     }
 
     public void saveToFile(String path) throws SecurityException, IOException {
@@ -189,7 +199,12 @@ public class EditorUI extends Container {
             }
         };
 
-		Button[] bottomButtons = {placeButton, menuButton, zoomInButton, zoomOutButton, editButton};
+        BackButton backButton = new BackButton(RootContainer.getInst());
+        backButton.setTitle("Back");
+
+        Button[] bottomButtons = viewMode ?
+                new Button[] {menuButton, backButton} :
+                new Button[] {placeButton, menuButton, zoomInButton, zoomOutButton, editButton};
         bottomButtonPanel = (ButtonRow) new ButtonRow()
                 .setButtons(bottomButtons)
                 .setButtonsBgColor(BG_COLOR_HIGHLIGHTED);
