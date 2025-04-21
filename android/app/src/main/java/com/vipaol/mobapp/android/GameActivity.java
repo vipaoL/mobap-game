@@ -1,22 +1,39 @@
 package com.vipaol.mobapp.android;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 
+import java.util.Objects;
+
 import mobileapplication3.game.MenuCanvas;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.MobappActivity;
+import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.UISettings;
 import utils.MobappGameSettings;
 
 public class GameActivity extends MobappActivity {
+    private IUIComponent root = new MenuCanvas();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // handle file open intents
+        try {
+            Intent intent = getIntent();
+            if (Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
+                root = IntentsUtil.handleFileOpenIntent(intent, this);
+                RootContainer.setRootUIComponent(root);
+            }
+        } catch (Throwable ex) {
+            Platform.showError(ex);
+        }
+
         // ------- migrate records to use a unified way to storing them
         try {
             // try to read from the new storage
@@ -44,7 +61,7 @@ public class GameActivity extends MobappActivity {
 
     @Override
     protected IUIComponent getRootUIComponent() {
-        return new MenuCanvas();
+        return root;
     }
 
     @Override
