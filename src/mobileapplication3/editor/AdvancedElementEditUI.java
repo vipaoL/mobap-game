@@ -32,6 +32,7 @@ public class AdvancedElementEditUI extends AbstractPopupPage {
                 	if (element.getID() != Element.END_POINT) {
                 		sb.recalculateEndPoint();
                 	}
+					sb.onUpdate();
                     close();
                 }
             },
