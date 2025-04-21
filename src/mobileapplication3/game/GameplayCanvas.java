@@ -125,8 +125,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	private boolean openMenu;
 
     public GameplayCanvas() {
-        loadingProgress = 5;
-        log("gcanvas constructor");
+        log("game: constructor");
         repaintOnlyOnFlushGraphics = true;
     }
     
@@ -233,8 +232,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
             boolean wasPaused = true;
             tickTime = TICK_DURATION;
-            int prevTickTime = TICK_DURATION;
-			int physicsIterationsSetting = MobappGameSettings.DEFAULT_PHYSICS_PRECISION;
+            int physicsIterationsSetting = MobappGameSettings.DEFAULT_PHYSICS_PRECISION;
 			boolean lockPhysicsPrecision;
 			boolean dynamicPhysicsPrecision;
 			int maxFrameTime = MobappGameSettings.DEFAULT_FRAME_TIME;
@@ -268,10 +266,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             currentEffects = new short[1][];
             
             setLoadingProgress(80);
-
-            long sleep = 0;
-            long start = 0;
-            int bigTickN = 0;
 
             // init music player if enabled
             if (DebugMenu.music) {
@@ -307,7 +301,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				for (int i = 0; !hasParent() && i < 30; i++) {
 					Thread.sleep(100);
 				}
-			} catch (InterruptedException e) { }
+			} catch (InterruptedException ignored) { }
+
+			long sleep;
+			long start = System.currentTimeMillis();
+			int bigTickN = 0;
 
             // Main game cycle
             while (!stopped && hasParent()) {
@@ -351,8 +349,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                        wasPaused = false;
 	                    }
 
-						prevTickTime = tickTime;
-	                    start = System.currentTimeMillis();
+                        start = System.currentTimeMillis();
 	
 	                    // Tick and draw
 						Contact[][] carContacts = getCarContacts();
@@ -473,19 +470,19 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                                }
 	                            }
 
-                                int speedMultipiler;
+                                int speedMultiplier;
                                 if (uninterestingDebug) {
-	                                speedMultipiler = 250000;
+	                                speedMultiplier = 250000;
 	                            } else {
 		                            carVelocitySqr = (vX * vX + vY * vY) / 4;
 		                            if (carVelocitySqr > 1000000) {
-		                                speedMultipiler = 16000;
+		                                speedMultiplier = 16000;
 		                                speedoState = 2;
 		                            } else if (carVelocitySqr > 100000) {
-		                                speedMultipiler = 123000;
+		                                speedMultiplier = 123000;
 		                                speedoState = 1;
 		                            } else {
-		                                speedMultipiler = 160000;
+		                                speedMultiplier = 160000;
 		                                speedoState = 0;
 		                            }
 	                            }
@@ -494,11 +491,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                            if (currentEffects[EFFECT_SPEED] != null) {
 	                                if (currentEffects[EFFECT_SPEED][0] > 0) {
 	                                    directionOffset = currentEffects[EFFECT_SPEED][1];
-	                                    speedMultipiler = speedMultipiler * currentEffects[EFFECT_SPEED][2] / 100;
+	                                    speedMultiplier = speedMultiplier * currentEffects[EFFECT_SPEED][2] / 100;
 	                                }
 	                            }
-	                            int motorForceX = Mathh.cos(carAngle - 15 + directionOffset) * speedMultipiler / 50;
-	                            int motorForceY = Mathh.sin(carAngle - 15 + directionOffset) * speedMultipiler / -50;
+	                            int motorForceX = Mathh.cos(carAngle - 15 + directionOffset) * speedMultiplier / 50;
+	                            int motorForceY = Mathh.sin(carAngle - 15 + directionOffset) * speedMultiplier / -50;
 	                            world.carbody.applyMomentum(new FXVector(convertByTimestep(motorForceX), convertByTimestep(motorForceY)));
 
 	                            if ((!leftWheelContacts && carBodyContacts) || rightWheelContacts) {
@@ -1002,9 +999,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         int id = data[0];
         int dataLength = data.length - 1;
         currentEffects[id] = new short[dataLength];
-        for (int i = 1; i < data.length; i++) {
-            currentEffects[id][i - 1] = data[i];
-        }
+        System.arraycopy(data, 1, currentEffects[id], 0, data.length - 1);
     }
     
     private void gameOver() {
@@ -1100,11 +1095,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             	if (worldgen != null) {
             		worldgen.stop();
             	}
-                boolean successed = gameThread == null;
-                while (!successed) {
+                boolean succeed = gameThread == null;
+                while (!succeed) {
                     try {
                         gameThread.join();
-                        successed = true;
+                        succeed = true;
                     } catch (InterruptedException ex) {
 						Logger.log(ex);
                     }
