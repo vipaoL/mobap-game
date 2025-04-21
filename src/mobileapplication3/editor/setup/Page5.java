@@ -7,6 +7,7 @@ package mobileapplication3.editor.setup;
 
 import mobileapplication3.editor.EditorSettings;
 import mobileapplication3.platform.FileUtils;
+import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.AbstractPopupPage;
@@ -75,23 +76,24 @@ public class Page5 extends AbstractSetupWizardPage {
     private void saveFolderChoice(final String path) {
         showPopup(new LoadingPopup("Checking folder...", this));
         (new Thread(new Runnable() {
-        	String subFolderPath;
+        	String folderPath;
             public void run() {
-            	subFolderPath = null;
+            	folderPath = null;
                 try {
-                	subFolderPath = EditorSettings.getStructsFolderPath(path);
-                    FileUtils.createFolder(subFolderPath);
+                	folderPath = EditorSettings.getStructsFolderPath(path);
+                    FileUtils.createFolder(folderPath);
                 } catch (Throwable ex) {
                     closePopup();
-                    Platform.showError("Can't create folder " + subFolderPath + ": ", ex);
+                    Platform.showError("Can't create folder \"" + folderPath + ": ", ex);
                 }
-                subFolderPath = null;
+                folderPath = null;
                 try {
-                	subFolderPath = EditorSettings.getLevelsFolderPath(path);
-                    FileUtils.createFolder(subFolderPath);
+                	folderPath = EditorSettings.getLevelsFolderPath(path);
+                    Logger.log("creating subfolder: " + folderPath);
+                    FileUtils.createFolder(folderPath);
                 } catch (Throwable ex) {
                     closePopup();
-                    Platform.showError("Can't create folder " + subFolderPath + ":", ex);
+                    Platform.showError("Can't create folder \"" + folderPath + "\": ", ex);
                 }
                 try {
                     FileUtils.checkFolder(path);
@@ -99,7 +101,7 @@ public class Page5 extends AbstractSetupWizardPage {
                     feedback.nextPage();
                 } catch (Exception ex) {
                     closePopup();
-                    Platform.showError("Can't create file in this folder: " + ex);
+                    Platform.showError("Can't create file in this folder: ", ex);
                 }
             }
         })).start();
