@@ -101,7 +101,7 @@ public class Accelerator extends AbstractRectBodyElement {
 						return 360;
 					}
 				},
-				new Property("Speed multiplier") {
+				new Property("Speed multiplier (percents)") {
 					public void setValue(short value) {
 						m = value;
 					}
@@ -111,11 +111,11 @@ public class Accelerator extends AbstractRectBodyElement {
 					}
 
 					public short getMinValue() {
-						return (short) -getMaxValue();
+						return 0;
 					}
 
 					public short getMaxValue() {
-						return 2048;
+						return 1000;
 					}
 				},
 				new Property("Effect duration (ticks)") {
