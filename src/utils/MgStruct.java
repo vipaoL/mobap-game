@@ -67,7 +67,9 @@ public class MgStruct {
             try {
             	saveStructToStorage(readFromDataInputStream(dis));
             } finally {
-				dis.close();
+                try {
+                    dis.close();
+                } catch (IOException ignored) { }
 			}
             return true;
         } catch (Exception ex) {
