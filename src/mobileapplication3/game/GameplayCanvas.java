@@ -955,10 +955,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
 	private void drawDebugText(Graphics g, String str) {
-		if (DebugMenu.isDebugEnabled) {
-			g.drawString(str, 0, debugTextOffset, 0);
-			debugTextOffset += currentFontH;
-		}
+		g.drawString(str, 0, debugTextOffset, 0);
+		debugTextOffset += currentFontH;
 	}
 
 	private void drawLoading(Graphics g) {
