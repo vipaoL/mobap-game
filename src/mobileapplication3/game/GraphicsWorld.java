@@ -692,6 +692,9 @@ public class GraphicsWorld extends World {
                 zoomOut += 1;
             }
             zoomOut += zoomOutBase;
+            if (Math.abs(zoomOut) < 500000 / scMinSide) {
+            	zoomOut = 500000 / scMinSide * Mathh.sign(zoomOut);
+            }
         }
         
         // for timely track generation and deleting waste objects
