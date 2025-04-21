@@ -43,7 +43,7 @@ public class EditorUI extends Container {
     private StartPointWarning startPointWarning = null;
     private final StructureBuilder elementsBuffer;
 
-    private boolean isAutoSaveEnabled = true;    
+    private boolean isAutoSaveEnabled = false;
     private final int mode;
 
     public EditorUI(int editorMode) {
