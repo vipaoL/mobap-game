@@ -3,6 +3,10 @@ package com.vipaol;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import mobileapplication3.editor.EditorSettings;
+import mobileapplication3.editor.EditorUI;
+import mobileapplication3.editor.MGStructs;
+import mobileapplication3.editor.elements.Element;
 import mobileapplication3.game.DebugMenu;
 import mobileapplication3.game.MenuCanvas;
 import mobileapplication3.platform.FileUtils;
@@ -10,17 +14,22 @@ import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.MobappDesktopMain;
 import mobileapplication3.platform.PlatformSettings;
 import mobileapplication3.platform.ui.RootContainer;
+import mobileapplication3.ui.IUIComponent;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 public class MobappGameDesktopMain extends MobappDesktopMain {
+
+    private IUIComponent root = new MenuCanvas();
+
     public static void main(String[] args) {
-        parseArgs(args);
         new MobappGameDesktopMain(args);
     }
 
-    private static void parseArgs(String[] args) {
+    private void parseArgs(String[] args) {
         OptionParser parser = new OptionParser();
         OptionSpec<Void> debug = parser.acceptsAll(Arrays.asList("debug", "d"), "Enable debug mode");
         OptionSpec<Void> verbose = parser.acceptsAll(Arrays.asList("verbose", "v"), "Print logs to stdout");
@@ -35,6 +44,9 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
         OptionSpec<Void> fullscreenMode = parser.accepts("fullscreen", "Enable fullscreen mode");
         OptionSpec<Void> disableFullscreenMode = parser.accepts("no-fullscreen", "Disable fullscreen mode");
         parser.acceptsAll(Arrays.asList("help", "h", "?"), "Show help").forHelp();
+        parser.nonOptions("Path to level or structure to open in view mode")
+                .ofType(File.class)
+                .describedAs("*.mgstruct or *.mglvl");
 
         try {
             OptionSet options = parser.parse(args);
@@ -53,7 +65,16 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
             if (options.has(fontSize)) {
                 PlatformSettings.setFontSizeOverride(options.valueOf(fontSize));
             }
+            List<File> nonOptions = (List<File>) options.nonOptionArguments();
+            if (nonOptions != null && !nonOptions.isEmpty()) {
+                if (nonOptions.size() > 1) {
+                    throw new IllegalArgumentException("Too many arguments");
+                } else {
+                    root = openFile(nonOptions.get(0));
+                }
+            }
         } catch (Exception e) {
+            Logger.log(e);
             System.err.println("Error: " + e.getMessage());
             System.out.println();
             try {
@@ -65,8 +86,23 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
         }
     }
 
+    private static IUIComponent openFile(File file) {
+        Element[] elements = MGStructs.readMGStruct(file.getPath());
+        if (elements == null) {
+            elements = new Element[0];
+        }
+        String name = file.getName();
+        int mode = name.endsWith(".mgstruct") ? EditorUI.MODE_STRUCTURE : EditorUI.MODE_LEVEL;
+        String newPath = (mode == EditorUI.MODE_STRUCTURE ?
+                EditorSettings.getStructsFolderPath() :
+                EditorSettings.getLevelsFolderPath())
+                + FileUtils.SEP + name;
+        return new EditorUI(mode, elements, newPath).setViewMode(true);
+    }
+
     public MobappGameDesktopMain(String[] args) {
         super(args);
-        RootContainer.setRootUIComponent(new MenuCanvas());
+        parseArgs(args);
+        RootContainer.setRootUIComponent(root);
     }
 }
