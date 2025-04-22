@@ -6,6 +6,7 @@ import joptsimple.OptionSpec;
 import mobileapplication3.game.DebugMenu;
 import mobileapplication3.game.MenuCanvas;
 import mobileapplication3.platform.FileUtils;
+import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.MobappDesktopMain;
 import mobileapplication3.platform.PlatformSettings;
 import mobileapplication3.platform.ui.RootContainer;
@@ -22,6 +23,7 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
     private static void parseArgs(String[] args) {
         OptionParser parser = new OptionParser();
         OptionSpec<Void> debug = parser.acceptsAll(Arrays.asList("debug", "d"), "Enable debug mode");
+        OptionSpec<Void> verbose = parser.acceptsAll(Arrays.asList("verbose", "v"), "Print logs to stdout");
         OptionSpec<String> workdirOpt = parser.accepts("workdir", "Directory for game settings, records and custom content")
                 .withRequiredArg()
                 .describedAs("directory")
@@ -41,6 +43,7 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 System.exit(0);
             }
             DebugMenu.isDebugEnabled = options.has(debug);
+            Logger.logToStdout(options.has(verbose));
             FileUtils.setStoragePath(options.valueOf(workdirOpt));
             if (options.has(fullscreenMode)) {
                 PlatformSettings.setFullscreenModeOverride(true);
