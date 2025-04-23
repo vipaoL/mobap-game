@@ -25,12 +25,13 @@ import utils.MobappGameSettings;
  * @author vipaol
  */
 public class GraphicsWorld extends World {
-	
+
+    public static int DEFAULT_LANDSCAPE_COLOR = 0x4444ff;
 	private static final int BIG_SCREEN_SIDE = 480;
 	private static final int CAR_COLLISION_LAYER = 1;
 
     public int colBg = 0x000000;
-    public int colLandscape = 0x4444ff;
+    public int colLandscape = DEFAULT_LANDSCAPE_COLOR;
     int colBodies = 0xffffff;
     int currColBg;
     int currColWheel;
@@ -665,6 +666,7 @@ public class GraphicsWorld extends World {
         bg = bgOverride;
         try {
             betterGraphics = MobappGameSettings.isBetterGraphicsEnabled(Math.max(scWidth, scHeight) >= BIG_SCREEN_SIDE);
+            currColLandscape = colLandscape = MobappGameSettings.getLandscapeColor();
             bg = bg || MobappGameSettings.isBGEnabled(false);
             legacyDrawingMethod = MobappGameSettings.isLegacyDrawingMethodEnabled(false);
         } catch (Throwable ex) {

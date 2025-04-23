@@ -1,5 +1,6 @@
 package utils;
 
+import mobileapplication3.game.GraphicsWorld;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Settings;
@@ -10,6 +11,7 @@ public class MobappGameSettings {
 		    IS_SETUP_WIZARD_COMPLETED = "wizardCompleted",
 			MGSTRUCTS_FOLDER_PATH = "mgPath",
 		    IS_BETTER_GRAPHICS_ENABLED = "btrGr",
+            LANDSCAPE_COLOR = "landscapeCol",
             LEGACY_DRAWING_METHOD = "oldDrawing",
             PHYSICS_PRECISION = "PhyPrecision",
             DETAIL_LEVEL = "DetailLvl",
@@ -38,6 +40,7 @@ public class MobappGameSettings {
     	            IS_SETUP_WIZARD_COMPLETED,
     	            MGSTRUCTS_FOLDER_PATH,
     	            IS_BETTER_GRAPHICS_ENABLED,
+                    LANDSCAPE_COLOR,
                     LEGACY_DRAWING_METHOD,
                     PHYSICS_PRECISION,
                     DETAIL_LEVEL,
@@ -107,21 +110,31 @@ public class MobappGameSettings {
     public static boolean isBetterGraphicsEnabled() {
         return getSettingsInst().getBool(IS_BETTER_GRAPHICS_ENABLED);
     }
-    
+
     public static boolean isBetterGraphicsEnabled(boolean defaultValue) {
         return getSettingsInst().getBool(IS_BETTER_GRAPHICS_ENABLED, defaultValue);
     }
-    
+
     public static void setBetterGraphicsEnabled(boolean b) {
     	getSettingsInst().set(IS_BETTER_GRAPHICS_ENABLED, b);
     }
-    
+
     public static boolean toggleBetterGraphics() {
     	return getSettingsInst().toggleBool(IS_BETTER_GRAPHICS_ENABLED);
     }
-    
+
     ///
-    
+
+    public static int getLandscapeColor() {
+        return getSettingsInst().getInt(LANDSCAPE_COLOR, GraphicsWorld.DEFAULT_LANDSCAPE_COLOR);
+    }
+
+    public static void setLandscapeColor(int value) {
+        getSettingsInst().set(LANDSCAPE_COLOR, String.valueOf(value));
+    }
+
+    ///
+
     public static String getMgstructsFolderPath() {
         if (mgstructsFolderPath == null) {
             mgstructsFolderPath = getSettingsInst().getStr(MGSTRUCTS_FOLDER_PATH);

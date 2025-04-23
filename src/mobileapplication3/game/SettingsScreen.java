@@ -12,11 +12,14 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             FRAME_TIME = 2,
             HI_RES_GRAPHICS = 3,
             SHOW_FPS = 4,
-            BG = 5,
+            LANDSCAPE_COLOR = 5,
             BATTERY = 6,
             DEBUG = 7,
             ABOUT = 8,
             BACK = 9;
+
+    private static final int[] LANDSCAPE_COLORS = {GraphicsWorld.DEFAULT_LANDSCAPE_COLOR, 0xaaaaff, 0xffffff, 0x44ff44, 0xff4444};
+    private static final String[] LANDSCAPE_COLOR_NAMES = {"blue", "light blue", "white", "green", "red"};
 
     private static String[] menuOpts = new String[BACK + 1];
         
@@ -106,8 +109,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 case SHOW_FPS:
                 	MobappGameSettings.toggleFPSShown();
                 	break;
-                case BG:
-                	MobappGameSettings.toggleBG();
+                case LANDSCAPE_COLOR:
+                    MobappGameSettings.setLandscapeColor(LANDSCAPE_COLORS[(findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor()) + 1) % LANDSCAPE_COLORS.length]);
                 	break;
                 case BATTERY:
                 	if (!MobappGameSettings.isBattIndicatorEnabled()) {
@@ -163,7 +166,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             menuOpts[FRAME_TIME] = "FPS: " + round(1000f / frameTime) + " (" + frameTime + "ms/frame)";
             menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
             menuOpts[SHOW_FPS] = "Show FPS";
-            menuOpts[BG] = "Enable background";
+            menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor())];
             menuOpts[BATTERY] = "Show battery level";
             menuOpts[DEBUG] = "Debug settings";
             menuOpts[ABOUT] = "About";
@@ -173,7 +176,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             setEnabledFor(MobappGameSettings.isLegacyDrawingMethodEnabled(), LEGACY_DRAWING_METHOD);
         	setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), HI_RES_GRAPHICS);
         	setEnabledFor(MobappGameSettings.isFPSShown(), SHOW_FPS);
-        	setEnabledFor(MobappGameSettings.isBGEnabled(), BG);
+            setEnabledFor(findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor()) != 0, LANDSCAPE_COLOR);
         	if (!batFailed) {
         		setEnabledFor(MobappGameSettings.isBattIndicatorEnabled(), BATTERY);
         	} else {
@@ -184,5 +187,14 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         // round to two decimal places
         private double round(float d) {
             return (Math.floor(d * 100 + 0.5)) / 100;
+        }
+
+        private int findArrayIndex(int[] arr, int a) {
+            for (int i = 0; i < arr.length; i++) {
+                if (arr[i] == a) {
+                    return i;
+                }
+            }
+            return 0;
         }
     }
