@@ -81,6 +81,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int tickTime;
     private int fps;
     private int tps;
+	private int physicsIterations;
 	private int debugTickTime, debugPaintTime;
     private String statusMessage = null;
 
@@ -247,7 +248,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     		}
 			dynamicPhysicsPrecision = physicsIterationsSetting == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
 			lockPhysicsPrecision = !dynamicPhysicsPrecision && physicsIterationsSetting != MobappGameSettings.AUTO_PHYSICS_PRECISION;
-            int physicsIterations = physicsIterationsSetting;
+            physicsIterations = physicsIterationsSetting;
 			if (physicsIterations <= 0) {
 				physicsIterations = 2;
 			}
@@ -867,7 +868,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 }
 				drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
 			}
-			drawDebugText(g, "physics: " + debugTickTime + ", paint: " + debugPaintTime);
+			drawDebugText(g, "physics: " + debugTickTime + "ms, paint: " + debugPaintTime + "ms");
         }
         // show coordinates of car if enabled
         if (DebugMenu.coordinates) {
@@ -883,7 +884,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     g.setColor(255, 0, 0);
                 }
             }
-			drawDebugText(g, "FPS:" + fps + " TPS:" + tps);
+			drawDebugText(g, "FPS:" + fps + " TPS:" + tps + " t/f=" + physicsIterations);
 		}
 
         try {
