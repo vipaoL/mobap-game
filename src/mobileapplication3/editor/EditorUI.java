@@ -203,7 +203,7 @@ public class EditorUI extends Container {
         backButton.setTitle("Back");
 
         Button[] bottomButtons = viewMode ?
-                new Button[] {menuButton, backButton} :
+                new Button[] {menuButton, zoomInButton, zoomOutButton, backButton} :
                 new Button[] {placeButton, menuButton, zoomInButton, zoomOutButton, editButton};
         bottomButtonPanel = (ButtonRow) new ButtonRow()
                 .setButtons(bottomButtons)
