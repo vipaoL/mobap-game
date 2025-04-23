@@ -4,14 +4,7 @@ import mobileapplication3.editor.AutoSaveUI.AutoSaveData;
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.RootContainer;
-import mobileapplication3.ui.BackButton;
-import mobileapplication3.ui.Button;
-import mobileapplication3.ui.ButtonCol;
-import mobileapplication3.ui.Container;
-import mobileapplication3.ui.IPopupFeedback;
-import mobileapplication3.ui.IUIComponent;
-import mobileapplication3.ui.TextComponent;
-import mobileapplication3.ui.UIComponent;
+import mobileapplication3.ui.*;
 
 public class MainMenu extends Container {
 	private final TextComponent title;
@@ -30,32 +23,33 @@ public class MainMenu extends Container {
 		final MainMenu inst = this;
 		title = new TextComponent("Mobapp Editor");
 		logo = About.getAppLogo();
+		int c = Keys.KEY_NUM1;
 		buttons = new ButtonCol(new Button[] {
 				new Button("Structures") {
 					public void buttonPressed() {
 						showPopup(new StructuresMenu(inst));
 					}
-				}.setBgColor(BG_COLOR_HIGHLIGHTED),
+				}.setBgColor(BG_COLOR_HIGHLIGHTED).setBindedKeyCode(c++),
 				new Button("Levels") {
 					public void buttonPressed() {
 						showPopup(new LevelsMenu(inst));
 					}
-				}.setBgColor(BG_COLOR_HIGHLIGHTED),
+				}.setBgColor(BG_COLOR_HIGHLIGHTED).setBindedKeyCode(c++),
 				new Button("Open Game") {
 					public void buttonPressed() {
 						RootContainer.setRootUIComponent(new mobileapplication3.game.MenuCanvas());
 					}
-				}.setBgColor(BG_COLOR_HIGHLIGHTED).setIsActive(gameIncluded),
+				}.setBgColor(BG_COLOR_HIGHLIGHTED).setIsActive(gameIncluded).setBindedKeyCode(c++),
 				new Button("Settings") {
 					public void buttonPressed() {
 						showPopup(new SettingsUI(inst));
 					}
-				},
+				}.setBindedKeyCode(c++),
 				new Button("About") {
 		            public void buttonPressed() {
 		                showPopup(new About(inst));
 		            }
-		        },
+		        }.setBindedKeyCode(c++),
 				new BackButton(parent)
 		});
 		setComponents(new IUIComponent[]{title, logo, buttons});
