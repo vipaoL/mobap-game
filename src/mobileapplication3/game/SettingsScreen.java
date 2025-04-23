@@ -150,7 +150,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
 
         void refreshStates() {
             int physicsPrecision = MobappGameSettings.getPhysicsPrecision();
-            int detailLvl = MobappGameSettings.getDetailLevel();
             int frameTime = MobappGameSettings.getFrameTime();
             menuOpts[PHYSICS_PRECISION] = "Physics precision: ";
             if (physicsPrecision == MobappGameSettings.AUTO_PHYSICS_PRECISION) {
@@ -170,6 +169,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             menuOpts[ABOUT] = "About";
             menuOpts[BACK] = "Back";
             setEnabledFor(physicsPrecision != MobappGameSettings.DEFAULT_PHYSICS_PRECISION, PHYSICS_PRECISION);
+            setEnabledFor(frameTime != MobappGameSettings.DEFAULT_FRAME_TIME, FRAME_TIME);
             setEnabledFor(MobappGameSettings.isLegacyDrawingMethodEnabled(), LEGACY_DRAWING_METHOD);
         	setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), HI_RES_GRAPHICS);
         	setEnabledFor(MobappGameSettings.isFPSShown(), SHOW_FPS);
