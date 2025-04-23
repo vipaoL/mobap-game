@@ -97,6 +97,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     
     // counters
     public int points = 0;
+	private boolean countPoints = true;
     private int damage;
 	private int timeStuck = 0;
     public int timeFlying = 10;
@@ -166,6 +167,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 			carSpawnY = levelData[0][2];
 		}
 		world.removeBodies = false;
+		return this;
+	}
+
+	public GameplayCanvas disablePointCounter() {
+		countPoints = false;
 		return this;
 	}
     
@@ -268,6 +274,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             
             Logger.setLogMessageDelay(50);
             currentEffects = new short[1][];
+
+			if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode) {
+				disablePointCounter();
+			}
             
             setLoadingProgress(80);
 
@@ -967,7 +977,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         
         // score counter and debug posReset indicator
         if (WorldGen.isEnabled && world != null) {
-            g.setColor(flipIndicator, flipIndicator, 255);
+			if (countPoints || flipIndicator < 127) {
+				g.setColor(flipIndicator, flipIndicator, 255);
+			} else {
+				g.setColor(127, 31, 31);
+			}
             setFont(largefont, g);
             g.drawString(String.valueOf(points), scW/2, scH - currentFontH * 3 / 2,
                     Graphics.HCENTER | Graphics.TOP);
@@ -1127,7 +1141,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				stopped = true;
 				isFirstStart = false;
 
-				if (gameMode == GAME_MODE_ENDLESS && !(DebugMenu.isDebugEnabled || DebugMenu.simulationMode)) {
+				if (gameMode == GAME_MODE_ENDLESS && countPoints) {
 					new Thread(new Runnable() {
 						public void run() {
 							try {
