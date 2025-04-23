@@ -86,7 +86,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
         switch (selected) {
             case 0:
                 isDebugEnabled = !isDebugEnabled;
-                showFontSize = isDebugEnabled;
+                coordinates = isDebugEnabled;
                 setIsSpecialOptnActivated(isDebugEnabled);
                 Logger.logToStdout(isDebugEnabled);
                 break;
