@@ -120,7 +120,6 @@ public class MainMenu extends Container {
 					final String path = data.getPath();
 					showPopup(new AutoSaveUI(this, elements) {
 						public void onRestore() {
-							close();
 							RootContainer.setRootUIComponent(new EditorUI(mode, elements, path));
 						};
 	
