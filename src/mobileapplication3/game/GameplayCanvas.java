@@ -452,14 +452,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 						int vX = carVelocityFX.xAsInt();
 						int vY = carVelocityFX.yAsInt();
 
-						if (WorldGen.isEnabled && vY < 0) {
-							int d = worldgen.lastY - world.carY - 7000;
-							if (d > 1) {
-								world.carbody.applyMomentum(new FXVector(0, FXUtil.divideFX(carVelocityFX.yFX, FXUtil.toFX(-Math.max(100000 / d, 1)))));
-							}
-						}
+						limitTopHeight();
 
-	                    // Gas and brake
+						// Gas and brake
 						boolean isNotFlying = timeFlying <= 2;
 						if (motorTurnedOn) {
 	                        ticksMotorTurnedOff = 0;
@@ -627,6 +622,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         Logger.log("game thread stopped");
     }
 
+	private void limitTopHeight() {
+		FXVector carVelocityFX = world.carbody.velocityFX();
+		if (worldgen != null && carVelocityFX.yAsInt() < 0) {
+			int d = worldgen.lastY - world.carY - 7000;
+			if (d > 1) {
+				world.carbody.applyMomentum(new FXVector(0, FXUtil.divideFX(carVelocityFX.yFX, FXUtil.toFX(-Math.max(100000 / d, 1)))));
+			}
+		}
+	}
+
 	private void tickDamage() {
 		// add damage if the car lies upside down or fell out of the world
 		int lowestY = getLowestSafeY();
@@ -755,6 +760,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         } else {
 			world.drawWorld(g, null, 0, 0);
 		}
+
+		limitTopHeight();
 
         if (world.carY > getLowestSafeY()) {
     		if (bgTick % 10 == 0) {
