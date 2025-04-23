@@ -909,6 +909,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
 			}
 			drawDebugText(g, "physics: " + debugTickTime + "ms, paint: " + debugPaintTime + "ms");
+
+			if (flipCounter != null) {
+				int x = world.xToPX(flipCounter.lastFlipX);
+				g.drawLine(x, 0, x, h);
+			}
         }
         // show coordinates of car if enabled
         if (DebugMenu.coordinates) {
@@ -1171,8 +1176,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
 
-	public void onPosReset() {
+	public void onPosReset(int dx) {
 		posResetIndicator = 255;
+		if (flipCounter != null) {
+			flipCounter.onPosReset(dx);
+		}
 	}
 
     public void onHide() {
@@ -1306,6 +1314,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         int step = 0;
         boolean flipDirection = false;
         boolean prevFlipDirection = false;
+		int lastFlipX = -3000;
 
         void tick() {
             if (DebugMenu.dontCountFlips) {
@@ -1320,16 +1329,18 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             int ang = carAngle;
             boolean isInNormalPos = ang < 45 || ang > 315;
             if (isInNormalPos && step % 2 == 0) {
-                step++;
-                if (step > 1) {
-                    if (flipDirection) {
-                        if ((step - 1) % 4 == 0) {
-                            afterFlip();
-                        }
-                    } else {
-                        afterFlip();
-                    }
-                }
+				if (world.carX > lastFlipX || step < 1) {
+					step++;
+					if (step > 1) {
+						if (flipDirection) {
+							if ((step - 1) % 4 == 0) {
+								afterFlip();
+							}
+						} else {
+							afterFlip();
+						}
+					}
+				}
             } else if (!isInNormalPos && step % 2 != 0) {
                 step++;
             }
@@ -1339,6 +1350,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         public void afterFlip() {
             flipIndicator = 0;
             points++;
+			lastFlipX = world.carX;
         }
+
+		public void onPosReset(int dx) {
+			lastFlipX += dx;
+		}
     }
 }

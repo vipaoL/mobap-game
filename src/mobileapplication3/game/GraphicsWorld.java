@@ -627,11 +627,11 @@ public class GraphicsWorld extends World {
     }
 
 
-    private int xToPX(int c) {
+    public int xToPX(int c) {
         return c * 1000 / zoomOut + offsetX;
     }
 
-    private int yToPX(int c) {
+    public int yToPX(int c) {
         return c * 1000 / zoomOut + offsetY;
     }
 

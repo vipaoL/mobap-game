@@ -309,8 +309,9 @@ public class WorldGen implements Runnable {
     private void resetPosition() { // world cycling
         isResettingPosition = true;
 
+        int dx;
         synchronized (lock) {
-            int dx = -3000 - w.carbody.positionFX().xAsInt();
+            dx = -3000 - w.carbody.positionFX().xAsInt();
             lastX = lastX + dx;
 
             Logger.log("resetting pos");
@@ -325,7 +326,7 @@ public class WorldGen implements Runnable {
 
             isResettingPosition = false;
         }
-        game.onPosReset();
+        game.onPosReset(dx);
     }
     
     private void moveLandscape(int dx) {
