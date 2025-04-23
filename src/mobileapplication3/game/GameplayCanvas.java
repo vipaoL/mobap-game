@@ -37,6 +37,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private static final int BATT_UPD_PERIOD = 10000;
 	private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2;
 	private static final int GAME_OVER_DAMAGE = 8;
+	private static final int GAME_OVER_STUCK_TIME = 1000; // ms
     
     // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
@@ -70,6 +71,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int carAngle = 0;
 	public int carSpawnX = 100;
 	public int carSpawnY = -400;
+	private int prevCarX, prevCarY;
     // motor state
     private boolean motorTurnedOn = false;
 
@@ -96,6 +98,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     // counters
     public int points = 0;
     private int damage;
+	private int timeStuck = 0;
     public int timeFlying = 10;
     private int ticksMotorTurnedOff = 50;
     private long lastBigTickTime;
@@ -539,6 +542,36 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                            }
 	                        }
 	                    }
+
+						if (motorTurnedOn && Math.abs(world.carX - prevCarX) <= 1 && Math.abs(world.carY - prevCarY) <= 1) {
+							for (int i = 0; i < carContacts.length; i++) {
+								for (int j = 0; j < carContacts[i].length; j++) {
+									if (carContacts[i][j] == null) {
+										continue;
+									}
+									Body body = carContacts[i][j].body1();
+									UserData userData = body.getUserData();
+									if (!(userData instanceof MUserData)) {
+										body = carContacts[i][j].body2();
+										userData = body.getUserData();
+									}
+									if (userData instanceof MUserData &&
+											((MUserData) userData).bodyType == MUserData.TYPE_FALLING_PLATFORM &&
+											!body.isDynamic()) {
+										timeStuck = 0;
+									}
+								}
+							}
+							timeStuck += tickTime;
+							if (timeStuck > GAME_OVER_STUCK_TIME) {
+								gameOver();
+							}
+						} else {
+							timeStuck = 0;
+						}
+
+						prevCarX = world.carX;
+						prevCarY = world.carY;
 
 						if (worldgen != null && world.carX + world.viewField > worldgen.lastX) {
 							shouldWait = true;
