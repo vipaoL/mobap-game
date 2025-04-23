@@ -46,13 +46,13 @@ public class EditorQuickMenu extends AbstractPopupPage {
 
         Button levelTestButton = new Button("Open this level in the game") {
             public void buttonPressed() {
-                RootContainer.setRootUIComponent(new mobileapplication3.game.GameplayCanvas(parent).loadLevel(parent.getData()));
+                RootContainer.setRootUIComponent(new mobileapplication3.game.GameplayCanvas(parent).loadLevel(parent.getData()).disablePointCounter());
             }
         }.setBgColor(0x112211).setSelectedColor(0x115511).setIsActive(gameIncluded);
 
         Button structureTestButton = new Button("Test this structure in the game") {
             public void buttonPressed() {
-                RootContainer.setRootUIComponent(new mobileapplication3.game.GameplayCanvas(parent).addDeferredStructure(parent.getData()));
+                RootContainer.setRootUIComponent(new mobileapplication3.game.GameplayCanvas(parent).addDeferredStructure(parent.getData()).disablePointCounter());
             }
         }.setBgColor(0x112211).setSelectedColor(0x115511).setIsActive(gameIncluded);
 

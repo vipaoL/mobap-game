@@ -209,7 +209,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
                 test3.setGravity(FXVector.newVector(10, 100));
                 GraphicsWorld.bgOverride = true;
                 GraphicsWorld test2 = new GraphicsWorld(test3);
-                GameplayCanvas test = new GameplayCanvas(test2);
+                GameplayCanvas test = new GameplayCanvas(test2).disablePointCounter();
                 test.uninterestingDebug = true;
                 RootContainer.setRootUIComponent(test);
             }

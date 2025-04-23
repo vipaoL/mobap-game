@@ -1266,6 +1266,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 			pauseButtonPressed();
 		} else if (keyCode == Keys.KEY_NUM6) {
 			world.destroyCar();
+			disablePointCounter();
 		} else {
 			// any other button turns the motor on
 			motorTurnedOn = true;
