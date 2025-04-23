@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Contact;
+import at.emini.physics2D.Landscape;
 import at.emini.physics2D.UserData;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
@@ -355,6 +356,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 							}
 						}
 
+						if (fps < 20) {
+							tryReduceLags();
+						}
+
                         // Adjust physics engine tick time to current TPS
 	                    if (!wasPaused) {
 	                        tickTime = (int) (System.currentTimeMillis() - start);
@@ -631,6 +636,21 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
         Logger.log("game thread stopped");
     }
+
+	private void tryReduceLags() {
+		if (gameMode == GAME_MODE_ENDLESS) {
+			int layer = 5;
+			world.getLandscape().getBody().addCollisionLayer(layer);
+			Body[] bodies = world.getBodies();
+			for (int i = 0; i < world.getBodyCount(); i++) {
+				Body body = bodies[i];
+				if (body != world.leftWheel && body != world.carbody && body != world.rightWheel && body.isDynamic() && (body.getColissionBitFlag() & (1 << layer)) == 0) {
+					body.addCollisionLayer(layer);
+					break;
+				}
+			}
+		}
+	}
 
 	private void limitTopHeight() {
 		FXVector carVelocityFX = world.carbody.velocityFX();
