@@ -9,7 +9,6 @@ import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.RootContainer;
-import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.Keys;
 import utils.MgStruct;
 
@@ -36,6 +35,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     // states
     private boolean isInited = false;
     private boolean isGameStarted = false;
+    private int c = 0;
     
     private MgStruct mgStruct;
     private GameplayCanvas bg = null;
@@ -92,6 +92,16 @@ public class MenuCanvas extends GenericMenu implements Runnable {
                 sleep = Math.max(sleep, 0);
             } else {
                 sleep = 100;
+            }
+
+            if (c == 3) {
+                if (bg != null) {
+                    bg.startAgain();
+                    bg.disablePointCounter();
+                    RootContainer.setRootUIComponent(bg);
+                    bg = null;
+                    stop();
+                }
             }
 
             try {
@@ -156,11 +166,21 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             } else {
                 Logger.disableOnScreenLog();
             }
+        } else if (keyCode == Keys.KEY_NUM9) {
+            c++;
         }
         return super.handleKeyPressed(keyCode, count);
     }
-    
-    
+
+    public boolean handlePointerClicked(int x, int y) {
+        if (x < w / 32 && y < h / 32) {
+            c++;
+            return true;
+        } else {
+            return super.handlePointerClicked(x, y);
+        }
+    }
+
     void selectPressed() { // Do something when pressed an option in the menu
         defaultSelected = selected;
         if (selected == 1) { // Play

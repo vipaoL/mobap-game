@@ -70,8 +70,7 @@ public class WorldGen implements Runnable {
         Logger.log("wg:loading mgstruct");
         new MgStruct();
         reset();
-        wgThread = new Thread(this, "wg");
-        wgThread.start();
+        start();
     }
 
     public void addDeferredStructure(short[][] structureData) {
@@ -215,6 +214,14 @@ public class WorldGen implements Runnable {
         structLogger.add(structData);
 
         Logger.log("lastX=", lastX);
+    }
+
+    public void start() {
+        isEnabled = true;
+        if (wgThread == null || !wgThread.isAlive()) {
+            wgThread = new Thread(this, "wg");
+            wgThread.start();
+        }
     }
     
     public void pause() {

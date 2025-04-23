@@ -8,7 +8,6 @@ import java.util.Vector;
 
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Contact;
-import at.emini.physics2D.Landscape;
 import at.emini.physics2D.UserData;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
@@ -122,7 +121,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	private IUIComponent prevScreen = null;
 
     private Thread gameThread = null;
-	private int baseTimestepFX;
+	private int baseTimestepFX = 0;
 
 	private Vector deferredStructures = null;
 
@@ -177,9 +176,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	}
     
     public void init() {
-        log("starting game thread");
-        gameThread = new Thread(this, "game canvas");
-        gameThread.start();
+		if (gameThread == null || !gameThread.isAlive()) {
+			log("starting game thread");
+			gameThread = new Thread(this, "game canvas");
+			gameThread.start();
+		}
     }
     
     private void reset() {
@@ -188,8 +189,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         damage = 0;
 		WorldGen.isEnabled = gameMode == GAME_MODE_ENDLESS;
         if (WorldGen.isEnabled) {
-        	log("starting wg");
-            worldgen = new WorldGen(this, world);
+			if (worldgen == null) {
+				log("starting wg");
+				worldgen = new WorldGen(this, world);
+			}
 			if (deferredStructures != null) {
 				while (!deferredStructures.isEmpty()) {
 					worldgen.addDeferredStructure((short[][]) deferredStructures.elementAt(0));
@@ -206,7 +209,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 			x = -3000;
 			//x = -1114;
 		}
-		world.addCar(x, carSpawnY, FXUtil.TWO_PI_2FX / 360 * 30);
+		if (world.carbody == null) {
+			world.addCar(x, carSpawnY, FXUtil.TWO_PI_2FX / 360 * 30);
+		}
         setLoadingProgress(60);
     }
     
@@ -300,7 +305,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             log("starting game cycle");
 
             Logger.setLogMessageDelay(0);
-            baseTimestepFX = world.getTimestepFX();
+			if (baseTimestepFX == 0) {
+				baseTimestepFX = world.getTimestepFX();
+			}
             long lastFPSMeasureTime = System.currentTimeMillis();
             long lastBattUpdateTime = 0;
 			int physicsIterationsUnalteredCount = 0;
@@ -1176,15 +1183,15 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             		worldgen.stop();
             	}
                 boolean succeed = gameThread == null;
-                while (!succeed) {
-                    try {
-                        gameThread.join();
-                        succeed = true;
-                    } catch (InterruptedException ex) {
-						Logger.log(ex);
-                    }
-                }
-                log("game: stopped");
+				try {
+					while (!succeed) {
+						gameThread.join();
+						succeed = true;
+					}
+					log("game: stopped");
+				} catch (InterruptedException ex) {
+					Logger.log(ex);
+				}
                 if (GameplayCanvas.this.openMenu) {
 					if (prevScreen == null) {
 						RootContainer.setRootUIComponent(new MenuCanvas(inst));
@@ -1202,6 +1209,18 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 			stopperThread.start();
         }
     }
+
+	public void startAgain() {
+		if (stopperThread.isAlive()) {
+			stopperThread.interrupt();
+		}
+		stopperThread = null;
+		isStopping = false;
+		stopped = false;
+		gameOver = false;
+		init();
+		worldgen.start();
+	}
     
     private void resume() {
         paused = false;
