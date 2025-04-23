@@ -326,7 +326,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 							if (framesFromLastFPSMeasure == 0) {
 								int prevValue = physicsIterations;
 								if (fps != 0) {
-									physicsIterations = Math.max(1, 140 / fps + 1);
+									physicsIterations = Mathh.constrain(1, 140 / fps + 1, 10);
 									if (physicsIterations == prevValue) {
 										physicsIterationsUnalteredCount++;
 										if (!dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
