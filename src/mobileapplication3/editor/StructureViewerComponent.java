@@ -25,6 +25,10 @@ public class StructureViewerComponent extends UIComponent {
 		setElements(elements);
 	}
 
+	public void postInit() {
+		setOptimalZoomAndOffset(w, h);
+	}
+
 	public void setElements(Element[] elements) {
 		this.elements = elements;
 		start = StartPoint.findStartPoint(elements)[0];
@@ -60,12 +64,16 @@ public class StructureViewerComponent extends UIComponent {
     }
 
 	protected void onSetBounds(int x0, int y0, int w, int h) {
+		setOptimalZoomAndOffset(w, h);
+	}
+
+	protected void setOptimalZoomAndOffset(int w, int h) {
 		zoomOut = Mathh.constrain(MIN_ZOOM_OUT, 4000000 / Math.min(w, h), MAX_ZOOM_OUT);
 		zoomOut = Math.max(zoomOut, 1000*(end - start)*3/w/2);
 		offsetX = w/2;
 		if (zoomOut != 0) {
 			offsetX -= (end + start) / 2 * 1000 / zoomOut;
-			}
+		}
 		offsetY = h/2;
 	}
 
