@@ -595,7 +595,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 							Logger.log("wg can't keep up, locking game thread...");
 						}
 
-	                    while (shouldWait) {
+						int waitIterationsElapsed = 0;
+	                    while (shouldWait && !isStopping) {
 	                        isWaiting = true;
 	                        Thread.yield();
 	                        try {
@@ -603,8 +604,15 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	                        } catch (InterruptedException ex) {
 	                            Logger.log(ex);
 	                        }
+							waitIterationsElapsed++;
+							if (waitIterationsElapsed >= 1000) {
+								if (waitIterationsElapsed == 1000) {
+									paused = true;
+								}
+								paint();
+							}
 	                    }
-	
+
 	                    isWaiting = false;
 
 	                    Thread.yield();
