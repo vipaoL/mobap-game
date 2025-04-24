@@ -153,7 +153,7 @@ public class BrokenLine extends Line {
 					}
 					
 					public short getMinValue() {
-						return 0;
+						return 1;
 					}
 					
 					public short getMaxValue() {
