@@ -255,10 +255,6 @@ public abstract class GenericMenu extends CanvasComponent {
         return true;
     }
     
-    public boolean handleKeyReleased(int keyCode, int count) {
-    	return true;
-    }
-    
     public boolean handleKeyPressed(int keyCode) {
         lastKeyCode = keyCode;
         isKnownButton = false;
@@ -339,10 +335,11 @@ public abstract class GenericMenu extends CanvasComponent {
 
         return false;
     }
-    
-    public void keyReleased(int keyCode) {
+
+    public boolean handleKeyReleased(int keyCode, int count) {
         keyPressDelay = 0;
         isSelectPressed = false;
+        return true;
     }
     
     protected void loadCanvasParams(int x0, int y0, int w, int h) {
