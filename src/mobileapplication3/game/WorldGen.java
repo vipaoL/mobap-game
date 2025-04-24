@@ -105,6 +105,11 @@ public class WorldGen implements Runnable {
                     needSpeed = false;
                 }
                 game.shouldWait = false;
+                if (game.isWaiting) {
+                    synchronized (lock) {
+                        lock.notify();
+                    }
+                }
             }
             
             if (tick == 0) {
@@ -132,9 +137,9 @@ public class WorldGen implements Runnable {
         if (tick >= 10) {
             tick = 0;
         }
-        Thread.yield();
         try {
             if (!needSpeed) {
+                Thread.yield();
                 Thread.sleep(20);
             }
         } catch (InterruptedException ignored) { }

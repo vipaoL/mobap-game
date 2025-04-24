@@ -595,28 +595,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 							Logger.log("wg can't keep up, locking game thread...");
 						}
 
-						int waitIterationsElapsed = 0;
-	                    while (shouldWait && !isStopping) {
+	                    if (shouldWait && !isStopping) {
 	                        isWaiting = true;
 							wasPaused = true;
-	                        Thread.yield();
-	                        try {
-	                            Thread.sleep(1);
-	                        } catch (InterruptedException ex) {
-	                            Logger.log(ex);
-	                        }
-							waitIterationsElapsed++;
-							if (waitIterationsElapsed >= 1000) {
-								if (waitIterationsElapsed == 1000) {
-									paused = true;
-								}
-								paint();
+							Logger.log("waiting for wg to get ready...");
+							paint();
+							synchronized (wgLock) {
+								wgLock.wait();
 							}
+							Logger.log("resuming");
 	                    }
 
 	                    isWaiting = false;
 
-	                    Thread.yield();
+						Thread.yield(); // fixes input lag on Sony Ericsson phones
 	                    sleep = maxFrameTime - (System.currentTimeMillis() - start);
 	                    sleep = Math.max(sleep, 0);
 	                } else {
