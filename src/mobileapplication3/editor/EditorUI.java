@@ -48,6 +48,7 @@ public class EditorUI extends Container {
     private boolean isAutoSaveEnabled = false;
     private final int mode;
     private boolean viewMode = false;
+    private boolean inited = false;
 
     public EditorUI(int editorMode) {
     	mode = editorMode;
@@ -68,6 +69,10 @@ public class EditorUI extends Container {
 	}
 
     public void init() {
+        if (inited) {
+            return;
+        }
+
         super.init();
 
     	isAutoSaveEnabled = EditorSettings.getAutoSaveEnabled(true);
@@ -78,6 +83,8 @@ public class EditorUI extends Container {
         initListPanel();
 
         setComponents(new IUIComponent[]{editorCanvas, startPointWarning, placementButtonPanel, placedElementsList, bottomButtonPanel});
+
+        inited = true;
     }
 
     public void onSetBounds(int x0, int y0, int w, int h) {
