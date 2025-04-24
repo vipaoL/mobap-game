@@ -598,6 +598,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 						int waitIterationsElapsed = 0;
 	                    while (shouldWait && !isStopping) {
 	                        isWaiting = true;
+							wasPaused = true;
 	                        Thread.yield();
 	                        try {
 	                            Thread.sleep(1);
