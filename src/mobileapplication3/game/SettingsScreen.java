@@ -11,16 +11,15 @@ import java.util.Random;
 
 public class SettingsScreen extends GenericMenu implements Runnable {
     private static final int
-            PHYSICS_PRECISION = 0,
-            LEGACY_DRAWING_METHOD = 1,
-            FRAME_TIME = 2,
-            HI_RES_GRAPHICS = 3,
-            SHOW_FPS = 4,
-            LANDSCAPE_COLOR = 5,
-            BATTERY = 6,
-            DEBUG = 7,
-            ABOUT = 8,
-            BACK = 9;
+            LEGACY_DRAWING_METHOD = 0,
+            FRAME_TIME = 1,
+            HI_RES_GRAPHICS = 2,
+            SHOW_FPS = 3,
+            LANDSCAPE_COLOR = 4,
+            BATTERY = 5,
+            DEBUG = 6,
+            ABOUT = 7,
+            BACK = 8;
 
     private static final int[] LANDSCAPE_COLORS = {GraphicsWorld.DEFAULT_LANDSCAPE_COLOR, 0x44aaff, 0xaaaaff, 0xffffff, 0x44ffaa, 0xaaff44, 0xff44aa, 0xffaa44};
     private static final String[] LANDSCAPE_COLOR_NAMES = {"blue", "light blue", "ash", "white", "light green", "lime", "pink", "orange"};
@@ -96,20 +95,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         int selected = this.selected;
         int value;
         switch (selected) {
-            case PHYSICS_PRECISION:
-                value = MobappGameSettings.getPhysicsPrecision();
-                if (value == MobappGameSettings.AUTO_PHYSICS_PRECISION) {/*
-                    value = MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
-                } else if (value == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {*/
-                    value = 1;
-                } else {
-                    value *= 2;
-                    if (value > MobappGameSettings.MAX_PHYSICS_PRECISION) {
-                        value = MobappGameSettings.AUTO_PHYSICS_PRECISION;
-                    }
-                }
-                MobappGameSettings.setPhysicsPrecision(value);
-                break;
             case LEGACY_DRAWING_METHOD:
                 MobappGameSettings.toggleLegacyDrawingMethod();
                 break;
@@ -175,16 +160,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     }
 
     void refreshStates() {
-        int physicsPrecision = MobappGameSettings.getPhysicsPrecision();
         int frameTime = MobappGameSettings.getFrameTime();
-        menuOpts[PHYSICS_PRECISION] = "Physics precision: ";
-        if (physicsPrecision == MobappGameSettings.AUTO_PHYSICS_PRECISION) {
-            menuOpts[PHYSICS_PRECISION] += "Auto";
-        } else if (physicsPrecision == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {
-            menuOpts[PHYSICS_PRECISION] += "Dynamic";
-        } else {
-            menuOpts[PHYSICS_PRECISION] += String.valueOf(physicsPrecision);
-        }
         menuOpts[LEGACY_DRAWING_METHOD] = "Legacy drawing method";
         menuOpts[FRAME_TIME] = "FPS: " + round(1000f / frameTime) + " (" + frameTime + "ms/frame)";
         menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
@@ -194,7 +170,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         menuOpts[DEBUG] = "Debug settings";
         menuOpts[ABOUT] = "About";
         menuOpts[BACK] = "Back";
-        setEnabledFor(physicsPrecision != MobappGameSettings.DEFAULT_PHYSICS_PRECISION, PHYSICS_PRECISION);
         setEnabledFor(frameTime != MobappGameSettings.DEFAULT_FRAME_TIME, FRAME_TIME);
         setEnabledFor(MobappGameSettings.isLegacyDrawingMethodEnabled(), LEGACY_DRAWING_METHOD);
         setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), HI_RES_GRAPHICS);

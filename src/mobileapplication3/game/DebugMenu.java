@@ -9,6 +9,7 @@ package mobileapplication3.game;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Sound;
 import mobileapplication3.platform.ui.RootContainer;
+import utils.MobappGameSettings;
 
 /**
  *
@@ -22,6 +23,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
         "Simulation mode",
         "GAMING MODE",
         "What?",
+        "Physics precision",
         "Music",
         "Back"
     };
@@ -112,6 +114,20 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 whatTheGame = !whatTheGame;
                 break;
             case 6:
+                int value = MobappGameSettings.getPhysicsPrecision();
+                if (value == MobappGameSettings.AUTO_PHYSICS_PRECISION) {/*
+                    value = MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
+                } else if (value == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {*/
+                    value = 1;
+                } else {
+                    value *= 2;
+                    if (value > MobappGameSettings.MAX_PHYSICS_PRECISION) {
+                        value = MobappGameSettings.AUTO_PHYSICS_PRECISION;
+                    }
+                }
+                MobappGameSettings.setPhysicsPrecision(value);
+                break;
+            case 7:
                 music = !music;
                 if (music) {
                     Sound sound = new Sound();
@@ -128,12 +144,22 @@ public class DebugMenu extends GenericMenu implements Runnable {
         }
     }
     void refreshStates() {
+        int physicsPrecision = MobappGameSettings.getPhysicsPrecision();
+        MENU_OPTS[6] = "Physics precision: ";
+        if (physicsPrecision == MobappGameSettings.AUTO_PHYSICS_PRECISION) {
+            MENU_OPTS[6] += "Auto";
+        } else if (physicsPrecision == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {
+            MENU_OPTS[6] += "Dynamic";
+        } else {
+            MENU_OPTS[6] += String.valueOf(physicsPrecision);
+        }
         setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         setEnabledFor(RootContainer.enableOnScreenLog, 1);
         setEnabledFor(structureDebug, 2);
         setEnabledFor(simulationMode, 3);
         setEnabledFor(discoMode, 4);
         setEnabledFor(whatTheGame, 5);
-        setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 6); // disable this option. it's not ready yet
+        setEnabledFor(physicsPrecision != MobappGameSettings.DEFAULT_PHYSICS_PRECISION, 6);
+        setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 7); // disable this option. it's not ready yet
     }
 }
