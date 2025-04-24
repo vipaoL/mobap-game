@@ -232,7 +232,7 @@ public class Circle extends AbstractCurve {
 					}
 					
 					public short getMinValue() {
-						return 0;
+						return -360;
 					}
 					
 					public short getMaxValue() {
@@ -346,23 +346,34 @@ public class Circle extends AbstractCurve {
         // calculated formula. r=20: sn=5,sl=72; r=1000: sn=36,sl=10
         int circleSegmentLen=10000/(140+r);
         circleSegmentLen = Math.min(72, Math.max(10, circleSegmentLen));
-        int pointsNumber = arcAngle/circleSegmentLen + 1;
+        int pointsNumber = Math.abs(arcAngle)/circleSegmentLen + 1;
         if (arcAngle % circleSegmentLen != 0) {
             pointsNumber += 1;
         }
         pointsCache = new PointsCache(pointsNumber);
-        
+
         int startAngle = this.startAngle;
-        
-        for(int i = 0; i <= arcAngle; i+=circleSegmentLen) {
-            pointsCache.writePointToCache(getPointOnCircleByAngle(startAngle+i));
+
+        if (arcAngle < 0) {
+            circleSegmentLen = -circleSegmentLen;
         }
-        
-        if (arcAngle % circleSegmentLen != 0) {
+        for (int i = 0; (i <= arcAngle && arcAngle > 0) || (i >= arcAngle && arcAngle < 0); i += circleSegmentLen) {
+            pointsCache.writePointToCache(getPointOnCircleByAngle(startAngle + i));
+        }
+
+        if (Math.abs(arcAngle) % Math.abs(circleSegmentLen) != 0) {
             pointsCache.writePointToCache(getPointOnCircleByAngle(startAngle+arcAngle));
         }
     }
-    
+
+    protected int getArrowsDirection() {
+        if (arcAngle == 360 || arcAngle == -360) {
+            return ARROWS_NORMAL;
+        } else {
+            return NO_ARROWS;
+        }
+    }
+
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
     	super.paint(g, zoomOut, offsetX, offsetY, drawThickness, drawAsSelected);
         int centerMarkR = 4;

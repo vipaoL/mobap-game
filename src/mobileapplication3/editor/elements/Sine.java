@@ -335,37 +335,8 @@ public class Sine extends AbstractCurve {
     public void recalcCalculatedArgs() {
     	calcAnchorPoint();
     }
-    
-    public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        if (pointsCache == null) {
-            genPoints();
-        }
-        
-        if (pointsCache.getSize() == 0) {
-        	return;
-        }
 
-        g.setColor(getSuitableColor(drawAsSelected));
-
-        short[] startPoint = pointsCache.getPoint(0);
-        for (int i = 0; i < pointsCache.getSize() - 1; i++) {
-            short[] endPoint = pointsCache.getPoint(i+1);
-            int x1 = xToPX(startPoint[0], zoomOut, offsetX);
-            int y1 = yToPX(startPoint[1], zoomOut, offsetY);
-            int x2 = xToPX(endPoint[0], zoomOut, offsetX);
-            int y2 = yToPX(endPoint[1], zoomOut, offsetY);
-            g.drawLine(xToPX(startPoint[0], zoomOut, offsetX), yToPX(startPoint[1], zoomOut, offsetY), xToPX(endPoint[0], zoomOut, offsetX), yToPX(endPoint[1], zoomOut, offsetY), LINE_THICKNESS, zoomOut, drawThickness, true, true, true);
-            if (i % 2 == 0) {
-	            int dx = x2 - x1;
-	            int dy = y2 - y1;
-	            int l = Mathh.calcDistance(dx, dy);
-	            int centerX = (x1 + x2) / 2;
-	            int centerY = (y1 + y2) / 2;
-	            int lzoomout = l * zoomOut;
-	            g.drawArrow(centerX, centerY, centerX + dy * 50000 / lzoomout, centerY - dx * 50000 / lzoomout, LINE_THICKNESS/6, zoomOut, drawThickness);
-            }
-            startPoint = endPoint;
-        }
+    protected int getArrowsDirection() {
+        return ARROWS_NORMAL;
     }
-    
 }

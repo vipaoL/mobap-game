@@ -255,18 +255,21 @@ public class ElementPlacer {
         }
 
         int linesFacing = 0;
-        if (angle == 360) {
+        if (Math.abs(angle) == 360) {
             linesFacing = 1; // these lines push bodies only in one direction
         }
 
         int lastAng = 0;
-        for(int i = 0; i <= angle - step; i+=step) {
+        if (angle < 0) {
+            step = -step;
+        }
+        for(int i = 0; (i <= angle - step && angle > 0) || (i >= angle - step && angle < 0); i+=step) {
             line(x+Mathh.cos(i+startAngle)*kx*r/10000, y+Mathh.sin(i+startAngle)*ky*r/10000, x+Mathh.cos(i+step+startAngle)*kx*r/10000,y+Mathh.sin(i+step+startAngle)*ky*r/10000, linesFacing, false);
             lastAng = i + step;
         }
 
         // close the circle if the angle is not multiple of the step (step)
-        if (angle % step != 0) {
+        if (Math.abs(angle) % Math.abs(step) != 0) {
             line(x+Mathh.cos(lastAng+startAngle)*kx*r/10000, y+Mathh.sin(lastAng+startAngle)*ky*r/10000, x+Mathh.cos(angle+startAngle)*kx*r/10000,y+Mathh.sin(angle+startAngle)*ky*r/10000, linesFacing, false);
         }
 
