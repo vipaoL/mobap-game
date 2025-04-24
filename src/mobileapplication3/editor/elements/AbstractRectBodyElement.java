@@ -133,7 +133,7 @@ public abstract class AbstractRectBodyElement extends Element {
                     }
 
                     public short getMinValue() {
-                        return 0;
+                        return 1;
                     }
 
                     public short getMaxValue() {
