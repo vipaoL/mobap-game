@@ -110,7 +110,7 @@ public class EditorQuickMenu extends AbstractPopupPage {
             public void buttonPressed() {
                 RootContainer.setRootUIComponent(new MainMenu(RootContainer.getInst()));
             }
-        }.setBindedKeyCode(Keys.KEY_NUM5);
+        }.setBindedKeyCode(Keys.KEY_NUM5).setBgColor(BG_COLOR_WARN);
 
         Button[] buttons = null;
         if (parent.getMode() == EditorUI.MODE_STRUCTURE) {
