@@ -26,10 +26,11 @@ public class AboutScreen extends GenericMenu implements Runnable {
     private static final String URL2 = "https://t.me/mobapp_game";
     private static final String URL2_PREVIEW = "TG: @mobapp_game";
     private static final String[] STRINGS = {"A cross-platform game", "on emini physics engine"};
+    private static final String COMMIT_HASH = Platform.getAppProperty("Commit");
     private static final String[] MENU_OPTS = {""/*there is the qr code*/,
         URL_PREVIEW,
         URL2_PREVIEW,
-        "Version: " + Platform.getAppVersion(),
+        "Version: " + Platform.getAppVersion() + "-" + (COMMIT_HASH != null ? COMMIT_HASH : ""),
         "Back"};
 
     private final Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
@@ -93,15 +94,6 @@ public class AboutScreen extends GenericMenu implements Runnable {
     public void run() {
         long sleep;
         long start;
-        String commitHash = Platform.getAppProperty("Commit");
-        if (commitHash != null) {
-            for (int i = 0; i < MENU_OPTS.length; i++) {
-                if (MENU_OPTS[i].startsWith("Version: ")) {
-                    MENU_OPTS[i] += "-" + commitHash;
-                    break;
-                }
-            }
-        }
 
         while (!isStopped) {
             if (!isPaused) {
