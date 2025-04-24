@@ -34,7 +34,7 @@ public class Accelerator extends AbstractRectBodyElement {
                 yToPX(y + dy/2, zoomOut, offsetY),
                 thickness,
                 zoomOut,
-                drawThickness,
+                true,
 				true,
                 false,
                 true);
