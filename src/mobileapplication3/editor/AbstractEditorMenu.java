@@ -50,7 +50,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 			}
 		}.setBindedKeyCode(Keys.KEY_NUM1);
 
-		final Switch alwaysShowListSwitch = new Switch("Always show list") {
+		final Button alwaysShowListSwitch = new Switch("Always show list") {
 			public void setValue(boolean value) {
 				EditorSettings.setWhatToLoadAutomatically(value ? EditorSettings.OPTION_ALWAYS_LOAD_LIST : EditorSettings.OPTION_ALWAYS_LOAD_NONE);
 			}
@@ -58,7 +58,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 			public boolean getValue() {
 				return EditorSettings.getWhatToLoadAutomatically() >= EditorSettings.OPTION_ALWAYS_LOAD_LIST;
 			}
-		};
+		}.setBindedKeyCode(Keys.KEY_NUM2);
 
 		final Switch alwaysShowGridSwitch = new Switch("Always show thumbnails") {
 			public void setValue(boolean value) {
@@ -74,7 +74,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 			public void buttonPressed() {
 				setLayout(LAYOUT_GRID);
 			}
-		};
+		}.setBindedKeyCode(Keys.KEY_NUM3);
 
 		final BackButton backButton = new BackButton(parent);
 		backButtonComponent = new ButtonRow(new Button[]{backButton}).bindToSoftButtons();
@@ -87,9 +87,9 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 							public void buttonPressed() {
 								setLayout(LAYOUT_LIST_OF_NAMES);
 							}
-						},
+						}.setBindedKeyCode(Keys.KEY_NUM2),
 						new ButtonStub(),
-						new BackButton(parent)
+						new BackButton(parent).setBindedKeyCodes(new int[] {Keys.KEY_SOFT_LEFT, Keys.KEY_SOFT_RIGHT, Keys.KEY_NUM0})
 				});
 				setComponents(new IUIComponent[]{title, buttons});
 				break;

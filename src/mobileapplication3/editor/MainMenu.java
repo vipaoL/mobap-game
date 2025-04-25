@@ -50,7 +50,7 @@ public class MainMenu extends Container {
 		                showPopup(new About(inst));
 		            }
 		        }.setBindedKeyCode(c++),
-				new BackButton(parent)
+				new BackButton(parent).setBindedKeyCodes(new int[] {Keys.KEY_SOFT_RIGHT, Keys.KEY_NUM0})
 		});
 		setComponents(new IUIComponent[]{title, logo, buttons});
 	}
