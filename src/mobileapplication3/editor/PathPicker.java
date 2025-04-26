@@ -31,8 +31,8 @@ import mobileapplication3.ui.TextComponent;
 
 public class PathPicker extends AbstractPopupPage {
 
-    private static final String STRUCTURE_FILE_EXTENSION = ".mgstruct";
-    private static final String LEVEL_FILE_EXTENSION = ".mglvl";
+    public static final String STRUCTURE_FILE_EXTENSION = ".mgstruct";
+    public static final String LEVEL_FILE_EXTENSION = ".mglvl";
 	public static final String QUESTION_REPLACE_WITH_PATH = ".curr_folder.";
     private static final int TARGET_SAVE = 0, TARGET_OPEN = 1;
     public static final int MODE_STRUCTURE = EditorUI.MODE_STRUCTURE, MODE_LEVEL = EditorUI.MODE_LEVEL;

@@ -112,6 +112,13 @@ public class EditorQuickMenu extends AbstractPopupPage {
             }
         };
 
+        Button convertButton = new Button("Convert to " + (parent.getMode() == EditorUI.MODE_STRUCTURE ? "level" : "structure")) {
+            public void buttonPressed() {
+                parent.setMode(parent.getMode() == EditorUI.MODE_STRUCTURE ? EditorCanvas.MODE_LEVEL : EditorUI.MODE_STRUCTURE);
+                close();
+            }
+        };
+
         Button menuButton = new Button("Open Menu") {
             public void buttonPressed() {
                 RootContainer.setRootUIComponent(new MainMenu(RootContainer.getInst()));
@@ -120,9 +127,9 @@ public class EditorQuickMenu extends AbstractPopupPage {
 
         Button[] buttons = null;
         if (parent.getMode() == EditorUI.MODE_STRUCTURE) {
-            buttons = new Button[]{structureTestButton, saveButton, saveAsButton, moveElementsButton, menuButton};
+            buttons = new Button[]{structureTestButton, saveButton, saveAsButton, moveElementsButton, convertButton, menuButton};
         } else if (parent.getMode() == EditorUI.MODE_LEVEL) {
-            buttons = new Button[]{levelTestButton, saveButton, saveAsButton, moveElementsButton, menuButton};
+            buttons = new Button[]{levelTestButton, saveButton, saveAsButton, moveElementsButton, convertButton, menuButton};
         }
         return buttons;
     }

@@ -24,7 +24,7 @@ public abstract class StructureBuilder {
 
     public static final int MODE_STRUCTURE = EditorUI.MODE_STRUCTURE, MODE_LEVEL = EditorUI.MODE_LEVEL;
 
-    private final int mode;
+    private int mode;
     private Vector buffer;
     public Element placingNow;
     private NextPointHandler nextPointHandler;
@@ -32,14 +32,19 @@ public abstract class StructureBuilder {
     private String path = null;
 
     public StructureBuilder(int mode) {
-    	this.mode = mode;
-    	buffer = new Vector();
-    	if (mode == MODE_STRUCTURE) {
-    		buffer.addElement(new EndPoint().setArgs(new short[]{0, 0}));
-    	} else if (mode == MODE_LEVEL) {
-    		buffer.addElement(new LevelStart().setArgs(new short[]{200, -200}));
-    	}
-	}
+        reset(mode);
+    }
+
+    public void reset(int mode) {
+        this.mode = mode;
+        buffer = new Vector();
+        if (mode == MODE_STRUCTURE) {
+            buffer.addElement(new EndPoint().setArgs(new short[]{0, 0}));
+        } else if (mode == MODE_LEVEL) {
+            buffer.addElement(new LevelStart().setArgs(new short[]{200, -200}));
+        }
+        onUpdate();
+    }
 
     public void place(short id, short x, short y) throws IllegalArgumentException {
     	isEditing = false;
@@ -244,6 +249,15 @@ public abstract class StructureBuilder {
 
     public int getMode() {
     	return mode;
+    }
+
+    public void setMode(int mode) {
+        Vector oldBuffer = buffer;
+        reset(mode);
+        for (int i = 1; i < oldBuffer.size(); i++) {
+            buffer.addElement(oldBuffer.elementAt(i));
+        }
+        onUpdate();
     }
 
     public abstract void onUpdate();

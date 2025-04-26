@@ -9,10 +9,7 @@ import java.io.IOException;
 
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.editor.elements.StartPoint;
-import mobileapplication3.platform.Logger;
-import mobileapplication3.platform.Mathh;
-import mobileapplication3.platform.Platform;
-import mobileapplication3.platform.Utils;
+import mobileapplication3.platform.*;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.RootContainer;
@@ -46,7 +43,7 @@ public class EditorUI extends Container {
     public final StructureBuilder elementsBuffer;
 
     private boolean isAutoSaveEnabled = false;
-    private final int mode;
+    private int mode;
     private boolean viewMode = false;
     private boolean inited = false;
 
@@ -70,7 +67,11 @@ public class EditorUI extends Container {
 	}
 
     public void init() {
-        if (inited) {
+        init(false);
+    }
+
+    public void init(boolean force) {
+        if (inited && !force) {
             return;
         }
 
@@ -142,6 +143,32 @@ public class EditorUI extends Container {
 
     public int getMode() {
         return mode;
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
+        elementsBuffer.setMode(mode);
+        String folderPath;
+        String name = getFileName();
+        if (mode == EditorUI.MODE_STRUCTURE) {
+            folderPath = EditorSettings.getStructsFolderPath();
+            name = changeExtension(name, PathPicker.LEVEL_FILE_EXTENSION, PathPicker.STRUCTURE_FILE_EXTENSION);
+        } else {
+            folderPath = EditorSettings.getLevelsFolderPath();
+            name = changeExtension(name, PathPicker.STRUCTURE_FILE_EXTENSION, PathPicker.LEVEL_FILE_EXTENSION);
+        }
+        elementsBuffer.setFilePath(folderPath + name);
+        elementsBuffer.recalculateEndPoint();
+        init(true);
+        onSetBounds(x0, y0, w, h);
+    }
+
+    private String changeExtension(String fileName, String oldExtension, String newExtension) {
+        if (fileName.endsWith(oldExtension)) {
+            return fileName.substring(0, Utils.indexOf(fileName, oldExtension, 0)) + newExtension;
+        } else {
+            return fileName;
+        }
     }
 
     public EditorUI setViewMode(boolean viewMode) {
@@ -222,6 +249,8 @@ public class EditorUI extends Container {
     private void initStartPointWarning() {
     	if (mode == MODE_STRUCTURE) {
     		startPointWarning = (StartPointWarning) new StartPointWarning().setVisible(false);
+        } else {
+            startPointWarning = null;
     	}
     }
 
