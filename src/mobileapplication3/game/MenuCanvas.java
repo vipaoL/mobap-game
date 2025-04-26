@@ -55,7 +55,10 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     public MenuCanvas() {
         Logger.log("menu:constr");
         // menu initialization
-        loadParams(menuOptions, 1, menuOptions.length - 2, defaultSelected, new int[menuOptions.length]);
+        loadParams(menuOptions, defaultSelected);
+        // placeholders
+        setFirstReachable(1);
+        setLastReachable(menuOptions.length - 2);
     }
     
     public void init() {

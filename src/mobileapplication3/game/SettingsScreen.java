@@ -32,7 +32,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
 
     public SettingsScreen() {
         bgColor = COLOR_TRANSPARENT;
-        loadParams(menuOpts, statemap);
+        loadParams(menuOpts);
+        loadStatemap(statemap);
     }
 
     public void init() {

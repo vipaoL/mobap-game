@@ -27,9 +27,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
         "Music",
         "Back"
     };
-    
-    // array with states of all buttons (active/inactive/enabled)
-    private final int[] statemap = new int[MENU_OPTS.length];
+
     public static boolean isDebugEnabled = false;
     public static boolean closerWorldgen = false;
     public static boolean coordinates = false;
@@ -48,8 +46,8 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean structureDebug = false;
     
     public DebugMenu() {
-    	statemap[1] = GenericMenu.STATE_INACTIVE; // set "-----" separator as inactive button
-        loadParams(MENU_OPTS, statemap);
+        loadParams(MENU_OPTS);
+        loadStatemap(new int[MENU_OPTS.length]);
 	}
     
     public void init() {

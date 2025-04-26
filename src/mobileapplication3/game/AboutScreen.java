@@ -42,7 +42,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
     private int counter = 17;
 
     public void init() {
-        loadParams(MENU_OPTS, 0, MENU_OPTS.length - 1, MENU_OPTS.length - 1);
+        loadParams(MENU_OPTS, MENU_OPTS.length - 1);
         setFirstDrawable(1);
     }
 

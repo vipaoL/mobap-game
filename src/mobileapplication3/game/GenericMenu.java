@@ -5,8 +5,6 @@
  */
 package mobileapplication3.game;
 
-import java.util.Vector;
-
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Platform;
@@ -24,7 +22,7 @@ public abstract class GenericMenu extends CanvasComponent {
     private static final int PAUSE_DELAY = 5;
     public int x0, y0, w, h;
     private int fontH, tick = 0, k = 10, keyPressDelay = 0,
-            keyPressDelayAfterShowing = 5, firstReachable, lastReachable,
+            keyPressDelayAfterShowing = 5, firstReachable = 0, lastReachable = NOT_SET,
             firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY, lastKeyCode = 0;
     
     public int selected;
@@ -37,7 +35,6 @@ public abstract class GenericMenu extends CanvasComponent {
     
     private boolean isPressedByPointerNow, firstload = true,
             isSpecialOptionActivated = false, isSelectPressed = false,
-            isStatemapEnabled = false,
             fontFound = false;
     
     private boolean isKnownButton = true, isInited = false;
@@ -48,17 +45,12 @@ public abstract class GenericMenu extends CanvasComponent {
     public static final int STATE_INACTIVE = -1;
     public static final int STATE_NORMAL = 0;
     public static final int STATE_NORMAL_ENABLED = 1;
-    
-    
-    // key codes TODO move to ui/Keys
+
     public static final int SIEMENS_KEY_FIRE = -26;
     public static final int SIEMENS_KEY_UP = -59;
     public static final int SIEMENS_KEY_DOWN = -60;
     public static final int SIEMENS_KEY_LEFT = -61;
     public static final int SIEMENS_KEY_RIGHT = -62;
-    public static final int SIEMENS_KEY_LEFT_SOFT = -1;
-    public static final int SIEMENS_KEY_RIGHT_SOFT = -4;
-    public static final int SE_KEY_BACK = -11;
     
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
     	if (bgColor >= 0) {
@@ -83,7 +75,7 @@ public abstract class GenericMenu extends CanvasComponent {
 
                 }
 
-                if (isStatemapEnabled) { // coloring other options depending on theirs state (if we have this info)
+                if (stateMap != null) { // coloring other options depending on theirs state (if we have this info)
                     if (stateMap[i] == STATE_NORMAL_ENABLED) {
                         g.setColor(colReachableEnabled);
                     } else if (stateMap[i] == STATE_INACTIVE) {
@@ -117,23 +109,23 @@ public abstract class GenericMenu extends CanvasComponent {
     }
     
     public int findOptimalFont(int canvW, int canvH, String[] options) {
-        font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+        font = new Font(Font.SIZE_LARGE);
         
         // height
-        if (font.getHeight() * options.length - firstDrawable >= canvH - canvH/16) {
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+        if (font.getHeight() * (options.length - firstDrawable) >= canvH - canvH/16) {
+            font = new Font(Font.SIZE_MEDIUM);
         }
-        if (font.getHeight() * options.length - firstDrawable >= canvH - canvH/16) {
-            font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+        if (font.getHeight() * (options.length - firstDrawable) >= canvH - canvH/16) {
+            font = new Font(Font.SIZE_SMALL);
         }
         
         // width
         if (font.getSize() != Font.SIZE_SMALL) {
             for (int i = firstDrawable; i < options.length - 1; i++) {
-                if (font.stringWidth((String) options[i]) >= canvW - canvW/16) {
-                    font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-                    if (font.stringWidth((String) options[i]) >= canvW - canvW/16) {
-                        font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+                if (font.stringWidth(options[i]) >= canvW - canvW/16) {
+                    font = new Font(Font.SIZE_MEDIUM);
+                    if (font.stringWidth(options[i]) >= canvW - canvW/16) {
+                        font = new Font(Font.SIZE_SMALL);
                         break;
                     }
                 }
@@ -143,7 +135,7 @@ public abstract class GenericMenu extends CanvasComponent {
     }
     
     private boolean isOptionAvailable(int n) {
-        if (isStatemapEnabled) {
+        if (stateMap != null) {
             if (n >= stateMap.length) {
                 return false;
             }
@@ -151,8 +143,8 @@ public abstract class GenericMenu extends CanvasComponent {
                 return false;
             }
         }
-        
-        if (n < firstReachable || n > lastReachable) {
+
+        if (n < firstReachable || n > getLastReachable()) {
             return false;
         }
         
@@ -194,13 +186,15 @@ public abstract class GenericMenu extends CanvasComponent {
         }
         this.selected = selected;
         isPressedByPointerNow = true;
-        return !isStatemapEnabled || stateMap[selected] != STATE_INACTIVE;
+        return stateMap == null || stateMap[selected] != STATE_INACTIVE;
     }
     
     private boolean handleKeyStates(int keyStates) {
         if (keyStates == 0) {
         	return false;
         }
+
+        int lastReachable = getLastReachable();
 
         isPaused = false;
         switch (keyStates) {
@@ -210,7 +204,7 @@ public abstract class GenericMenu extends CanvasComponent {
 			case Keys.FIRE:
 				isSelectPressed = true;
             	isKnownButton = true;
-				return !isStatemapEnabled || stateMap[selected] != STATE_INACTIVE;
+				return stateMap == null || stateMap[selected] != STATE_INACTIVE;
 		}
         
         boolean needRepeat;
@@ -236,12 +230,12 @@ public abstract class GenericMenu extends CanvasComponent {
                     break;
             }
             
-            needRepeat = !isSelectPressed && isStatemapEnabled && stateMap[selected] == STATE_INACTIVE;
+            needRepeat = !isSelectPressed && stateMap != null && stateMap[selected] == STATE_INACTIVE;
         } while (needRepeat);
 
         return isSelectPressed;
     }
-    
+
     public boolean handleKeyRepeated(int keyCode, int pressedCount) {
     	handleKeyPressed(keyCode);
     	return true;
@@ -312,7 +306,6 @@ public abstract class GenericMenu extends CanvasComponent {
                 break;
             case Keys.KEY_NUM0: // back
             case Keys.KEY_SOFT_RIGHT:
-            case SE_KEY_BACK:
             case SIEMENS_KEY_RIGHT:
             	return handleKeyStates(Keys.LEFT);
             case Keys.KEY_POUND:
@@ -364,14 +357,7 @@ public abstract class GenericMenu extends CanvasComponent {
     public void reloadCanvasParameters(int x0, int y0, int w, int h) {
         loadCanvasParams(x0, y0, w, h);
     }
-    
-    /**
-     * Should be placed to showNotify.
-     * <p>onHide() in its right place is also needed.
-     * <p>
-     * It prevents siemens' bug that calls hideNotify right after
-     * calling showNotify.
-     */
+
     public void onShow() {
         Logger.log("menu:showNotify");
         
@@ -397,44 +383,40 @@ public abstract class GenericMenu extends CanvasComponent {
     	return true;
     }
 
-    public void loadParams(String[] options, int[] statemap) {
-        loadParams(options, 0, options.length - 1, options.length - 1, statemap);
+    public void loadParams(String[] options) {
+        loadParams(options, options.length - 1);
     }
-    public void loadParams(String[] options, int firstReachable, int lastReachable, int defaultSelected) {
-        loadParams(options, firstReachable, lastReachable, defaultSelected, null);
-    }
-    public void loadParams(Vector options, int firstReachable, int lastReachable, int defaultSelected) {
-        String[] optsArray = new String[options.size()];
-        for (int i = 0; i < options.size(); i++) {
-            optsArray[i] = (String) options.elementAt(i);
-        }
-        loadParams(optsArray, firstReachable, lastReachable, defaultSelected);
-    }
-    public void loadParams(String[] options, int firstReachable, int lastReachable, int defaultSelected, int[] optionStateMap) {
+
+    public void loadParams(String[] options, int defaultSelected) {
         this.options = options;
-        this.firstReachable = firstReachable;
-        this.lastReachable = lastReachable;
+        stateMap = new int[options.length];
         if (firstload) {
             selected = defaultSelected;
             firstload = false;
         }
-        if (optionStateMap != null) {
-            loadStatemap(optionStateMap);
-        }
         isInited = true;
     }
+
+    public void setFirstReachable(int firstReachable) {
+        this.firstReachable = firstReachable;
+    }
+
+    private int getLastReachable() {
+        return lastReachable != NOT_SET ? lastReachable : options.length - 1;
+    }
+
+    public void setLastReachable(int lastReachable) {
+        this.lastReachable = lastReachable;
+    }
+
     public void loadStatemap(int[] stateMap) {
-        isStatemapEnabled = false;
         if (stateMap != null) {
             if (stateMap.length == options.length) {
                 this.stateMap = stateMap;
-                isStatemapEnabled = true;
                 Logger.log("stateMap loaded");
             } else {
-                Platform.showError("GenericMenu.loadStatemap:optionTypeMap.length must be == options.length");
+                Platform.showError("incorrect stateMap length: " + stateMap.length + " " + getClass().getName());
             }
-        } else {
-            Platform.showError("GenericMenu.loadStatemap:null stateMap");
         }
     }
     public void setDefaultColor(int color_hex) {

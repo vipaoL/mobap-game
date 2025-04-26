@@ -57,7 +57,8 @@ public class Levels extends GenericMenu implements Runnable {
     private void refreshButtons() {
         buttons[buttons.length-1] = "Back";
         defaultSelected = Math.min(defaultSelected, buttons.length - 1);
-        loadParams(buttons, 1, buttons.length - 1, defaultSelected);
+        loadParams(buttons, defaultSelected);
+        setFirstReachable(1);
         selected = defaultSelected;
         if (w != 0 && h != 0) {
             loadCanvasParams(x0, y0, w, h);

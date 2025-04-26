@@ -25,7 +25,8 @@ public class RecordsScreen extends GenericMenu implements Runnable {
         for (int i = 0; i < records.length; i++) {
         	buttons[i + 1] = records[i] + "";
         }
-        loadParams(buttons, 1, buttons.length - 1, buttons.length - 1);
+        loadParams(buttons);
+        setFirstReachable(1);
 	}
 
     public void init() {
