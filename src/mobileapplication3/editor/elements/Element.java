@@ -172,6 +172,12 @@ public abstract class Element {
         System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
         return result;
     }
+
+    public static void move(Element[] elements, int dx, int dy) {
+        for (int i = 0; i < elements.length; i++) {
+            elements[i].move((short) dx, (short) dy);
+        }
+    }
     
     public abstract PlacementStep[] getPlacementSteps();
     

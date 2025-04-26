@@ -43,7 +43,7 @@ public class EditorUI extends Container {
     private ButtonPanelHorizontal placementButtonPanel = null;
     private ButtonCol placedElementsList = null;
     private StartPointWarning startPointWarning = null;
-    private final StructureBuilder elementsBuffer;
+    public final StructureBuilder elementsBuffer;
 
     private boolean isAutoSaveEnabled = false;
     private final int mode;

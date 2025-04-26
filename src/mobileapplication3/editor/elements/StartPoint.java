@@ -5,9 +5,7 @@ public class StartPoint {
 	
 	public static void moveToZeros(Element[] elements) {
 		short[] startPoint = findStartPoint(elements);
-		for (int i = 0; i < elements.length; i++) {
-			elements[i].move((short) -startPoint[0], (short) -startPoint[1]);
-		}
+		Element.move(elements, -startPoint[0], -startPoint[1]);
 	}
 	
 	public static boolean checkStartPoint(Element[] elements) {

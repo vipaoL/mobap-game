@@ -106,6 +106,12 @@ public class EditorQuickMenu extends AbstractPopupPage {
             }
         }.setBindedKeyCode(Keys.KEY_NUM9);
 
+        Button moveElementsButton = new Button(MoveAllElements.getName()) {
+            public void buttonPressed() {
+                showPopup(new MoveAllElements(EditorQuickMenu.this, parent.elementsBuffer.getElementsAsArray()));
+            }
+        };
+
         Button menuButton = new Button("Open Menu") {
             public void buttonPressed() {
                 RootContainer.setRootUIComponent(new MainMenu(RootContainer.getInst()));
@@ -114,9 +120,9 @@ public class EditorQuickMenu extends AbstractPopupPage {
 
         Button[] buttons = null;
         if (parent.getMode() == EditorUI.MODE_STRUCTURE) {
-            buttons = new Button[]{structureTestButton, saveButton, saveAsButton, menuButton};
+            buttons = new Button[]{structureTestButton, saveButton, saveAsButton, moveElementsButton, menuButton};
         } else if (parent.getMode() == EditorUI.MODE_LEVEL) {
-            buttons = new Button[]{levelTestButton, saveButton, saveAsButton, menuButton};
+            buttons = new Button[]{levelTestButton, saveButton, saveAsButton, moveElementsButton, menuButton};
         }
         return buttons;
     }
