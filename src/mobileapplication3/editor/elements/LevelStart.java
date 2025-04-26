@@ -29,7 +29,7 @@ public class LevelStart extends Element {
                 }
                 
                 public String getCurrentStepInfo() {
-					return "x=" + x + " y=" + y;
+					return "Choose level start point: x=" + x + " y=" + y;
 				}
             }
         };

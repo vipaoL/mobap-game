@@ -54,7 +54,8 @@ public class EditorCanvas extends StructureViewerComponent {
         if (structureBuilder.placingNow != null) {
             g.setColor(0xaaffaa);
             g.drawString(structureBuilder.getPlacingInfo(), x0, y0, 0);
-            g.drawString("(Click to continue)", x0, y0 + g.getFontHeight(), 0);
+            g.drawString("Move cursor to set the point", x0, y0 + g.getFontHeight(), 0);
+            g.drawString("Click to continue", x0, y0 + g.getFontHeight() * 2, 0);
         }
     }
 
