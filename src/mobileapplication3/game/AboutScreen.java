@@ -11,6 +11,7 @@ import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
+import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.Image;
@@ -30,13 +31,11 @@ public class AboutScreen extends GenericMenu implements Runnable {
     private static final String[] MENU_OPTS = {""/*there is the qr code*/,
         URL_PREVIEW,
         URL2_PREVIEW,
-        "Version: " + Platform.getAppVersion() + "-" + (COMMIT_HASH != null ? COMMIT_HASH : ""),
+        "Version: " + Platform.getAppVersion() + (COMMIT_HASH != null ? "-" + COMMIT_HASH : ""),
         "Back"};
 
-    private final Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     private Image qr, qrBig;
 
-    private final int fontH = font.getHeight();
     private int w, h;
     private int headerH, qrSide, menuH;
     private boolean bigQRIsDrawn = false;
@@ -59,12 +58,12 @@ public class AboutScreen extends GenericMenu implements Runnable {
 
         this.w = w;
         this.h = h;
-        qrSide = this.h - fontH * (STRINGS.length + MENU_OPTS.length) * 2;
+        qrSide = Math.min(this.h / 2, this.h - new Font(Font.SIZE_SMALL).getHeight() * (STRINGS.length + MENU_OPTS.length));
         qrSide = Math.max(qrSide, 66);
         qrSide = Math.min(qrSide, w*7/8);
         int totalTextH = this.h - qrSide;
 
-        menuH = totalTextH * MENU_OPTS.length / (MENU_OPTS.length + STRINGS.length);
+        menuH = totalTextH * (MENU_OPTS.length - 1) / ((MENU_OPTS.length - 1) + STRINGS.length);
         headerH = totalTextH - menuH;
         loadCanvasParams(0, h - menuH, this.w, menuH);
 
@@ -122,7 +121,6 @@ public class AboutScreen extends GenericMenu implements Runnable {
         }
         g.setColor(0, 0, 0);
         g.fillRect(0, 0, this.w, this.h);
-        g.setFont(font);
         drawHeader(g);
         drawQR(g);
         super.onPaint(g, x0, y0 + h - menuH, w, menuH, forceInactive);
