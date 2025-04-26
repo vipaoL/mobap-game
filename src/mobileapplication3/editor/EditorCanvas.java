@@ -115,6 +115,17 @@ public class EditorCanvas extends StructureViewerComponent {
         return true;
     }
 
+    protected boolean handleMouseEvent(int event, int x, int y) {
+        if (event == MOUSE_WHEEL_SCROLLED_DOWN) {
+            zoomOut();
+        } else if (event == MOUSE_WHEEL_SCROLLED_UP) {
+            zoomIn();
+        } else {
+            return false;
+        }
+        return true;
+    }
+
     public boolean handlePointerPressed(int x, int y) {
         pointerHandler.handlePointerPressed(x, y);
         return true;
