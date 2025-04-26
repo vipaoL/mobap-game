@@ -7,12 +7,7 @@ package mobileapplication3.game;
 import java.util.Random;
 import java.util.Vector;
 
-import at.emini.physics2D.Body;
-import at.emini.physics2D.Joint;
-import at.emini.physics2D.Landscape;
-import at.emini.physics2D.Shape;
-import at.emini.physics2D.UserData;
-import at.emini.physics2D.World;
+import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import mobileapplication3.platform.Logger;
@@ -98,15 +93,39 @@ public class GraphicsWorld extends World {
     }
 
     public void removeBody(Body body) {
-        if (body != carbody && body != leftWheel && body != rightWheel) {
-            super.removeBody(body);
-        } else {
-            try {
-                throw new IllegalArgumentException("Trying to remove a part of the car. Please report this bug");
-            } catch (IllegalArgumentException ex) {
-                Logger.log(ex);
-            }
+        if (body == leftWheel) {
+            Logger.log("Deleting leftWheel...");
+        } else if (body == carbody) {
+            Logger.log("Deleting carbody...");
+        } else if (body == rightWheel) {
+            Logger.log("Deleting rightWheel...");
         }
+        super.removeBody(body);
+    }
+
+    public void cleanWorld() {
+        Constraint[] constraints = getConstraints();
+        while (getConstraintCount() > 0) {
+            removeConstraint(constraints[0]);
+        }
+        rmAllBodies();
+        rmLandscapeSegments();
+    }
+    private void rmLandscapeSegments() {
+        Landscape landscape = getLandscape();
+        while (landscape.segmentCount() > 0) {
+            landscape.removeSegment(0);
+        }
+    }
+
+    private void rmAllBodies() {
+        Body[] bodies = getBodies();
+        while (getBodyCount() > 0) {
+            removeBody(bodies[0]);
+        }
+        leftWheel = null;
+        carbody = null;
+        rightWheel = null;
     }
 
     public void addCar(int spawnX, int spawnY, int ang2FX) {

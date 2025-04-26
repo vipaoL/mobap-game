@@ -108,6 +108,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int ticksFromLastTPSMeasure = 0;
     
     public short[][] currentEffects = new short[1][];
+	private short[][] level = null;
 
     // fonts
     private static final Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
@@ -161,6 +162,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	}
 
 	public GameplayCanvas loadLevel(short[][] levelData) {
+		this.level = levelData;
 		gameMode = GAME_MODE_LEVEL;
 		StructurePlacer.place(world, false, levelData, 0, 0);
 		if (levelData[0][0] == ElementPlacer.LEVEL_START) {
@@ -188,6 +190,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         log("resetting the world");
         points = 0;
         damage = 0;
+		countPoints = true;
 		WorldGen.isEnabled = gameMode == GAME_MODE_ENDLESS;
         if (WorldGen.isEnabled) {
 			if (worldgen == null) {
@@ -195,23 +198,19 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				worldgen = new WorldGen(this, world);
 			}
 			if (deferredStructures != null) {
-				while (!deferredStructures.isEmpty()) {
-					worldgen.addDeferredStructure((short[][]) deferredStructures.elementAt(0));
-					deferredStructures.removeElementAt(0);
+				for (int i = 0; i < deferredStructures.size(); i++) {
+					worldgen.addDeferredStructure((short[][]) deferredStructures.elementAt(i));
 				}
-				deferredStructures = null;
 			}
             flipCounter = new FlipCounter();
             log("wg started");
         }
         setLoadingProgress(50);
-		int x = carSpawnX;
 		if (WorldGen.isEnabled) {
-			x = -3000;
-			//x = -1114;
+			carSpawnX = -3000;
 		}
 		if (world.carbody == null) {
-			world.addCar(x, carSpawnY, FXUtil.TWO_PI_2FX / 360 * 30);
+			world.addCar(carSpawnX, carSpawnY, FXUtil.TWO_PI_2FX / 360 * 30);
 		}
         setLoadingProgress(60);
     }
@@ -1219,7 +1218,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
 	public void startAgain() {
-		if (stopperThread.isAlive()) {
+		if (stopperThread != null && stopperThread.isAlive()) {
 			stopperThread.interrupt();
 		}
 		stopperThread = null;
@@ -1227,7 +1226,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 		stopped = false;
 		gameOver = false;
 		init();
-		worldgen.start();
+		if (worldgen != null) {
+			worldgen.start();
+		}
 	}
     
     private void resume() {
@@ -1284,6 +1285,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
 
+	private void restart() {
+		stop(false, true);
+		if (worldgen != null) {
+			worldgen.reset();
+		} else {
+			world.cleanWorld();
+		}
+		reset();
+		if (level != null) {
+			loadLevel(level);
+		}
+		startAgain();
+	}
+
     // keyboard events
     public boolean handleKeyReleased(int keyCode, int count) {
     	if (gameOver) {
@@ -1314,6 +1329,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 		} else if (keyCode == Keys.KEY_NUM6) {
 			world.destroyCar();
 			disablePointCounter();
+		} else if (keyCode == Keys.KEY_NUM7) {
+			restart();
 		} else {
 			// any other button turns the motor on
 			motorTurnedOn = true;

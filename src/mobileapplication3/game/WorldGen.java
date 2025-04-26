@@ -255,7 +255,7 @@ public class WorldGen implements Runnable {
         Logger.log("wg: stopped");
     }
     
-    private void reset() {
+    public void reset() {
         needSpeed = true;
         Logger.log("wg:restart()");
         prevStructRandomId = 1;
@@ -265,7 +265,7 @@ public class WorldGen implements Runnable {
         lastY = 0;
         try {
             Logger.log("wg:cleaning world");
-            cleanWorld();
+            w.cleanWorld();
         } catch (NullPointerException ignored) { }
         
         structLogger = new StructLog(10);
@@ -276,26 +276,6 @@ public class WorldGen implements Runnable {
         int y1 = lastY - 100;
         elementPlacer.line(x1, y1, lastX, lastY);
         structLogger.add(concatArrays(new int[] {lastX, lastY, elementPlacer.getLineCount(), -1}, elementPlacer.getDrawingData()));
-    }
-    private void cleanWorld() {
-        Constraint[] constraints = w.getConstraints();
-        while (w.getConstraintCount() > 0) {
-            w.removeConstraint(constraints[0]);
-        }
-        rmAllBodies();
-        rmLandscapeSegments();
-    }
-    private void rmLandscapeSegments() {
-        while (landscape.segmentCount() > 0) {
-            landscape.removeSegment(0);
-        }
-    }
-    
-    private void rmAllBodies() {
-        Body[] bodies = w.getBodies();
-        while (w.getBodyCount() > 0) {
-            w.removeBody(bodies[0]);
-        }
     }
 
     public int getSegmentCount() {
