@@ -1299,6 +1299,17 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 		startAgain();
 	}
 
+	public boolean handleMouseEvent(int event, int x, int y) {
+		if (event == MOUSE_SECONDARY_RELEASED) {
+			restart();
+			motorTurnedOn = false;
+			return true;
+		} else if (event == MOUSE_WHEEL_RELEASED) {
+			stop(true, false);
+		}
+		return false;
+	}
+
     // keyboard events
     public boolean handleKeyReleased(int keyCode, int count) {
     	if (gameOver) {
