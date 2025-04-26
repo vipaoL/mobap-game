@@ -340,6 +340,7 @@ public class EditorUI extends Container {
 
     private void moveToZeros() {
     	StartPoint.moveToZeros(elementsBuffer.getElementsAsArray());
+        saveToAutoSave();
     }
 
     class StartPointWarning extends Container {
