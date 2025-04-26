@@ -55,7 +55,7 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 System.exit(0);
             }
             DebugMenu.isDebugEnabled = options.has(debug);
-            Logger.logToStdout(options.has(verbose));
+            Logger.logToStdout(options.has(verbose) || DebugMenu.isDebugEnabled);
             FileUtils.setStoragePath(options.valueOf(workdirOpt));
             if (options.has(fullscreenMode)) {
                 PlatformSettings.setFullscreenModeOverride(true);
