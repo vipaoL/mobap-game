@@ -31,8 +31,8 @@ import utils.MobappGameSettings;
  */
 public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final int TICK_DURATION = 50;
-	private static final String[] MENU_HINT = {"MENU:", "here(touch), #", "D, left soft"};
-    private static final String[] PAUSE_HINT = {"PAUSE:", "here(touch), *,", "B, right soft"};
+	private static final String[] MENU_HINT = {"MENU", "(LSoft, #, 9)"};
+    private static final String[] PAUSE_HINT = {"PAUSE", "(RSoft, *, 3)"};
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
 	private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
@@ -883,14 +883,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         // show hint on first start
         if (isFirstStart && hintVisibleTimer > 0) {
             int color = 255 * hintVisibleTimer / 120;
-            g.setColor(color/4, color/2, color/4);
+            g.setColor(0, 0, color/4);
 			int btnW = scW/3;
 			int btnH = scH/6;
 			int btnRoundingD = Math.min(btnW, btnH) / 4;
-            g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
-            g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
-            g.setColor(color/4, color/4, color);
-            setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL), g);
+			if (color / 4 > 7) {
+				g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
+				g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
+			}
+            g.setColor(color/2, color/2, color);
+            setFont(new Font(Font.SIZE_MEDIUM), g);
             for (int i = 0; i < MENU_HINT.length; i++) {
                 g.drawString(MENU_HINT[i], scW/6, i * currentFontH + scH / 12 - currentFontH*MENU_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
             }
