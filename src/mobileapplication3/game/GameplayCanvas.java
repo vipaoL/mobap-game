@@ -35,7 +35,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private static final String[] PAUSE_HINT = {"PAUSE:", "here(touch), *,", "B, right soft"};
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
-	private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2;
+	private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
 	private static final int GAME_OVER_DAMAGE = 8;
 	private static final int GAME_OVER_STUCK_TIME = 1000; // ms
     
@@ -136,6 +136,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     
     public GameplayCanvas(GraphicsWorld w) {
     	this();
+		gameMode = GAME_MODE_EMINI_WORLD;
         world = w;
 		world.setGame(this);
     }
@@ -697,7 +698,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
 	private int getLowestSafeY() {
-		return world.lowestY;
+		if (gameMode != GAME_MODE_EMINI_WORLD) {
+			return world.lowestY;
+		} else {
+			return 10000;
+		}
 	}
 
 	private void setSimulationArea() {
