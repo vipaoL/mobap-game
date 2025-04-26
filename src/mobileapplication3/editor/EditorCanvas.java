@@ -53,7 +53,8 @@ public class EditorCanvas extends StructureViewerComponent {
         drawCursor(g, x0, y0);
         if (structureBuilder.placingNow != null) {
             g.setColor(0xaaffaa);
-            g.drawString(structureBuilder.getPlacingInfo(), 0, 0, 0);
+            g.drawString(structureBuilder.getPlacingInfo(), x0, y0, 0);
+            g.drawString("(Click to continue)", x0, y0 + g.getFontHeight(), 0);
         }
     }
 
