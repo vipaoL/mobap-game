@@ -14,6 +14,7 @@ import at.emini.physics2D.util.PhysicsFileReader;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
+import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.RootContainer;
 import utils.GameFileUtils;
 import utils.MgStruct;
@@ -68,7 +69,9 @@ public class Levels extends GenericMenu implements Runnable {
         try {
             levelPaths = getLevels();
             buttons = new String[levelPaths.length + 2];
-            System.arraycopy(levelPaths, 0, buttons, 1, levelPaths.length);
+            for (int i = 0; i < levelPaths.length; i++) {
+                buttons[1 + i] = getLevelName(levelPaths[i]);
+            }
         } catch (SecurityException e) {
             e.printStackTrace();
             buttons[0] = "no read permission";
@@ -140,6 +143,14 @@ public class Levels extends GenericMenu implements Runnable {
     public String[] getLevels() {
         Logger.log("Levels:getLevels()");
         return GameFileUtils.listFilesInAllPlaces(LEVELS_FOLDER_NAME);
+    }
+
+    private String getLevelName(String path) {
+        if (path != null) {
+            return path.substring(path.lastIndexOf('/') + 1);
+        } else {
+            return null;
+        }
     }
     
     public synchronized void openFromFS(final String path) {
