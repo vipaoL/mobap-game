@@ -1318,23 +1318,37 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 			return false;
 		}
 
-        int gameAction = RootContainer.getAction(keyCode);
-        // menu
-        if (keyCode == Keys.KEY_SOFT_LEFT || keyCode == Keys.KEY_POUND || keyCode == Keys.KEY_NUM0 || gameAction == Keys.GAME_D) {
-            stop(true, false);
-        } else if (keyCode == Keys.KEY_SOFT_RIGHT || keyCode == GenericMenu.SE_KEY_BACK) {
-			pauseButtonPressed();
-		} else if (keyCode == Keys.KEY_STAR || gameAction == Keys.GAME_B) {
-			pauseButtonPressed();
-		} else if (keyCode == Keys.KEY_NUM6) {
-			world.destroyCar();
-			disablePointCounter();
-		} else if (keyCode == Keys.KEY_NUM7) {
-			restart();
-		} else {
-			// any other button turns the motor on
-			motorTurnedOn = true;
-		}
+        switch (keyCode) {
+			case Keys.KEY_SOFT_LEFT:
+			case Keys.KEY_POUND:
+			case Keys.KEY_NUM0:
+			case Keys.KEY_NUM9:
+				stop(true, false);
+				break;
+			case Keys.KEY_SOFT_RIGHT:
+			case Keys.KEY_STAR:
+			case Keys.KEY_NUM3:
+				pauseButtonPressed();
+				break;
+			case Keys.KEY_NUM6:
+				world.destroyCar();
+				disablePointCounter();
+				break;
+			case Keys.KEY_NUM7:
+				restart();
+				break;
+			default:
+				int gameAction = RootContainer.getAction(keyCode);
+				if (gameAction == Keys.GAME_D) {
+					stop(true, false);
+				} else if (gameAction == Keys.GAME_B) {
+					pauseButtonPressed();
+				} else {
+					// any other button turns the motor on
+					motorTurnedOn = true;
+				}
+				break;
+        }
 
         return true;
     }
