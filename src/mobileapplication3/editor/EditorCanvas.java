@@ -36,11 +36,14 @@ public class EditorCanvas extends StructureViewerComponent {
         editMode = structureBuilder.getMode();
     }
 
+    public void onUpdate() {
+        setElements(structureBuilder.getElementsAsArray());
+    }
+
     public void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
     	if (editMode == MODE_STRUCTURE) {
     		car.drawCar(g, x0, y0);
     	}
-        setElements(structureBuilder.getElementsAsArray()); // TODO
         super.onPaint(g, x0, y0, w, h, forceInactive);
         if (editMode == MODE_STRUCTURE) {
         	drawStartPoint(g, x0, y0);

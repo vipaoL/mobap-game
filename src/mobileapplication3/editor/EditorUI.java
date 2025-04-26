@@ -57,6 +57,7 @@ public class EditorUI extends Container {
                 try {
                     initListPanel();
                     saveToAutoSave();
+                    editorCanvas.onUpdate();
                 } catch (NullPointerException ignored) { }
             }
         };
