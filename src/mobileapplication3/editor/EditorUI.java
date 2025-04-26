@@ -169,7 +169,7 @@ public class EditorUI extends Container {
 	}
 
     private void initEditorCanvas() {
-        editorCanvas = new EditorCanvas(elementsBuffer);
+        editorCanvas = new EditorCanvas(elementsBuffer, viewMode);
     }
 
     private void initBottomPanel() {

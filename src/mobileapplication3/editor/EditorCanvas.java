@@ -25,15 +25,17 @@ public class EditorCanvas extends StructureViewerComponent {
     public int selectedElement = 0;
     private int zoomOutMacroModeThreshold = 200;
     private final int editMode;
+    private boolean viewMode;
 
     private final StructureBuilder structureBuilder;
     private final PointerHandler pointerHandler = new PointerHandler();
     private final Car car = new Car();
 
-    public EditorCanvas(StructureBuilder structureBuilder) {
+    public EditorCanvas(StructureBuilder structureBuilder, boolean viewMode) {
     	super(structureBuilder.getElementsAsArray());
         this.structureBuilder = structureBuilder;
         editMode = structureBuilder.getMode();
+        this.viewMode = viewMode;
     }
 
     public void onUpdate() {
@@ -206,6 +208,12 @@ public class EditorCanvas extends StructureViewerComponent {
 
     public int getCursorY() {
         return cursorY;
+    }
+
+    protected void setOptimalZoomAndOffset(int w, int h) {
+        if (viewMode) {
+            super.setOptimalZoomAndOffset(w, h);
+        }
     }
 
     class Car {
