@@ -281,7 +281,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             Logger.setLogMessageDelay(50);
             currentEffects = new short[1][];
 
-			if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode) {
+			if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode || deferredStructures != null) {
 				disablePointCounter();
 			}
             
