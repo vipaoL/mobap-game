@@ -11,18 +11,18 @@ import java.util.Random;
 
 public class SettingsScreen extends GenericMenu implements Runnable {
     private static final int
-            LEGACY_DRAWING_METHOD = 0,
-            FRAME_TIME = 1,
-            HI_RES_GRAPHICS = 2,
-            SHOW_FPS = 3,
-            LANDSCAPE_COLOR = 4,
+            LANDSCAPE_COLOR = 0,
+            HI_RES_GRAPHICS = 1,
+            LEGACY_DRAWING_METHOD = 2,
+            FRAME_TIME = 3,
+            SHOW_FPS = 4,
             BATTERY = 5,
             DEBUG = 6,
             ABOUT = 7,
             BACK = 8;
 
     private static final int[] LANDSCAPE_COLORS = {GraphicsWorld.DEFAULT_LANDSCAPE_COLOR, 0x44aaff, 0xaaaaff, 0xffffff, 0x44ffaa, 0xaaff44, 0xff44aa, 0xffaa44};
-    private static final String[] LANDSCAPE_COLOR_NAMES = {"blue", "light blue", "ash", "white", "light green", "lime", "pink", "orange"};
+    private static final String[] LANDSCAPE_COLOR_NAMES = {"blue", "light blue", "pale blue", "white", "light green", "lime", "pink", "orange"};
 
     private static String[] menuOpts = new String[BACK + 1];
 

@@ -973,7 +973,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     g.setColor(255, 0, 0);
                 }
             }
-			drawDebugText(g, "FPS:" + fps + " TPS:" + tps + " t/f=" + physicsIterations);
+			drawDebugText(g, "FPS:" + fps + " TPS:" + tps + " m=" + physicsIterations);
 		}
 
         try {
