@@ -14,7 +14,6 @@ import at.emini.physics2D.util.PhysicsFileReader;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
-import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.RootContainer;
 import utils.GameFileUtils;
 import utils.MgStruct;

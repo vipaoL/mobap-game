@@ -114,6 +114,9 @@ public class MgStruct {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+                try {
+                    dis.close();
+                } catch (Exception ignored) { }
             }
         }
         if (loadedFromFiles > 0) {
@@ -159,6 +162,9 @@ public class MgStruct {
                             data[i] = dis.readShort();
                         }
                     } catch (EOFException ex) {
+                        try {
+                            dis.close();
+                        } catch (Exception e) { }
                         throw ex;
                     }
                     structure[c] = data;
@@ -166,19 +172,21 @@ public class MgStruct {
 
                 try {
                 	dis.close();
-                } catch (IOException e) { }
+                } catch (Exception e) { }
                 return structure;
             } else {
                 Logger.log("Unsupported file format version: " + fileFormatVersion);
                 try {
                 	dis.close();
-                } catch (IOException e) { }
+                } catch (Exception e) { }
                 return null;
             }
         } catch(ArrayIndexOutOfBoundsException ex) {
             Logger.log("error parsing file " + ex);
             ex.printStackTrace();
-            dis.close();
+            try {
+                dis.close();
+            } catch (Exception e) { }
             return null;
         }
     }

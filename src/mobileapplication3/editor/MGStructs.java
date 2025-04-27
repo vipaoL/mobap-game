@@ -15,6 +15,7 @@ public class MGStructs {
     }
 
     public static Element[] readMGStruct(DataInputStream dis) {
+        Element[] ret = null;
         try {
             short fileVer = dis.readShort();
             Logger.log("");
@@ -29,14 +30,16 @@ public class MGStructs {
                     break;
                 }
             }
-            return shrinkArray(elements);
+            ret = shrinkArray(elements);
         } catch (NullPointerException ex) {
         	Logger.log("nothing to read (null)");
-        	return null;
         } catch (IOException ex) {
             Logger.log(ex);
-            return null;
         }
+        try {
+            dis.close();
+        } catch (Exception e) { }
+        return ret;
     }
 
     private static Element[] shrinkArray(Element[] elements) {
