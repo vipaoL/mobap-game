@@ -3,6 +3,7 @@ package mobileapplication3.editor;
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.editor.elements.EndPoint;
 import mobileapplication3.editor.elements.Element.PlacementStep;
+import mobileapplication3.editor.elements.LevelStart;
 import mobileapplication3.ui.AbstractPopupPage;
 import mobileapplication3.ui.BackButton;
 import mobileapplication3.ui.Button;
@@ -75,7 +76,7 @@ public class ElementEditUI extends AbstractPopupPage {
 			}
 		}.setBgColor(BG_COLOR_DANGER);
 
-		if (element instanceof EndPoint) {
+		if (element instanceof EndPoint || element instanceof LevelStart) {
 			cloneButton.setIsActive(false);
 			deleteButton.setIsActive(false);
 		}
