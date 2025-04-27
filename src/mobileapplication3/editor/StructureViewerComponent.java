@@ -11,14 +11,15 @@ public class StructureViewerComponent extends UIComponent {
 
 	protected static final int MIN_ZOOM_OUT = 8, MAX_ZOOM_OUT = 200000;
 
-    protected int offsetX, offsetY, zoomOut = 8192;
+    protected int offsetX, offsetY, zoomOut;
 	protected short start, end;
 
 	protected Element[] elements = new Element[0];
 
 	public StructureViewerComponent() {
 		setBgColor(COLOR_ACCENT_MUTED);
-	}
+        setZoomOut(8192);
+    }
 
 	public StructureViewerComponent(Element[] elements) {
 		this();
@@ -68,8 +69,9 @@ public class StructureViewerComponent extends UIComponent {
 	}
 
 	protected void setOptimalZoomAndOffset(int w, int h) {
-		zoomOut = Mathh.constrain(MIN_ZOOM_OUT, 4000000 / Math.min(w, h), MAX_ZOOM_OUT);
+		int zoomOut = Mathh.constrain(MIN_ZOOM_OUT, 4000000 / Math.min(w, h), MAX_ZOOM_OUT);
 		zoomOut = Math.max(zoomOut, 1000*(end - start)*3/w/2);
+		setZoomOut(zoomOut);
 		offsetX = w/2;
 		if (zoomOut != 0) {
 			offsetX -= (end + start) / 2 * 1000 / zoomOut;
@@ -77,4 +79,7 @@ public class StructureViewerComponent extends UIComponent {
 		offsetY = h/2;
 	}
 
+	protected void setZoomOut(int zoomOut) {
+		this.zoomOut = zoomOut;
+	}
 }

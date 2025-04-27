@@ -20,7 +20,8 @@ public class EditorCanvas extends StructureViewerComponent {
 	public static final int MODE_STRUCTURE = EditorUI.MODE_STRUCTURE, MODE_LEVEL = EditorUI.MODE_LEVEL;
     private static final int COL_BG = 0x000000;
 
-    private int cursorX, cursorY = 0;
+    private int cursorX, cursorY;
+    private int gridStep;
     private int keyRepeats = 0;
     public int selectedElement = 0;
     private int zoomOutMacroModeThreshold = 200;
@@ -62,15 +63,16 @@ public class EditorCanvas extends StructureViewerComponent {
     public void drawBg(Graphics g, int x0, int y0, int w, int h, boolean isActive) {
     	g.setColor(COL_BG);
         g.fillRect(x0, y0, w, h);
-        if (zoomOut < 200) {
+
+        int step = gridStep * 1000/zoomOut;
+        if (step > 10) {
             g.setColor(0x000077);
-            int step = 1000/zoomOut;
-            int gridOffsetY = x0 + (h/2) % step;
-            int gridOffsetX = y0 + (w/2) % step;
-            for (int y = gridOffsetY; y < h; y+=step) {
+            int gridOffsetX = y0 + (w / 2) % step + offsetX % step;
+            int gridOffsetY = x0 + (h / 2) % step + offsetY % step;
+            for (int y = gridOffsetY; y < h; y += step) {
                 g.drawLine(0, y, w, y);
             }
-            for (int x = gridOffsetX; x < w; x+=step) {
+            for (int x = gridOffsetX; x < w; x += step) {
                 g.drawLine(x, 0, x, h);
             }
         }
@@ -148,8 +150,7 @@ public class EditorCanvas extends StructureViewerComponent {
             count = 10;
         }
 
-        int minStep = count * count;
-        int step = Math.max(minStep, zoomOut / 1000);
+        int step = Math.max(count * count * gridStep, zoomOut / 1000 / gridStep * gridStep);
 		switch (RootContainer.getAction(keyCode)) {
             case Keys.FIRE:
                 structureBuilder.handleNextPoint((short) cursorX, (short) cursorY, false);
@@ -165,14 +166,13 @@ public class EditorCanvas extends StructureViewerComponent {
     }
 
     public boolean handleKeyRepeated(int keyCode, int pressedCount) {
-        int minStep = Math.max(zoomOut / 100, 1);
-        int a = keyRepeats;
-        int step = (minStep + a) * pressedCount;
+        int a = Math.min(100, keyRepeats);
+        int step = (gridStep * (1 + a)) * pressedCount;
         if (!moveCursorByKeyboard(keyCode, step)) {
         	return false;
         }
         pointerHandler.onCursorMove();
-        keyRepeats = Math.min(100, keyRepeats + 1);
+        keyRepeats++;
         return true;
     }
 
@@ -212,6 +212,7 @@ public class EditorCanvas extends StructureViewerComponent {
 	                    return false;
 	            }
 	    }
+        roundToGrid();
     	return true;
     }
 
@@ -226,6 +227,42 @@ public class EditorCanvas extends StructureViewerComponent {
     protected void setOptimalZoomAndOffset(int w, int h) {
         if (viewMode) {
             super.setOptimalZoomAndOffset(w, h);
+        }
+    }
+
+    protected void setZoomOut(int zoomOut) {
+        zoomOut = Mathh.constrain(MIN_ZOOM_OUT, zoomOut, MAX_ZOOM_OUT);
+        super.setZoomOut(zoomOut);
+
+        if (zoomOut < 200) {
+            gridStep = 1;
+        } else if (zoomOut < 600) {
+            gridStep = 25;
+        } else if (zoomOut < 2000) {
+            gridStep = 50;
+        } else {
+            gridStep = 100;
+        }
+    }
+
+    private void roundToGrid() {
+        if (gridStep > 1) {
+            cursorX = (cursorX + gridStep * Mathh.sign(cursorX) / 2) / gridStep * gridStep;
+            cursorY = (cursorY + gridStep * Mathh.sign(cursorY) / 2) / gridStep * gridStep;
+            if (Math.abs(cursorX) % 1000 == 300) {
+                if (cursorX > 0) {
+                    cursorX -= 8;
+                } else {
+                    cursorX += 8;
+                }
+            }
+            if (Math.abs(cursorY) % 1000 == 300) {
+                if (cursorY > 0) {
+                    cursorY -= 8;
+                } else {
+                    cursorY += 8;
+                }
+            }
         }
     }
 
@@ -309,6 +346,13 @@ public class EditorCanvas extends StructureViewerComponent {
             cursorX = prevCursorX + dx * zoomOut / 1000;
             cursorY = prevCursorY + dy * zoomOut / 1000;
 
+
+            if (gridStep > 1) {
+                cursorX = cursorX / gridStep * gridStep;
+                cursorY = cursorY / gridStep * gridStep;
+            }
+            roundToGrid();
+
             onCursorMove();
             dragged = dragged || (dx != 0 || dy != 0);
         }
@@ -324,7 +368,7 @@ public class EditorCanvas extends StructureViewerComponent {
         }
 
         void onCursorMove() {
-            if (zoomOut < 500 && (lastCursorX != cursorX || lastCursorY != cursorY)) {
+            if (lastCursorX != cursorX || lastCursorY != cursorY) {
                 Platform.vibrate(1);
             }
 
@@ -335,18 +379,12 @@ public class EditorCanvas extends StructureViewerComponent {
     }
 
     void zoomIn() {
-        int newZoomOut = zoomOut / 2;
-        if (newZoomOut > MIN_ZOOM_OUT) {
-            zoomOut = newZoomOut;
-        }
+        setZoomOut(zoomOut / 2);
         recalculateOffset();
     }
 
     void zoomOut() {
-        int newZoomOut = zoomOut * 2;
-        if (newZoomOut < MAX_ZOOM_OUT) {
-            zoomOut = newZoomOut;
-        }
+        setZoomOut(zoomOut * 2);
         recalculateOffset();
     }
 
