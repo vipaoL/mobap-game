@@ -34,6 +34,7 @@ public class WorldGen implements Runnable {
     private int nextStructRandomId;
     private boolean isResettingPosition = false;
     private Vector deferredStructures = null;
+    public int firstDeferredStructureX = -1;
     
     public int lastX, lastY;
     private final int POINTS_DIVIDER = 2000;
@@ -175,6 +176,9 @@ public class WorldGen implements Runnable {
             * ...
             */
             if (deferredStructures != null && !needSpeed && !deferredStructures.isEmpty()) {
+                if (firstDeferredStructureX == -1) {
+                    firstDeferredStructureX = lastX;
+                }
                 structData = StructurePlacer.place(w, isResettingPosition, (short[][]) deferredStructures.elementAt(0), lastX, lastY);
                 deferredStructures.removeElementAt(0);
                 if (deferredStructures.isEmpty()) {
@@ -315,6 +319,7 @@ public class WorldGen implements Runnable {
             w.moveBg(dx);
 
             nextPointsCounterTargetX += dx;
+            firstDeferredStructureX += dx;
 
             isResettingPosition = false;
         }

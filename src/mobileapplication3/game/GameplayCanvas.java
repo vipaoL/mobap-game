@@ -1024,6 +1024,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				int d = h / 20;
 				g.fillArc(x0, y0 + h - d, d, d, 0, 360);
 			}
+			int d;
+			if (worldgen.firstDeferredStructureX != -1 && (d = (worldgen.firstDeferredStructureX - world.carX) / 100 * 100) >= 0) {
+				int c = Mathh.constrain(0, d / 20, 255);
+				g.setColor(c, c, c);
+				drawDebugText(g, d + " ->");
+			}
         }
         
         // draw beautiful(isn't it?) pause screen
