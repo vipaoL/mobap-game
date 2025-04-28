@@ -3,6 +3,7 @@ package mobileapplication3.editor;
 import mobileapplication3.editor.AutoSaveUI.AutoSaveData;
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.platform.Platform;
+import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.*;
 
@@ -67,9 +68,9 @@ public class MainMenu extends Container {
 	        title
 	                .setSize(w, TextComponent.HEIGHT_AUTO)
 	                .setPos(x0, y0, TOP | LEFT);
-	        buttons
-			        .setButtonsBgPadding(w/128)
-			        .setSize(w/2, h/2)
+	        buttons.setButtonsBgPadding(w/128);
+			buttons
+					.setSizes(w/2, h/2, Font.getDefaultFontHeight() * 2)
 			        .setPos(x0 + w/2, y0 + h - margin, BOTTOM | HCENTER);
 	        
 	        int logoSide = Math.min(w * 3 / 4, buttons.getTopY() - title.getBottomY() - margin);
@@ -79,7 +80,7 @@ public class MainMenu extends Container {
 	        logo
 	        		.setSize(logoSide, logoSide)
 	        		.setPos(x0 + w/2, (buttons.getTopY() + title.getBottomY()) / 2, VCENTER | HCENTER);
-	        buttons.setSize(Math.max(w/2, logoSide * 32 / 31), h/2);
+	        buttons.setSize(Math.max(w/2, logoSide * 32 / 31), buttons.getHeight());
 		} else { // horizontal layout
 			title
 		            .setSize(w, TextComponent.HEIGHT_AUTO)
