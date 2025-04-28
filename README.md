@@ -5,15 +5,16 @@
 
 
 # About
-A crossplatform game on emini physics engine
-- Endless gameplay and procedural world generation (random combination of predefined or custom structures)
-- Supports touch and keyboard controls
-- Adaptive to screen resolution.
-- Custom structures: you can create create your custom structures using [the structure editor](https://github.com/vipaoL/mobapp-editor) (it is included into the android version of the game) and load them into the game by pressing the "Ext Structs" button in the game's main menu. The game will use your structures in world generation on a par with the built-in structures. Structures should be saved to a folder named "MGStructs" in the root of any drive (E:/ for example). You can also put MGStructs folder into "other", graphics or photos folder, if your phone doesn't allow creating folders in the root.
-- Custom levels which can be created with emini world designer (emini engine is the physics engine the game use). Some example levels are pinned with the first release of the game. You should put the "Levels" folder into: [root] (e.g. c:/Levels), [root]/other and in your graphics and photos folders
+A crossplatform game on emini physics engine (Android, J2ME and desktop Java are supported)
+- Endless gameplay with procedural world generation (random combination of predefined or custom structures)
+- Built-in levels
+- Touchscreen and keyboard support
+- Adaptive to screen resolution
+- Custom structures: You can create create your custom structures using the built-in editor and load them into the game by pressing "Load Structures" in the game's main menu. Then the game will use your custom structures in world generation on a par with the built-in structures. You can also test structures quickly right from the editor
+- Custom levels: The built-in editor also allows to create custom levels that can be loaded from the "Levels" menu or right from the editor
 
-![Gameplay](https://user-images.githubusercontent.com/59665125/170510578-16867f63-9968-4163-9282-d138356c4738.png)
-![About screen](https://user-images.githubusercontent.com/59665125/170510649-ac57e0da-7374-4ada-bf7d-33956d262575.png)
-![Debug menu](https://user-images.githubusercontent.com/59665125/170510660-60e9d6e1-d99e-4bc7-8931-ed5b952cd5ab.png)
-![Main menu](https://user-images.githubusercontent.com/59665125/166309387-667bae51-8be3-45fe-a087-62cd5a91de9d.png)
-
+![photo](https://github.com/user-attachments/assets/3e4c62eb-3cab-4e38-a75e-28ae485e8d50)
+![Scr_174](https://github.com/user-attachments/assets/eda7a77e-dba1-4a03-bd94-5cd6fc36dc88)
+![Scr_176](https://github.com/user-attachments/assets/4ff3f507-2c74-4807-9bcb-b4ac9105c8ec)
+![Scr_178](https://github.com/user-attachments/assets/31e28575-43cc-470e-a34b-0570e1919819)
+![Scr_181](https://github.com/user-attachments/assets/37a9b5fe-5aa7-4150-afec-24bfd4c6343b)
