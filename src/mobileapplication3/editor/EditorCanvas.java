@@ -69,10 +69,10 @@ public class EditorCanvas extends StructureViewerComponent {
             g.setColor(0x000077);
             int gridOffsetX = y0 + (w / 2) % step + offsetX % step;
             int gridOffsetY = x0 + (h / 2) % step + offsetY % step;
-            for (int y = gridOffsetY; y < h; y += step) {
+            for (int y = gridOffsetY - step; y < h; y += step) {
                 g.drawLine(0, y, w, y);
             }
-            for (int x = gridOffsetX; x < w; x += step) {
+            for (int x = gridOffsetX - step; x < w; x += step) {
                 g.drawLine(x, 0, x, h);
             }
         }
