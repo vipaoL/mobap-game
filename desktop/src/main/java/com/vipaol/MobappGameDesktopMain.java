@@ -29,7 +29,7 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
         new MobappGameDesktopMain(args);
     }
 
-    private void parseArgs(String[] args) {
+    protected void parseArgs(String[] args) {
         OptionParser parser = new OptionParser();
         OptionSpec<Void> debug = parser.acceptsAll(Arrays.asList("debug", "d"), "Enable debug mode");
         OptionSpec<Void> verbose = parser.acceptsAll(Arrays.asList("verbose", "v"), "Print logs to stdout");
@@ -102,7 +102,6 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
 
     public MobappGameDesktopMain(String[] args) {
         super(args);
-        parseArgs(args);
         RootContainer.setRootUIComponent(root);
     }
 }
