@@ -1017,8 +1017,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 				g.setColor(127, 31, 31);
 			}
             setFont(largefont, g);
-            g.drawString(String.valueOf(points), scW/2, scH - currentFontH * 3 / 2,
-                    Graphics.HCENTER | Graphics.TOP);
+            g.drawString(String.valueOf(points), scW/2, scH * 15 / 16,
+                    Graphics.HCENTER | Graphics.BOTTOM);
 			if (DebugMenu.isDebugEnabled && posResetIndicator > 0) {
 				g.setColor(posResetIndicator, 0, 0);
 				int d = h / 20;
