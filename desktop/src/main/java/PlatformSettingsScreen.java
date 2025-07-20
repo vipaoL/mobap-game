@@ -57,6 +57,19 @@ public class PlatformSettingsScreen extends Page {
                                 + (PlatformSettings.fontSizeOverride == PlatformSettings.UNDEF ? "" : "\n(Is set by command line arguments)");
                     }
                 }.setIsActive(PlatformSettings.fontSizeOverride == PlatformSettings.UNDEF),
+                new Switch("Black and white mode"
+                        + (PlatformSettings.blackAndWhiteModeOverride == PlatformSettings.UNDEF ? "" : "\n(Is set by command line arguments)")) {
+                    @Override
+                    public boolean getValue() {
+                        return PlatformSettings.getBlackAndWhiteMode();
+                    }
+
+                    @Override
+                    public void setValue(boolean value) {
+                        PlatformSettings.setBlackAndWhiteMode(value);
+                        Platform.refreshPlatformSettings();
+                    }
+                }.setIsActive(PlatformSettings.blackAndWhiteModeOverride == PlatformSettings.UNDEF),
                 new Button("Reset desktop settings") {
                     @Override
                     public void buttonPressed() {

@@ -43,6 +43,8 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 .defaultsTo(PlatformSettings.getFontSize());
         OptionSpec<Void> fullscreenMode = parser.accepts("fullscreen", "Enable fullscreen mode");
         OptionSpec<Void> disableFullscreenMode = parser.accepts("no-fullscreen", "Disable fullscreen mode");
+        OptionSpec<Void> blackAndWhiteMode = parser.acceptsAll(Arrays.asList("black-and-white", "bw"), "Enable black and white mode");
+        OptionSpec<Void> disableBlackAndWhiteMode = parser.acceptsAll(Arrays.asList("no-black-and-white", "no-bw"), "Disable black and white mode");
         parser.acceptsAll(Arrays.asList("help", "h", "?"), "Show help").forHelp();
         parser.nonOptions("Path to level or structure to open in view mode")
                 .ofType(File.class)
@@ -61,6 +63,11 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 PlatformSettings.setFullscreenModeOverride(true);
             } else if (options.has(disableFullscreenMode)) {
                 PlatformSettings.setFullscreenModeOverride(false);
+            }
+            if (options.has(blackAndWhiteMode)) {
+                PlatformSettings.setBlackAndWhiteModeOverride(true);
+            } else if (options.has(disableBlackAndWhiteMode)) {
+                PlatformSettings.setBlackAndWhiteModeOverride(false);
             }
             if (options.has(fontSize)) {
                 PlatformSettings.setFontSizeOverride(options.valueOf(fontSize));
