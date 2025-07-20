@@ -111,8 +111,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 	private short[][] level = null;
 
     // fonts
-    private static final Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-    private static final Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    private Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+    private Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private Font currentFont = largefont;
     private int currentFontH = currentFont.getHeight();
     
