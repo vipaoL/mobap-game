@@ -113,13 +113,9 @@ public class ElementPlacer {
                 int centerY = y + l * Mathh.sin(ang) / 2000;
 
                 int colorModifier = (speedMultiplier - 100) * 3;
-                int red = Math.min(255, Math.max(0, colorModifier));
-                int blue = Math.min(255, Math.max(0, -colorModifier));
+                int red = Math.min(255, Math.max(50, colorModifier));
+                int blue = Math.min(255, Math.max(50, -colorModifier));
                 int green = blue;
-                if (red < 50 && blue < 50) {
-                    red = 50;
-                    blue = 50;
-                }
 
                 int color = ((red & 0xff) << 16) | ((green & 0xff) << 8) | (blue & 0xff);
                 Shape plate = Shape.createRectangle(l, thickness);
