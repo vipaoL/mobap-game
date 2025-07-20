@@ -11,7 +11,6 @@ import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
-import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.Image;
@@ -35,6 +34,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
         "Back"};
 
     private Image qr, qrBig;
+    private Font headerFont;
 
     private int w, h;
     private int headerH, qrSide, menuH;
@@ -66,6 +66,12 @@ public class AboutScreen extends GenericMenu implements Runnable {
         menuH = totalTextH * (MENU_OPTS.length - 1) / ((MENU_OPTS.length - 1) + STRINGS.length);
         headerH = totalTextH - menuH;
         loadCanvasParams(0, h - menuH, this.w, menuH);
+
+        if (headerH < Font.getDefaultFontHeight() * 5 / 2) {
+            headerFont = new Font(Font.SIZE_SMALL);
+        } else if (headerH > new Font(getFontSize()).getHeight() * 5 / 2) {
+            headerFont = new Font(getFontSize());
+        }
 
         try {
             qr = Image.createImage("/qr.png").scale(qrSide, qrSide);
@@ -136,6 +142,9 @@ public class AboutScreen extends GenericMenu implements Runnable {
     private void drawHeader(Graphics g) {
         g.setColor(0xffffff);
         int dY = headerH / (STRINGS.length + 1);
+        if (headerFont != null) {
+            g.setFont(headerFont);
+        }
         for (int i = 0; i < STRINGS.length; i++) {
             int y = (i + 1) * dY;
             g.drawString(STRINGS[i], w /2, y, Graphics.HCENTER | Graphics.VCENTER);
