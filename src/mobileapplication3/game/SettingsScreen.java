@@ -3,8 +3,10 @@ package mobileapplication3.game;
 import mobileapplication3.platform.Battery;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
+import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.RootContainer;
+import mobileapplication3.ui.IUIComponent;
 import utils.MobappGameSettings;
 
 import java.util.Random;
@@ -18,8 +20,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             SHOW_FPS = 4,
             BATTERY = 5,
             DEBUG = 6,
-            ABOUT = 7,
-            BACK = 8;
+            PLATFORM_SETTINGS = 7,
+            ABOUT = 8,
+            BACK = 9;
 
     private static final int[] LANDSCAPE_COLORS = {GraphicsWorld.DEFAULT_LANDSCAPE_COLOR, 0x44aaff, 0xaaaaff, 0xffffff, 0x44ffaa, 0xaaff44, 0xff44aa, 0xffaa44};
     private static final String[] LANDSCAPE_COLOR_NAMES = {"blue", "light blue", "pale blue", "white", "light green", "lime", "pink", "orange"};
@@ -146,6 +149,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 isStopped = true;
                 RootContainer.setRootUIComponent(new DebugMenu());
                 return;
+            case PLATFORM_SETTINGS:
+                RootContainer.setRootUIComponent(getPlatformSettings());
+                return;
             case ABOUT:
                 isStopped = true;
                 RootContainer.setRootUIComponent(new AboutScreen());
@@ -169,6 +175,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor())];
         menuOpts[BATTERY] = "Show battery level";
         menuOpts[DEBUG] = "Debug settings";
+        menuOpts[PLATFORM_SETTINGS] = "Platform settings";
         menuOpts[ABOUT] = "About";
         menuOpts[BACK] = "Back";
         setEnabledFor(frameTime != MobappGameSettings.DEFAULT_FRAME_TIME, FRAME_TIME);
@@ -180,6 +187,12 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             setEnabledFor(MobappGameSettings.isBattIndicatorEnabled(), BATTERY);
         } else {
             setStateFor(STATE_INACTIVE, BATTERY);
+        }
+        try {
+            Class.forName("PlatformSettingsScreen");
+            menuOpts[PLATFORM_SETTINGS] = String.valueOf(getPlatformSettings());
+        } catch (ClassNotFoundException ex) {
+            setStateFor(STATE_INACTIVE, PLATFORM_SETTINGS);
         }
     }
 
@@ -195,5 +208,14 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             }
         }
         return 0;
+    }
+
+    private static IUIComponent getPlatformSettings() {
+        try {
+            return (IUIComponent) Class.forName("PlatformSettingsScreen").newInstance();
+        } catch (Exception ex) {
+            Platform.showError(ex);
+            return null;
+        }
     }
 }
