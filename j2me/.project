@@ -30,11 +30,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.mtj.core.nature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>shared-src</name>
-			<type>2</type>
-			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/src</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>
